@@ -18,7 +18,7 @@ class MovieshubSports {
     this.matches = [
       {
         id: "star-sports-india",
-        title: "Star Sports 1 HD - India Tour & Live Cricket",
+        title: "Star Sports 1 HD - Sky Sports World Cricket & News",
         sport: "Cricket",
         subtitle: "ICC Tournament & International Cricket • Star Sports HD",
         badge: "Star Sports 1 HD",
@@ -27,12 +27,12 @@ class MovieshubSports {
         status: "LIVE",
         logo: "🏏",
         bgGradient: "linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%)",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
-        streamUrl2: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+        streamUrl2: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
         id: "star-sports-tamil-match",
-        title: "Star Sports 1 Tamil - Live Cricket & Pro Kabaddi",
+        title: "Star Sports 1 Tamil - Live Indian Cricket & Games",
         sport: "Cricket",
         subtitle: "Tamil Commentary • Live Matches • Star Sports Tamil",
         badge: "Star Sports Tamil",
@@ -41,8 +41,8 @@ class MovieshubSports {
         status: "LIVE",
         logo: "🏆",
         bgGradient: "linear-gradient(135deg, #2b1100 0%, #7c2d12 100%)",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
-        streamUrl2: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        streamUrl2: "https://fta.ektv.in/live/697/master.m3u8"
       },
       {
         id: "sony-ten-1-match",
@@ -60,36 +60,35 @@ class MovieshubSports {
       },
       {
         id: "sony-liv-wwe",
-        title: "Sony LIV Sports Live - WWE & Grand Slam Tennis",
+        title: "Sony LIV Sports Live - Global Combat & Tennis",
         sport: "Combat",
-        subtitle: "WWE Raw, SmackDown & Australian Open • Sony LIV HD",
+        subtitle: "Live Combat Championship & Grand Slam Tennis • Sony LIV HD",
         badge: "Sony LIV Ultra",
         quality: "1080p",
         viewers: 1940,
         status: "LIVE",
         logo: "🥊",
         bgGradient: "linear-gradient(135deg, #3f0909 0%, #831843 100%)",
-        streamUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
-        streamUrl2: "https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/full_live_manifest.m3u8"
+        streamUrl: "https://5c7b683162943.streamlock.net/live/ngrp:sportsone_all/playlist.m3u8",
+        streamUrl2: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
       },
-
       {
         id: "ind-vs-aus",
-        title: "India vs Australia - Live Cricket",
+        title: "India Cricket Special - DD Sports HD",
         sport: "Cricket",
-        subtitle: "T20 International & Test Series • Cricket Gold",
-        badge: "Cricket Gold HD",
+        subtitle: "Indian National Cricket & International Matches • DD Sports",
+        badge: "DD Sports Live",
         quality: "1080p",
         viewers: 1420,
         status: "LIVE",
         logo: "🏏",
         bgGradient: "linear-gradient(135deg, #0b1f3a 0%, #1a365d 100%)",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
-        streamUrl2: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        streamUrl2: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
       },
       {
         id: "arsenal-chelsea",
-        title: "Premier League Live - Football",
+        title: "Premier League Live - European Football",
         sport: "Football",
         subtitle: "European Soccer & League Matches • beIN Sports",
         badge: "beIN Sports",
@@ -103,7 +102,7 @@ class MovieshubSports {
       },
       {
         id: "f1-grand-prix",
-        title: "Formula 1 Grand Prix & Motorsports",
+        title: "Formula 1 Grand Prix & Extreme Motorsports",
         sport: "Motorsport",
         subtitle: "Red Bull Racing & Live Track Coverage • Red Bull TV",
         badge: "Red Bull TV",
@@ -113,13 +112,13 @@ class MovieshubSports {
         logo: "🏎️",
         bgGradient: "linear-gradient(135deg, #2b0b00 0%, #4a1500 100%)",
         streamUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
-        streamUrl2: "https://webstream.multistream.it/memfs/e2cb3629-c1a2-495b-b43a-9ee141d0115e/index.m3u8"
+        streamUrl2: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
       },
       {
         id: "nfl-network",
-        title: "NFL Live Football & Sports News",
+        title: "ACC Sports Live - American College Action",
         sport: "American Football",
-        subtitle: "Live Network Coverage & Analysis • ACC Sports",
+        subtitle: "Live Network Coverage & NCAA Basketball • ACC Sports",
         badge: "ACC Sports HD",
         quality: "1080p",
         viewers: 512,
@@ -127,27 +126,27 @@ class MovieshubSports {
         logo: "🏈",
         bgGradient: "linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%)",
         streamUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
-        streamUrl2: "https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/full_live_manifest.m3u8"
+        streamUrl2: "https://30a-tv.com/feeds/vidaa/golf.m3u8"
       },
       {
         id: "lakers-warriors",
-        title: "NBA Basketball - Live Action",
+        title: "NBA Basketball & Live Sports Hub",
         sport: "Basketball",
-        subtitle: "Game Highlights & Analysis • DraftKings Network",
-        badge: "DraftKings HD",
+        subtitle: "Game Highlights & Analysis • ACC Sports Network",
+        badge: "ACC Sports HD",
         quality: "1080p",
         viewers: 720,
         status: "LIVE",
         logo: "🏀",
         bgGradient: "linear-gradient(135deg, #2d1800 0%, #4f2d00 100%)",
-        streamUrl: "https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/full_live_manifest.m3u8",
-        streamUrl2: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
+        streamUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
+        streamUrl2: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
       },
       {
         id: "fox-footy",
-        title: "Fox Sports News & Highlights",
+        title: "Fox Sports News & Global Headlines",
         sport: "Australian Football",
-        subtitle: "Global Sports News & Breaking Headlines",
+        subtitle: "Global Sports News & Breaking Headlines • Fox Sports AU",
         badge: "Fox Sports",
         quality: "1080p",
         viewers: 380,
@@ -159,10 +158,10 @@ class MovieshubSports {
       },
       {
         id: "pga-golf",
-        title: "PGA Tour Live & Golf Kingdom",
+        title: "PGA Tour Live & Championship Golf",
         sport: "Golf",
-        subtitle: "Championship Tournaments & Golf Highlights",
-        badge: "Golf Kingdom",
+        subtitle: "Championship Tournaments & Golf Highlights • 30A Golf",
+        badge: "PGA Golf HD",
         quality: "720p",
         viewers: 210,
         status: "LIVE",
@@ -173,7 +172,7 @@ class MovieshubSports {
       },
       {
         id: "real-madrid-tv",
-        title: "CBS Sports Golazo - UEFA & International",
+        title: "CBS Sports Golazo - UEFA & Soccer 24/7",
         sport: "Football",
         subtitle: "Champions League Analysis & Live Soccer",
         badge: "CBS Sports",
@@ -187,7 +186,7 @@ class MovieshubSports {
       },
       {
         id: "dd-sports-national",
-        title: "DD Sports Live - Indian National Sports",
+        title: "DD Sports Live - Indian National Games",
         sport: "Cricket",
         subtitle: "Domestic Cricket, Athletics & Olympic Events",
         badge: "DD Sports HD",
@@ -197,8 +196,9 @@ class MovieshubSports {
         logo: "🏆",
         bgGradient: "linear-gradient(135deg, #001f3f 0%, #003366 100%)",
         streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
-        streamUrl2: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8"
-      },
+        streamUrl2: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
+      }
+    ,
       {
         id: "ninja-warrior",
         title: "American Ninja Warrior Sports",
@@ -266,6 +266,10 @@ class MovieshubSports {
       <div class="sports-page-wrapper">
         <!-- Top Controls / Filter Bar -->
         <div class="sports-header-row">
+          <button class="sports-back-btn" id="sportsBackToMoviesBtn" title="Back to Movieshub">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Back to Movies</span>
+          </button>
           <div class="sports-tabs">
             <button class="sports-tab-btn active" data-tab="live">🔴 Live Now</button>
             <button class="sports-tab-btn" data-tab="upcoming">📅 Upcoming</button>
@@ -303,6 +307,16 @@ class MovieshubSports {
   }
 
   bindEvents() {
+    const backToMovies = document.getElementById("sportsBackToMoviesBtn");
+    if (backToMovies) {
+      backToMovies.addEventListener("click", () => {
+        this.destroy();
+        if (window.movieshubApp) {
+          window.movieshubApp.switchView("movies");
+        }
+      });
+    }
+
     const searchInput = document.getElementById("sportsSearchInput");
     if (searchInput) {
       searchInput.addEventListener("input", (e) => {
@@ -401,12 +415,12 @@ class MovieshubSports {
 
     modal.innerHTML = `
       <div class="sports-modal-backdrop"></div>
-      <div class="sports-modal-content">
+      <div class="sports-modal-dialog">
         <div class="sports-modal-header">
           <div class="sports-modal-title-box" style="display:flex;align-items:center;gap:12px;">
             <button class="sports-modal-back-btn" id="sportsModalBackBtn" title="Back to Matches">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-              <span>Back</span>
+              <span>Back to Matches</span>
             </button>
             <span class="live-pill-tag">● LIVE</span>
             <h3 class="sports-modal-title">${match.title}</h3>
@@ -415,6 +429,10 @@ class MovieshubSports {
         </div>
 
         <div class="sports-modal-video-wrap">
+          <button class="sports-video-back-float" id="sportsVideoFloatingBackBtn" title="Back to Matches">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>Back</span>
+          </button>
           <video id="sportsVideoEl" class="sports-video-el" controls autoplay playsinline></video>
           <div class="sports-modal-loader" id="sportsModalLoader">
             <div class="spinner"></div>
@@ -457,6 +475,8 @@ class MovieshubSports {
     if (closeBtn) closeBtn.addEventListener("click", close);
     const backBtn = document.getElementById("sportsModalBackBtn");
     if (backBtn) backBtn.addEventListener("click", close);
+    const floatBack = document.getElementById("sportsVideoFloatingBackBtn");
+    if (floatBack) floatBack.addEventListener("click", close);
     if (backdrop) backdrop.addEventListener("click", close);
 
     const videoEl = document.getElementById("sportsVideoEl");

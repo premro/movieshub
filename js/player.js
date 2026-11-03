@@ -566,141 +566,55 @@ class MovieshubPlayer {
       const netmirrorEmbedUrl = `${pfx}/stream/netmirror/embed?tm_id=${netId || resolvedTmdbId}&nid=${netId || resolvedTmdbId}&year=${year}&lang=${encodeURIComponent(cleanLang)}`;
 
       // High-performance streaming servers:
-      // When Netmirror source is present (or regional cinema like Malayalam/Tamil), prioritize Movieshub Cloud
-      let servers = [];
-      const hasNetSource = !!netId || rawId.startsWith("netmirror-") || cleanTitle.includes("amaran") || cleanTitle.includes("angamaly") || cleanTitle.includes("blast") || cleanTitle.includes("goat") || cleanTitle.includes("maharaja");
-
-      if (hasNetSource) {
-        servers = [
-          {
-            id: "s1",
-            name: "Server 1",
-            badge: "Movieshub Cloud",
-            url: netmirrorEmbedUrl
-          },
-          {
-            id: "s2",
-            name: "Server 2",
-            badge: "Primary HD",
-            url: mtype === "tv"
-              ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
-              : `https://vidlink.pro/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s3",
-            name: "Server 3",
-            badge: "Fast Forward",
-            url: mtype === "tv"
-              ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/1/1`
-              : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
-          },
-          {
-            id: "s4",
-            name: "Server 4",
-            badge: "Backup 1",
-            url: mtype === "tv"
-              ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s5",
-            name: "Server 5",
-            badge: "Multi-Audio",
-            url: mtype === "tv"
-              ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s6",
-            name: "Server 6",
-            badge: "Cinema 4K",
-            url: mtype === "tv"
-              ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
-              : `https://www.2embed.cc/embed/${resolvedTmdbId}`
-          },
-          {
-            id: "s7",
-            name: "Server 7",
-            badge: "Mirror HD",
-            url: mtype === "tv"
-              ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s8",
-            name: "Server 8",
-            badge: "Ultra CDN",
-            url: mtype === "tv"
-              ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
-          }
-        ];
-      } else {
-        servers = [
-          {
-            id: "s1",
-            name: "Server 1",
-            badge: "Primary HD",
-            url: mtype === "tv"
-              ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
-              : `https://vidlink.pro/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s2",
-            name: "Server 2",
-            badge: "Fast Forward",
-            url: mtype === "tv"
-              ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/1/1`
-              : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
-          },
-          {
-            id: "s3",
-            name: "Server 3",
-            badge: "Movieshub Cloud",
-            url: netmirrorEmbedUrl
-          },
-          {
-            id: "s4",
-            name: "Server 4",
-            badge: "Backup 1",
-            url: mtype === "tv"
-              ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s5",
-            name: "Server 5",
-            badge: "Multi-Audio",
-            url: mtype === "tv"
-              ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s6",
-            name: "Server 6",
-            badge: "Cinema 4K",
-            url: mtype === "tv"
-              ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
-              : `https://www.2embed.cc/embed/${resolvedTmdbId}`
-          },
-          {
-            id: "s7",
-            name: "Server 7",
-            badge: "Mirror HD",
-            url: mtype === "tv"
-              ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s8",
-            name: "Server 8",
-            badge: "Ultra CDN",
-            url: mtype === "tv"
-              ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
-          }
-        ];
-      }
+      // Server 1 is ALWAYS Primary HD via VidLink (no iframe blocking, instant playback in 1-click)
+      const servers = [
+        {
+          id: "s1",
+          name: "Server 1",
+          badge: "Primary HD",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s2",
+          name: "Server 2",
+          badge: "Fast Stream",
+          url: mtype === "tv"
+            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/1/1`
+            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
+        },
+        {
+          id: "s3",
+          name: "Server 3",
+          badge: "Global CDN",
+          url: mtype === "tv"
+            ? `https://player.vidsrc.nl/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://player.vidsrc.nl/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s4",
+          name: "Server 4",
+          badge: "Cinema 4K",
+          url: mtype === "tv"
+            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
+            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+        },
+        {
+          id: "s5",
+          name: "Server 5",
+          badge: "Mirror HD",
+          url: mtype === "tv"
+            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s6",
+          name: "Server 6",
+          badge: "Movieshub Cloud",
+          url: netmirrorEmbedUrl
+        }
+      ];
 
       this.currentServerIdx = 0;
       this.isAutoSwitchingEnabled = true;

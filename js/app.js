@@ -845,15 +845,15 @@ class MovieshubApp {
   }
 
   renderTamilSections(container) {
-    const amaran = this.catalog.find(m => m.id === "amaran-tamil");
-    const goat = this.catalog.find(m => m.id === "goat-tamil");
-    const maharaja = this.catalog.find(m => m.id === "maharaja-tamil");
-    const leo = this.catalog.find(m => m.id === "leo-tamil");
-    const jailer = this.catalog.find(m => m.id === "jailer-tamil");
-    const vikram = this.catalog.find(m => m.id === "vikram-tamil");
+    const allTamilList = this.catalog.filter(m => m.language === "Tamil");
+    // Sort Tamil movies by year (latest 2026/2025 first) then rating
+    const sortedTamil = [...allTamilList].sort((a, b) => {
+      if ((b.year || 0) !== (a.year || 0)) return (b.year || 0) - (a.year || 0);
+      return (b.rating || 0) - (a.rating || 0);
+    });
 
-    const tamilHeroMovies = [amaran, goat, maharaja, leo, jailer].filter(Boolean);
-    const latestTamil = [amaran, goat, maharaja, leo, jailer, vikram].filter(Boolean);
+    const tamilHeroMovies = sortedTamil.slice(0, 5);
+    const latestTamil = sortedTamil.slice(0, 6);
 
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
       ? this.dashboardData.tamil_2026
@@ -942,12 +942,14 @@ class MovieshubApp {
   }
 
   renderAllLanguagesHome(container) {
-    const amaran = this.catalog.find(m => m.id === "amaran-tamil");
-    const goat = this.catalog.find(m => m.id === "goat-tamil");
-    const deadpool = this.catalog.find(m => m.id === "deadpool-and-wolverine");
-    const dune = this.catalog.find(m => m.id === "dune-part-two");
-    const maharaja = this.catalog.find(m => m.id === "maharaja-tamil");
-    const top5Imdb = [amaran, goat, deadpool, dune, maharaja].filter(Boolean);
+    // Top 5 Latest IMDb Blockbusters for the Auto-Rotating Billboard (2026/2025 newest first)
+    const sortedCatalog = [...this.catalog]
+      .filter(m => (m.backdrop || m.poster) && m.id !== "amaran-tamil")
+      .sort((a, b) => {
+        if ((b.year || 0) !== (a.year || 0)) return (b.year || 0) - (a.year || 0);
+        return (b.rating || 0) - (a.rating || 0);
+      });
+    const top5Imdb = sortedCatalog.slice(0, 5);
     const featuredMovie = top5Imdb[0] || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
     
     // Top 6 Latest Releases from IMDb / TMDB

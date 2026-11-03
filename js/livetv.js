@@ -25,8 +25,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "Cricket Live",
         logo: "🏏",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
-        backupUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
         id: "star-sports-tamil",
@@ -36,8 +36,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "Tamil Sports",
         logo: "🏆",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
-        backupUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        backupUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
       },
       {
         id: "sony-sports-ten-1-hd",
@@ -47,8 +47,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "Sony LIV Live",
         logo: "⚽",
-        streamUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
-        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+        streamUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
+        backupUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8"
       },
       {
         id: "sony-liv-sports-live",
@@ -58,8 +58,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "Sony LIV Ultra",
         logo: "🥊",
-        streamUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
-        backupUrl: "https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/full_live_manifest.m3u8"
+        streamUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
+        backupUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
       },
       {
         id: "sports-18-1-hd",
@@ -70,7 +70,7 @@ class MovieshubLiveTV {
         badge: "JioCinema Sports",
         logo: "🎯",
         streamUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
-        backupUrl: "https://webstream.multistream.it/memfs/e2cb3629-c1a2-495b-b43a-9ee141d0115e/index.m3u8"
+        backupUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
       },
       {
         id: "dd-sports-hd",
@@ -80,7 +80,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "India Sports",
         logo: "🇮🇳",
-        streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        backupUrl: "https://fta.ektv.in/live/697/master.m3u8"
       },
 
       // 🌴 TAMIL LIVE TELEVISION (Sun, Zee, Vijay, Kalaignar, Polimer, Thanthi...)
@@ -377,14 +378,14 @@ class MovieshubLiveTV {
 
       // 🇮🇳 ALL-INDIA & GLOBAL SPORTS / NEWS
       {
-        id: "cricket-gold",
-        name: "Cricket Gold HD",
+        id: "cbs-sports-golazo",
+        name: "CBS Sports Golazo HD",
         category: "Sports",
-        country: "IN",
+        country: "US",
         resolution: "1080p",
-        badge: "Cricket 24x7",
-        logo: "🏏",
-        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8"
+        badge: "UEFA & Soccer",
+        logo: "⚽",
+        streamUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
         id: "ndtv-24x7",
@@ -534,6 +535,10 @@ class MovieshubLiveTV {
           </div>
 
           <div class="livetv-screen" id="livetvScreen">
+            <button class="livetv-player-back-float" id="livetvFloatingBackBtn" title="Back to Movies">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+              <span>Back to Movies</span>
+            </button>
             <div class="livetv-empty-state" id="livetvEmptyState" style="display:none;">
               <div class="livetv-empty-icon">📺</div>
               <h3>Pick a channel to begin</h3>
@@ -592,6 +597,19 @@ class MovieshubLiveTV {
   }
 
   bindEvents() {
+    const handleBack = () => {
+      this.destroy();
+      if (window.movieshubApp) {
+        window.movieshubApp.switchView("movies");
+      }
+    };
+
+    const backBtn = document.getElementById("livetvBackBtn");
+    if (backBtn) backBtn.addEventListener("click", handleBack);
+
+    const floatBackBtn = document.getElementById("livetvFloatingBackBtn");
+    if (floatBackBtn) floatBackBtn.addEventListener("click", handleBack);
+
     const countrySelect = document.getElementById("livetvCountrySelect");
     if (countrySelect) {
       countrySelect.addEventListener("change", (e) => {

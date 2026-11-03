@@ -3005,3 +3005,84 @@ body {
     max-height: 400px;
   }
 }
+
+/* ==========================================================================
+   Live TV & Sports Interactive Back Buttons
+   ========================================================================== */
+.livetv-back-btn,
+.sports-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.livetv-back-btn:hover,
+.sports-back-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+  transform: translateX(-2px);
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+}
+
+.livetv-player-back-float,
+.sports-video-back-float {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 99;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.7);
+}
+
+.livetv-player-back-float:hover,
+.sports-video-back-float:hover {
+  background: #e50914;
+  border-color: #e50914;
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.6);
+}
+
+.sports-modal-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.sports-modal-back-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+}
