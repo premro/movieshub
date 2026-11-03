@@ -575,47 +575,47 @@ class MovieshubPlayer {
 
       const mtype = movie?.mediaType || "movie";
 
-      // High-performance, buffer-free streaming servers
+      // Verified, working, non-buffering streaming servers
       const servers = [
         {
           id: "s1",
           name: "Server 1",
-          badge: "Ultra Fast HD",
-          url: mtype === "tv"
-            ? `https://autoembed.me/tv/tmdb/${resolvedTmdbId}/1/1`
-            : `https://autoembed.me/movie/tmdb/${resolvedTmdbId}`
-        },
-        {
-          id: "s2",
-          name: "Server 2",
-          badge: "Fast Stream",
-          url: mtype === "tv"
-            ? `https://player.autoembed.cc/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://player.autoembed.cc/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s3",
-          name: "Server 3",
-          badge: "VidSrc CDN",
-          url: mtype === "tv"
-            ? `https://vidsrc.icu/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.icu/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s4",
-          name: "Server 4",
-          badge: "VidLink Stream",
+          badge: "Primary HD",
           url: mtype === "tv"
             ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
             : `https://vidlink.pro/movie/${resolvedTmdbId}`
         },
         {
-          id: "s5",
-          name: "Server 5",
+          id: "s2",
+          name: "Server 2",
+          badge: "JW Player",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
+        },
+        {
+          id: "s3",
+          name: "Server 3",
           badge: "Cinema 4K",
           url: mtype === "tv"
             ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
             : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+        },
+        {
+          id: "s4",
+          name: "Server 4",
+          badge: "CineSrc Fast",
+          url: mtype === "tv"
+            ? `https://cinesrc.st/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://cinesrc.st/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s5",
+          name: "Server 5",
+          badge: "Mirror HD",
+          url: mtype === "tv"
+            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
         }
       ];
 
@@ -636,7 +636,7 @@ class MovieshubPlayer {
 
       if (streamWrap) {
         streamWrap.innerHTML = `
-          <div class="player-preloader" id="player-preloader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;overflow:hidden;">
+          <div class="player-preloader" id="player-preloader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;overflow:hidden;pointer-events:none;">
             <div style="background-image:url('${safeBackdrop}');position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(30px) brightness(0.22);transform:scale(1.15);"></div>
             <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;max-width:90%;">
               <div class="spinner" style="width:46px;height:46px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
@@ -756,8 +756,8 @@ class MovieshubPlayer {
         }
       };
 
-      // Fast preloader dismissal fallback
-      setTimeout(hidePreloader, 1200);
+      // Fast preloader dismissal so video controls are immediately interactive
+      setTimeout(hidePreloader, 600);
 
       // Auto-Switch Toggle Button
       const autoSwitchBtn = document.getElementById("autoSwitchToggleBtn");
