@@ -2,14 +2,18 @@
   "client": {
     "source": ".",
     "ignore": [
+      ".git",
+      ".git/**",
       ".catalystrc",
       "catalyst.json",
+      "catalyst-debug.log",
       "server.py",
       "server.log",
       "README.md",
       "functions/**",
       "assets/videos/**",
       "assets/*.mp4",
+      "assets/**/*.mp4",
       "data/**"
     ]
   },
