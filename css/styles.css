@@ -1911,22 +1911,23 @@ body {
 .player-server-pills {
   display: flex;
   align-items: center;
-  gap: 8px;
-  overflow-x: auto;
+  gap: 6px;
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .srv-pill-btn {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #e5e7eb;
-  padding: 5px 12px;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: all 0.2s;
   white-space: nowrap;
 }
@@ -1941,6 +1942,14 @@ body {
   border-color: #e50914;
   color: #fff;
   box-shadow: 0 0 12px rgba(229, 9, 20, 0.5);
+}
+
+.srv-pill-btn.moviesda-pill-active, .moviesda-direct-btn {
+  border: 1.5px solid #e50914;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.35), rgba(0, 0, 0, 0.5)) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.3) !important;
 }
 
 .srv-pill-badge {

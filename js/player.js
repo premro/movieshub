@@ -44,11 +44,10 @@ function resolveMoviesdaFileId(title, fallback = "102943") {
 }
 
 function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
-  const fileId = getVerifiedMoviesdaFileId(title);
+  const fileId = getVerifiedMoviesdaFileId(title) || (String(tmId).length === 6 ? String(tmId) : null);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   
   if (fileId) {
-    const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
     const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
     return `<!DOCTYPE html>
 <html lang="en">
@@ -58,19 +57,8 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
   <title>${safeTitle} - Moviesda 2026 Tamil HD</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
-    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
-    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
-    .m-brand { display: flex; align-items: center; gap: 8px; }
-    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
-    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
-    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
-    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
-    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
-    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
-    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .m-frame-box { width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; }
     .clipped-embed-wrap { width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden; }
     .clipped-embed-wrap iframe {
       width: 100%;
@@ -79,146 +67,35 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
       border: none;
       display: block;
     }
-    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; z-index: 50; }
-    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
-    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
-    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
-    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
   </style>
 </head>
 <body>
-  <div class="m-wrap">
-    <div class="m-bar">
-      <div class="m-brand">
-        <span class="m-badge">MOVIESDA 2026 HD</span>
-        <span class="m-badge-clean">WATERMARK REMOVED</span>
-        <span class="m-title">${safeTitle} (${year})</span>
-      </div>
-      <div class="m-top-actions">
-        <a href="${downloadUrl}" class="m-dl-btn" target="_blank" rel="noopener noreferrer" download>
-          <span>⬇ Download 720p / 1080p MP4</span>
-        </a>
-        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
-          <span>Moviesda 2026 Hub</span>
-        </a>
-        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
-          <span>🔄 Reload</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="m-frame-box">
-      <div class="clipped-embed-wrap">
-        <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
-      </div>
-    </div>
-
-    <div class="m-sub-bar">
-      <div class="m-tags">
-        <span class="m-tag ta">Tamil Original Master</span>
-        <span class="m-tag atmos">Dolby Atmos 5.1</span>
-        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
-        <span class="m-tag">Fast CDN 1080p</span>
-      </div>
+  <div class="m-frame-box">
+    <div class="clipped-embed-wrap">
+      <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
-
-  <script>
-    const reloadBtn = document.getElementById("reloadBtn");
-    const embedFrame = document.getElementById("embedFrame");
-    if (reloadBtn && embedFrame) {
-      reloadBtn.addEventListener("click", () => {
-        const u = embedFrame.src;
-        embedFrame.src = "about:blank";
-        setTimeout(() => { embedFrame.src = u; }, 150);
-      });
-    }
-  </script>
 </body>
 </html>`;
   } else {
     const streamUrl = mtype === "tv"
       ? `https://vidsrc.su/embed/tv/${tmId}/1/1`
       : `https://vidsrc.su/embed/movie/${tmId}`;
-    const downloadUrl = `https://www.2embed.cc/embed/${tmId}`;
 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>${safeTitle} - Tamil Ultra HD Stream</title>
+  <title>${safeTitle} - Tamil Ultra HD</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
-    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
-    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
-    .m-brand { display: flex; align-items: center; gap: 8px; }
-    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
-    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
-    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
-    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
-    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
-    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
-    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
-    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; }
-    .clean-embed-iframe { width: 100%; height: 100%; border: none; display: block; }
-    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; z-index: 50; }
-    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
-    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
-    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
-    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
   </style>
 </head>
 <body>
-  <div class="m-wrap">
-    <div class="m-bar">
-      <div class="m-brand">
-        <span class="m-badge">TAMIL ULTRA HD</span>
-        <span class="m-badge-clean">VERIFIED TITLE MATCH</span>
-        <span class="m-title">${safeTitle} (${year})</span>
-      </div>
-      <div class="m-top-actions">
-        <a href="${downloadUrl}" class="m-dl-btn" target="_blank" rel="noopener noreferrer">
-          <span>⬇ Download 1080p MP4</span>
-        </a>
-        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
-          <span>Moviesda Hub</span>
-        </a>
-        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
-          <span>🔄 Reload</span>
-        </button>
-      </div>
-    </div>
-
-    <div class="m-frame-box">
-      <iframe id="embedFrame" class="clean-embed-iframe" src="${streamUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
-    </div>
-
-    <div class="m-sub-bar">
-      <div class="m-tags">
-        <span class="m-tag ta">Tamil Audio Master</span>
-        <span class="m-tag atmos">Dolby Atmos 5.1</span>
-        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
-        <span class="m-tag">Fast Ultra CDN</span>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const reloadBtn = document.getElementById("reloadBtn");
-    const embedFrame = document.getElementById("embedFrame");
-    if (reloadBtn && embedFrame) {
-      reloadBtn.addEventListener("click", () => {
-        const u = embedFrame.src;
-        embedFrame.src = "about:blank";
-        setTimeout(() => { embedFrame.src = u; }, 150);
-      });
-    }
-  </script>
+  <iframe id="embedFrame" src="${streamUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
 </body>
 </html>`;
   }
@@ -282,6 +159,10 @@ class MovieshubPlayer {
             <button class="mode-tab-btn" id="tab-trailer" title="Watch Official Trailer">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
               <span>Trailer</span>
+            </button>
+            <button class="mode-tab-btn" id="tab-moviesda-mode" title="Watch on Moviesda Tamil HD" style="border:1px solid rgba(229,9,20,0.5);background:rgba(229,9,20,0.2);color:#ff4d4d;font-weight:700;">
+              <span style="color:#e50914;font-size:12px;">⚡</span>
+              <span>Moviesda HD</span>
             </button>
           </div>
 
@@ -883,79 +764,121 @@ class MovieshubPlayer {
       const season = movie?.season || 1;
       const episode = movie?.episode || 1;
 
+      const isMoviesdaMovie = !!getVerifiedMoviesdaFileId(movie?.title) || movie?.platform === "Moviesda" || String(movie?.id || "").startsWith("moviesda-");
+      const fileId = getVerifiedMoviesdaFileId(movie?.title) || (String(movie?.id || "").startsWith("moviesda-") ? String(movie?.id).replace("moviesda-", "") : "102943");
+
       // MULTI-SERVER STREAMING NETWORK (js/player.js)
-      const servers = [
-        {
-          id: "s1",
-          name: "Server 1",
-          badge: "Movieshub Cloud",
-          url: mtype === "tv"
-            ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
-            : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
-        },
-        {
-          id: "s2",
-          name: "Server 2",
-          badge: "Primary HD (VidLink)",
-          url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s3",
-          name: "Server 3",
-          badge: "Fast Forward (AutoEmbed)",
-          url: mtype === "tv"
-            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
-            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
-        },
-        {
-          id: "s4",
-          name: "Server 4",
-          badge: "Backup 1 (0vidads)",
-          url: mtype === "tv"
-            ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s5",
-          name: "Server 5",
-          badge: "Multi-Audio (VidSync)",
-          url: mtype === "tv"
-            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s6",
-          name: "Server 6",
-          badge: "Cinema 4K (2Embed)",
-          url: mtype === "tv"
-            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
-            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
-        },
-        {
-          id: "s7",
-          name: "Server 7",
-          badge: "Mirror HD (VidSrc PM)",
-          url: mtype === "tv"
-            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s8",
-          name: "Server 8",
-          badge: "Ultra CDN (VidSrc Net)",
-          url: mtype === "tv"
-            ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s9",
-          name: "Server 9",
-          badge: "Moviesda Tamil HD",
-          url: `https://moviezda.me/moviesda-tamil-movies-2026/`
-        }
-      ];
+      let servers = [];
+      if (isMoviesdaMovie) {
+        // Dedicated Moviesda Mirror Network for Moviesda Exclusive Releases
+        // Prevents passing Moviesda file ID (e.g. 102966) to external TMDB servers which plays wrong movies!
+        servers = [
+          {
+            id: "s1",
+            name: "Server 1",
+            badge: "Moviesda Tamil HD",
+            url: `https://play.onestream.today/stream/page/${fileId}`
+          },
+          {
+            id: "s2",
+            name: "Server 2",
+            badge: "Moviesda Mirror 1",
+            url: `https://play.onestream.today/stream/page/${fileId}`
+          },
+          {
+            id: "s3",
+            name: "Server 3",
+            badge: "Movieshub Cloud",
+            url: `${pfx}/stream/moviesda?id=${fileId}&clean=1`
+          },
+          {
+            id: "s4",
+            name: "Server 4",
+            badge: "Moviesda VIP",
+            url: `https://play.onestream.today/stream/page/${fileId}`
+          },
+          {
+            id: "s5",
+            name: "Server 5",
+            badge: "Direct MP4 Player",
+            url: `https://download.moviespage.xyz/download/file/${fileId}`
+          }
+        ];
+      } else {
+        // Standard Multi-Server Network (Servers 1 through 9)
+        servers = [
+          {
+            id: "s1",
+            name: "Server 1",
+            badge: "Movieshub Cloud",
+            url: mtype === "tv"
+              ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
+              : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
+          },
+          {
+            id: "s2",
+            name: "Server 2",
+            badge: "Primary HD (VidLink)",
+            url: mtype === "tv"
+              ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
+              : `https://vidlink.pro/movie/${resolvedTmdbId}`
+          },
+          {
+            id: "s3",
+            name: "Server 3",
+            badge: "Fast Forward (AutoEmbed)",
+            url: mtype === "tv"
+              ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
+              : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
+          },
+          {
+            id: "s4",
+            name: "Server 4",
+            badge: "Backup 1 (0vidads)",
+            url: mtype === "tv"
+              ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+              : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
+          },
+          {
+            id: "s5",
+            name: "Server 5",
+            badge: "Multi-Audio (VidSync)",
+            url: mtype === "tv"
+              ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+              : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
+          },
+          {
+            id: "s6",
+            name: "Server 6",
+            badge: "Cinema 4K (2Embed)",
+            url: mtype === "tv"
+              ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
+              : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+          },
+          {
+            id: "s7",
+            name: "Server 7",
+            badge: "Mirror HD (VidSrc PM)",
+            url: mtype === "tv"
+              ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+              : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+          },
+          {
+            id: "s8",
+            name: "Server 8",
+            badge: "Ultra CDN (VidSrc Net)",
+            url: mtype === "tv"
+              ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+              : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
+          },
+          {
+            id: "s9",
+            name: "Server 9",
+            badge: "Moviesda Tamil HD",
+            url: `https://moviezda.me/moviesda-tamil-movies-2026/`
+          }
+        ];
+      }
 
       this.currentServerIdx = 0;
       this.isAutoSwitchingEnabled = false;
@@ -986,15 +909,25 @@ class MovieshubPlayer {
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">
             <iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
-          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 16px;background:rgba(15,13,23,0.95);border-top:1px solid rgba(255,255,255,0.08);z-index:50;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;">
               <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 <span>Back</span>
               </button>
-              <div class="player-server-pills" id="playerModalServerPills">
+              ${isMoviesdaMovie ? `
+                <span class="moviesda-live-badge" style="background:#e50914;color:#fff;font-size:11px;font-weight:800;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;display:flex;align-items:center;gap:5px;box-shadow:0 0 10px rgba(229,9,20,0.5);">
+                  <span>⚡</span>
+                  <span>MOVIESDA 1080P ORIGINAL</span>
+                </span>
+              ` : `
+                <button class="srv-pill-btn moviesda-direct-btn" id="directMoviesdaPillBtn" title="Direct Switch to Moviesda Tamil HD" style="border:1.5px solid #e50914;background:linear-gradient(135deg, rgba(229,9,20,0.35), rgba(0,0,0,0.5));color:#fff;font-weight:800;box-shadow:0 0 10px rgba(229,9,20,0.3);">
+                  <span>⚡ Moviesda Tamil HD</span>
+                </button>
+              `}
+              <div class="player-server-pills" id="playerModalServerPills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 ${servers.map((s, idx) => `
-                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
+                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""} ${s.badge.includes("Moviesda") ? "moviesda-pill-active" : ""}" data-idx="${idx}">
                     <span>${s.name}</span>
                     <span class="srv-pill-badge">${s.badge}</span>
                   </button>
@@ -1086,13 +1019,24 @@ class MovieshubPlayer {
             }
           };
 
-          const isMoviesdaMovie = !!getVerifiedMoviesdaFileId(movie?.title) || movie?.platform === "Moviesda" || String(movie?.id || "").startsWith("moviesda-");
-          
-          if (srv.id === "s9" || (srv.id === "s1" && isMoviesdaMovie)) {
+          // For Moviesda exclusive releases (like Immortal, Cold Call, Anakapalli, Baththa, etc.):
+          // ALL servers route to the verified Moviesda stream so Server 2/3/4/5 NEVER queries VidLink/AutoEmbed
+          // with a Moviesda file ID (which would play a 1934 cowboy movie!)
+          if (isMoviesdaMovie) {
+            curIframe.removeAttribute("src");
+            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(fileId || resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
+            hidePreloader();
+            return;
+          }
+
+          if (srv.id === "s9") {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
             hidePreloader();
-          } else if (srv.id === "s1") {
+            return;
+          }
+
+          if (srv.id === "s1") {
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
             fetch(srv.url)
               .then(res => {
@@ -1116,10 +1060,11 @@ class MovieshubPlayer {
                   : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`;
                 hidePreloader();
               });
-          } else {
-            curIframe.removeAttribute("srcdoc");
-            curIframe.src = srv.url;
+            return;
           }
+
+          curIframe.removeAttribute("srcdoc");
+          curIframe.src = srv.url;
         }
 
         // Auto-switch timer: Only if manually enabled by user and server takes > 20s
@@ -1194,6 +1139,29 @@ class MovieshubPlayer {
           const nextIdx = (this.currentServerIdx + 1) % servers.length;
           loadServer(nextIdx, false);
           if (window.showToast) window.showToast(`Switched to ${servers[nextIdx].name}`);
+        });
+      }
+
+      // Top bar Moviesda HD Tab
+      const tabMoviesdaMode = document.getElementById("tab-moviesda-mode");
+      if (tabMoviesdaMode) {
+        tabMoviesdaMode.addEventListener("click", () => {
+          if (isMoviesdaMovie) {
+            loadServer(0, false);
+            if (window.showToast) window.showToast("Streaming Moviesda Tamil HD (Watermark-Free)");
+          } else {
+            loadServer(servers.length - 1, false);
+            if (window.showToast) window.showToast("Switched to Server 9 (Moviesda Tamil HD)");
+          }
+        });
+      }
+
+      // Bottom bar direct Moviesda button
+      const directMoviesdaBtn = document.getElementById("directMoviesdaPillBtn");
+      if (directMoviesdaBtn) {
+        directMoviesdaBtn.addEventListener("click", () => {
+          loadServer(servers.length - 1, false);
+          if (window.showToast) window.showToast("Switched to Server 9 (Moviesda Tamil HD)");
         });
       }
 
