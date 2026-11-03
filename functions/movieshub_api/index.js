@@ -337,8 +337,8 @@ function resolveNetmirrorServers(tmId, mtype, lang, netId, year, title, prefix =
   const cleanQLang = encodeURIComponent(cleanLang);
 
   const fallbackVidsync = mtype === 'tv'
-    ? `https://vidsync.pro/embed/tv/${sTm}/1/1&dubLang=${cleanLang}&subtitle=English`
-    : `https://vidsync.pro/embed/movie/${sTm}&dubLang=${cleanLang}&subtitle=English`;
+    ? `https://autoembed.pro/tv/${sTm}/1/1`
+    : `https://autoembed.pro/movie/${sTm}`;
   const fallbackVidlink = mtype === 'tv'
     ? `https://vidlink.pro/tv/${sTm}/1/1`
     : `https://vidlink.pro/movie/${sTm}`;
@@ -355,8 +355,8 @@ function resolveNetmirrorServers(tmId, mtype, lang, netId, year, title, prefix =
       url: `${prefix}/stream/direct_mp4?tm_id=${sTm}&nid=${sNet}&year=${relYear}&lang=${cleanQLang}&title=${safeTitle}`
     },
     {
-      name: `Server 3 (${cleanLang} Dub · Cloud)`,
-      label: `${cleanLang} Dub · Cloud`,
+      name: `Server 3 (${cleanLang} Dub · AutoEmbed 4K)`,
+      label: `${cleanLang} Dub 4K`,
       url: fallbackVidsync
     },
     {
@@ -633,7 +633,7 @@ module.exports = async (req, res) => {
   // 9. Download
   if (pathname === '/api/download') {
     const tmId = u.searchParams.get('id') || '';
-    const fallbackUrl = `https://vidsync.pro/embed/movie/${tmId}`;
+    const fallbackUrl = `https://autoembed.pro/movie/${tmId}`;
     res.writeHead(302, { 'Location': fallbackUrl });
     return res.end();
   }

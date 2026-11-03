@@ -132,7 +132,7 @@ for (const m of global.MOVIE_CATALOG) {
   realPlayer.currentMovie = m;
   realPlayer.switchMode("movie");
   const iframeSrc = getMockEl("player-stream-iframe").src;
-  if (!iframeSrc || (!iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro"))) {
+  if (!iframeSrc || (!iframeSrc.includes("autoembed.pro") && !iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro") && !iframeSrc.includes("2embed.org"))) {
     playerStreamsOk = false;
   }
 
@@ -208,6 +208,15 @@ assert(livetvModule.includes("star-sports-1-hd") && livetvModule.includes("sony-
 const appModule = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
 assert(!appModule.includes("(!m.year || m.year <= 2024)"), "Hero billboard is no longer restricted to 2024");
 assert(appModule.includes("Game of Thrones"), "Dashboard showcases World TV & Multi-Audio series");
+
+
+// 8. Testing Server 3 & Tamil Dubbed Playback
+console.log("\n8. Testing Server 3 & Tamil Dubbed Engine...");
+const playerCode = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
+assert(!playerCode.includes("vidsync.pro"), "Server 3 never points to broken vidsync.pro");
+assert(playerCode.includes("2Embed Multi-Audio") || playerCode.includes("2embed.org"), "Server 3 is 2Embed Multi-Audio");
+assert(playerCode.includes("quickTamilAudioBtn"), "Quick Tamil Dubbed button present in player");
+assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio option present in popover");
 
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

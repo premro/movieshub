@@ -153,11 +153,13 @@ class MovieshubPlayer {
                     <div>
                       <h4>Audio Track</h4>
                       <ul id=\"audio-track-list\">
-                        <li class="active" data-val="Original">Original (Dolby Atmos 7.1.4)</li>
-                        <li data-val="Cinema">Dolby Atmos Cinema Hall</li>
-                        <li data-val="Dialogue">Dolby Atmos Dialogue Boost</li>
-                        <li data-val="Night">Dolby Atmos Night Mode</li>
-                        <li data-val="Direct">Direct Stereo Pass-Through</li>
+                        <li class="active" data-val="Tamil">🔊 Tamil (தமிழ்) [Dubbed / Regional]</li>
+                        <li data-val="Original">🔊 English (Original 5.1 / Atmos 7.1.4)</li>
+                        <li data-val="Hindi">🔊 Hindi (हिंदी) [Dubbed]</li>
+                        <li data-val="Telugu">🔊 Telugu (తెలుగు) [Dubbed]</li>
+                        <li data-val="Cinema">🎬 Dolby Atmos Cinema Hall</li>
+                        <li data-val="Dialogue">🗣️ Dolby Atmos Dialogue Boost</li>
+                        <li data-val="Night">🌙 Dolby Atmos Night Mode</li>
                       </ul>
                     </div>
                     <div>
@@ -431,9 +433,18 @@ class MovieshubPlayer {
         document.querySelectorAll("#audio-track-list li").forEach(l => l.classList.remove("active"));
         li.classList.add("active");
         const val = li.dataset.val;
-        if (window.DolbyAtmos) {
+        if (val === "Tamil") {
+          this.switchMode("stream");
+          if (window.showToast) window.showToast("Switched to Tamil Dubbed Audio (Server 1)");
+        } else if (val === "Hindi") {
+          this.switchMode("stream");
+          if (window.showToast) window.showToast("Switched to Hindi Dubbed Audio");
+        } else if (val === "Telugu") {
+          this.switchMode("stream");
+          if (window.showToast) window.showToast("Switched to Telugu Dubbed Audio");
+        } else if (window.DolbyAtmos) {
           if (this.video) window.DolbyAtmos.attach(this.video);
-          if (val === "Original") window.DolbyAtmos.applyPreset("atmos_3d");
+          if (val === "Original" || val === "Atmos") window.DolbyAtmos.applyPreset("atmos_3d");
           else if (val === "Cinema") window.DolbyAtmos.applyPreset("cinema");
           else if (val === "Dialogue") window.DolbyAtmos.applyPreset("dialogue");
           else if (val === "Night") window.DolbyAtmos.applyPreset("night");
@@ -570,7 +581,11 @@ class MovieshubPlayer {
         "interstellar": 157336,
         "severance": 95396,
         "stranger things": 66732,
-        "the boys": 76479
+        "the boys": 76479,
+        "game of thrones": 1399,
+        "got": 1399,
+        "house of the dragon": 94997,
+        "hotd": 94997
       };
 
       // 1. Prioritize explicit numeric tmdbId from movie object
@@ -608,22 +623,22 @@ class MovieshubPlayer {
         }
       }
 
-      const mtype = movie?.mediaType || "tv";
+      const mtype = (movie?.mediaType === "tv" || movie?.isTv || String(movie?.duration || "").toLowerCase().includes("season")) ? "tv" : "movie";
 
       // Verified, working, non-buffering streaming servers with Multi-Audio (Tamil, Hindi, English)
       const servers = [
         {
           id: "s1",
           name: "Server 1",
-          badge: "Multi-Audio (Tamil/Eng)",
+          badge: "Tamil & Multi (AutoEmbed 4K)",
           url: mtype === "tv"
-            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
+            ? `https://autoembed.pro/tv/${resolvedTmdbId}/1/1`
+            : `https://autoembed.pro/movie/${resolvedTmdbId}`
         },
         {
           id: "s2",
           name: "Server 2",
-          badge: "VidLink Multi",
+          badge: "VidLink Multi-Lang HD",
           url: mtype === "tv"
             ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=1`
             : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=1`
@@ -631,39 +646,31 @@ class MovieshubPlayer {
         {
           id: "s3",
           name: "Server 3",
-          badge: "Tamil Dub (Vidsync)",
+          badge: "2Embed Multi-Audio",
           url: mtype === "tv"
-            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/1/1&dubLang=Tamil&subtitle=English`
-            : `https://vidsync.pro/embed/movie/${resolvedTmdbId}&dubLang=Tamil&subtitle=English`
+            ? `https://2embed.org/embedtv/${resolvedTmdbId}&s=1&e=1`
+            : `https://2embed.org/embed/${resolvedTmdbId}`
         },
         {
           id: "s4",
           name: "Server 4",
-          badge: "Cinema 4K",
+          badge: "Vidsrc Dual Audio",
+          url: mtype === "tv"
+            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s5",
+          name: "Server 5",
+          badge: "Cinema 4K Ultra",
           url: mtype === "tv"
             ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
             : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         },
         {
-          id: "s5",
-          name: "Server 5",
-          badge: "JW Player HD",
-          url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
-        },
-        {
           id: "s6",
           name: "Server 6",
-          badge: "CineSrc Fast",
-          url: mtype === "tv"
-            ? `https://cinesrc.st/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://cinesrc.st/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s7",
-          name: "Server 7",
-          badge: "Mirror HD",
+          badge: "Mirror HD CDN",
           url: mtype === "tv"
             ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
             : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
@@ -715,6 +722,9 @@ class MovieshubPlayer {
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio" style="background:#e50914;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+                <span>🔊 Tamil Dubbed</span>
+              </button>
               <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage">
                 <div class="atmos-pulse-dot"></div>
                 <span>Dolby Atmos</span>
@@ -834,6 +844,15 @@ class MovieshubPlayer {
             autoSwitchBtn.innerHTML = "<span>⏸ Auto-Switch: OFF</span>";
             if (window.showToast) window.showToast("Server Auto-Switch OFF");
           }
+        });
+      }
+
+      // Quick Tamil Dubbed Button
+      const quickTamilBtn = document.getElementById("quickTamilAudioBtn");
+      if (quickTamilBtn) {
+        quickTamilBtn.addEventListener("click", () => {
+          loadServer(0, false);
+          if (window.showToast) window.showToast("Playing in Tamil Dubbed / Multi-Audio Stream (Server 1)");
         });
       }
 
