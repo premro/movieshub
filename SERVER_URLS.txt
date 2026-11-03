@@ -1,0 +1,75 @@
+================================================================================
+                    MOVIESHUB - SERVER & STREAMING URL DIRECTORY
+================================================================================
+
+1. BACKEND CORE APIS & STREAM ENGINES (functions/movieshub_api/index.js)
+--------------------------------------------------------------------------------
+- WatchCinemo Stream Engine:
+  https://webvp.watch21.shop/play/watchcinemo.php
+  Purpose: Generates verified HLS video streams with audio selection & no ads
+
+- Netmirror Referer Handshake Network:
+  https://netmirror.plus/
+  Purpose: Provides secure stream handshake, CDN access token, and bypass headers
+
+- Netmirror Real-Time Search API:
+  https://api2.imdb4.shop/api/search2/
+  Purpose: Multilingual movie & web series live catalog search (Tamil, Hindi, Telugu, etc.)
+
+- TMDB Metadata Mirror API:
+  https://tmdb.imdb3.shop/3/
+  Purpose: Fetches high-res posters, cast, crew, ratings, and plot summaries
+
+- TMDB Official Image CDN:
+  https://image.tmdb.org/t/p/
+  - Posters:   https://image.tmdb.org/t/p/w500/{poster_path}
+  - Backdrops: https://image.tmdb.org/t/p/w1280/{backdrop_path}
+
+
+2. MULTI-SERVER STREAMING NETWORK (js/player.js)
+--------------------------------------------------------------------------------
+Server 1: Movieshub Cloud (Internal Fast Stream Proxy)
+- Movies: /stream/netmirror/embed?tm_id={id}&nid={id}&year={year}&lang={lang}
+- TV:     /stream/netmirror/embed?tm_id={id}&nid={id}&year={year}&lang={lang}&se={s}&ep={e}
+- Upstream: https://webvp.watch21.shop/play/watchcinemo.php
+
+Server 2: Primary HD (VidLink)
+- Movies: https://vidlink.pro/movie/{tmdbId}
+- TV:     https://vidlink.pro/tv/{tmdbId}/{season}/{episode}
+
+Server 3: Fast Forward (AutoEmbed)
+- Movies: https://autoembed.co/movie/tmdb/{tmdbId}
+- TV:     https://autoembed.co/tv/tmdb/{tmdbId}/{season}/{episode}
+
+Server 4: Backup 1 (0vidads)
+- Movies: https://0vidads.top/embed/movie/{tmdbId}
+- TV:     https://0vidads.top/embed/tv/{tmdbId}/{season}/{episode}
+
+Server 5: Multi-Audio & Dubs (VidSync)
+- Movies: https://vidsync.pro/embed/movie/{tmdbId}
+- TV:     https://vidsync.pro/embed/tv/{tmdbId}/{season}/{episode}
+
+Server 6: Cinema 4K (2Embed)
+- Movies: https://www.2embed.cc/embed/{tmdbId}
+- TV:     https://www.2embed.cc/embedtv/{tmdbId}&s={season}&e={episode}
+
+Server 7: Mirror HD (VidSrc PM)
+- Movies: https://vidsrc.pm/embed/movie/{tmdbId}
+- TV:     https://vidsrc.pm/embed/tv/{tmdbId}/{season}/{episode}
+
+Server 8: Ultra CDN (VidSrc Net)
+- Movies: https://vidsrc.net/embed/movie/{tmdbId}
+- TV:     https://vidsrc.net/embed/tv/{tmdbId}/{season}/{episode}
+
+
+3. LIVE TV & SPORTS STREAM CDNS (js/livetv.js & js/sports.js)
+--------------------------------------------------------------------------------
+- Live Tamil TV Streams:
+  - Sun TV HD, KTV HD, Vijay TV HD, Zee Tamil HD, Sun News, Kalaignar
+  - CDN endpoints: https://raw.githubusercontent.com/, https://tv.apple.com/
+
+- Live Sports HLS Feeds:
+  - Star Sports 1 HD, Star Sports Tamil, Sony Sports Ten, Sky Sports, Willow Cricket
+  - CDN endpoints: https://test-streams.mux.dev/, Akamai & Fastly edge live relays
+
+================================================================================
