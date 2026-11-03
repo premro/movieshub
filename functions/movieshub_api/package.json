@@ -1,0 +1,9 @@
+{
+	"name": "movieshub_api",
+	"version": "1.0.0",
+	"main": "index.js",
+	"author": "premnath.v@zohocorp.com",
+	"dependencies": {
+		"zcatalyst-sdk-node": "latest"
+	}
+}

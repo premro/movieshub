@@ -1,0 +1,23 @@
+{
+  "client": {
+    "source": ".",
+    "ignore": [
+      ".catalystrc",
+      "catalyst.json",
+      "server.py",
+      "server.log",
+      "README.md",
+      "functions/**",
+      "assets/videos/**",
+      "assets/*.mp4",
+      "data/**"
+    ]
+  },
+  "functions": {
+    "targets": [
+      "movieshub_api"
+    ],
+    "ignore": [],
+    "source": "functions"
+  }
+}

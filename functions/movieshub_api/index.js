@@ -1,0 +1,647 @@
+'use strict';
+
+const https = require('https');
+const http = require('http');
+const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+const { URL, URLSearchParams } = require('url');
+
+const NETMIRROR_SECRET = 'net###@@sss';
+const TMDB_KEYS = ['c8dea14dc917687ac631a52620e4f7ad', '3cb41ecea3bf606c56552db3d17adefd'];
+
+const LANG_NAME_MAP = {
+  ta: 'Tamil', en: 'English', hi: 'Hindi', te: 'Telugu', ml: 'Malayalam',
+  kn: 'Kannada', ko: 'Korean', ja: 'Japanese'
+};
+const LANG_CODE_MAP = {
+  tamil: 'ta', english: 'en', hindi: 'hi', telugu: 'te', malayalam: 'ml'
+};
+
+const LANG_COLORS = {
+  tamil: '#ec4899', telugu: '#f43f5e', malayalam: '#a855f7',
+  kannada: '#8b5cf6', hindi: '#f97316', india: '#e50914',
+  indonesian: '#06b6d4', english: '#3b82f6', cinema: '#e50914'
+};
+
+let cachedDashboard = null;
+try {
+  const cachePath = path.join(__dirname, 'dashboard_cache.json');
+  if (fs.existsSync(cachePath)) {
+    cachedDashboard = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+  }
+} catch (e) {
+  console.error('[Cache Init Error]', e);
+}
+
+function fetchJson(url, options = {}) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const client = u.protocol === 'http:' ? http : https;
+    const req = client.request(u, {
+      method: options.method || 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)',
+        'Referer': 'https://netmirror.plus/',
+        ...(options.headers || {})
+      },
+      timeout: options.timeout || 6000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+    req.end();
+  });
+}
+
+function fetchBuffer(url, options = {}) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const client = u.protocol === 'http:' ? http : https;
+    const req = client.request(u, {
+      method: options.method || 'GET',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+        'Referer': 'https://netmirror.plus/',
+        ...(options.headers || {})
+      },
+      timeout: options.timeout || 8000
+    }, (res) => {
+      const chunks = [];
+      res.on('data', chunk => chunks.push(chunk));
+      res.on('end', () => resolve({ buffer: Buffer.concat(chunks), headers: res.headers, statusCode: res.statusCode }));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+    req.end();
+  });
+}
+
+async function fetchTmdbApi(endpoint, params = {}) {
+  for (const key of TMDB_KEYS) {
+    try {
+      const qs = new URLSearchParams({ ...params, api_key: key }).toString();
+      const url = `https://tmdb.imdb3.shop/3${endpoint}?${qs}`;
+      const data = await fetchJson(url, { timeout: 4000 });
+      if (data) return data;
+    } catch (e) {
+      continue;
+    }
+  }
+  return { results: [] };
+}
+
+function normalizeMovie(item) {
+  const mid = item.id;
+  const title = item.title || item.name || 'Movie';
+  const nativeTitle = item.original_title || item.original_name || title;
+  const origLang = item.original_language || 'en';
+  const langName = LANG_NAME_MAP[origLang] || (origLang === 'en' ? 'English' : origLang.toUpperCase());
+  const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+  const relDate = item.release_date || item.first_air_date || '2026';
+  const year = parseInt(relDate.slice(0, 4), 10) || 2026;
+  const vote = Math.round((parseFloat(item.vote_average) || 8.5) * 10) / 10;
+
+  const posterPath = item.poster_path;
+  const backdropPath = item.backdrop_path;
+
+  let posterUrl = '';
+  if (posterPath) {
+    posterUrl = `https://image.tmdb.org/t/p/w500${posterPath}`;
+  } else if (backdropPath) {
+    posterUrl = `https://image.tmdb.org/t/p/w500${backdropPath}`;
+  } else {
+    posterUrl = `/api/poster?title=${encodeURIComponent(title.slice(0, 30))}&year=${year}&lang=${encodeURIComponent(langName)}`;
+  }
+
+  const backdropUrl = backdropPath ? `https://image.tmdb.org/t/p/w1280${backdropPath}` : posterUrl;
+
+  const genreMap = {
+    28: 'Action', 12: 'Adventure', 16: 'Animation', 35: 'Comedy', 80: 'Crime',
+    18: 'Drama', 27: 'Horror', 878: 'Sci-Fi', 53: 'Thriller', 10749: 'Romance'
+  };
+  const genres = (item.genre_ids || []).slice(0, 3).map(gid => genreMap[gid] || 'Cinema');
+
+  return {
+    id: `tmdb-${mid}`,
+    tmdbId: mid,
+    title,
+    nativeTitle,
+    language: langName,
+    languageBadge: langName,
+    year,
+    rating: vote,
+    match: `${Math.min(99, Math.max(75, Math.floor(vote * 10 + 12)))}%`,
+    maturity: 'U/A 16+',
+    duration: mediaType === 'movie' ? '2h 30m' : 'Series',
+    genres: genres.length ? genres : ['Action', 'Drama'],
+    qualities: ['4K', '1080p'],
+    platform: 'Direct',
+    platformBadge: 'MOVIESHUB',
+    platformColor: '#E50914',
+    poster: posterUrl,
+    backdrop: backdropUrl,
+    mediaType,
+    overview: item.overview || `${title} (${year}) streaming now in 4K Ultra HD on Movieshub with pure ad-free playback.`,
+    cast: [],
+    director: 'Cinematic Director',
+    isTrending: (item.popularity || 0) > 40
+  };
+}
+
+const KNOWN_TMDB_MAP = {
+  'angamaly diaries': 442000,
+  'angamaly': 442000,
+  'dune: part two': 693134,
+  'dune part two': 693134,
+  'dune 2': 693134,
+  'dune': 693134,
+  'dune: part one': 438631,
+  'blast': 1515729,
+  'beast': 843241,
+  'leo': 1072790,
+  'jailer': 980078,
+  'vikram': 725201,
+  'master': 602211,
+  'goat': 1148817,
+  'the greatest of all time': 1148817,
+  'amaran': 1184918,
+  'kalki 2898 ad': 792307,
+  'kalki': 792307,
+  'aavesham': 1243644,
+  'manjummel boys': 1214484,
+  'bramayugam': 1171874,
+  'maharaja': 1114738,
+  'stree 2': 1114513,
+  '12th fail': 1181548,
+  'jawan': 872585,
+  'animal': 781732,
+  'salaar': 897087,
+  'rrr': 579974,
+  'deadpool & wolverine': 533535,
+  'oppenheimer': 872585,
+  'interstellar': 157336,
+  'severance': 95396,
+  'stranger things': 66732,
+  'the boys': 76479
+};
+
+async function searchMovies(query, lang = null) {
+  const results = [];
+  const seenIds = new Set();
+
+  try {
+    const url = `https://api2.imdb4.shop/api/search2/${encodeURIComponent(query)}?page=0`;
+    const data = await fetchJson(url, { timeout: 4000 });
+    const netItems = (data && data.results) || [];
+    for (const r of netItems) {
+      const rawTitle = (r.title || '').trim();
+      if (!rawTitle) continue;
+      const mid = String(r.id);
+      const uid = `netmirror-${mid}`;
+      if (seenIds.has(uid)) continue;
+      seenIds.add(uid);
+
+      let itemLang = 'Hindi';
+      let badgeText = 'India';
+      const match = rawTitle.match(/\[(.*?)\]/);
+      if (match) {
+        badgeText = match[1].trim();
+        itemLang = badgeText;
+      } else {
+        const cn = r.cn || 'India';
+        badgeText = cn;
+        itemLang = cn === 'India' ? 'Hindi' : cn;
+      }
+
+      const badgeColor = LANG_COLORS[badgeText.toLowerCase()] || '#e50914';
+      const posterImg = r.backdrop_path || `/api/poster?title=${encodeURIComponent(rawTitle)}&year=2023&lang=${encodeURIComponent(itemLang)}`;
+      let relYear = 2023;
+      try { relYear = parseInt(r.release_date, 10) || 2023; } catch (e) {}
+      let voteAvg = 6.5;
+      try { voteAvg = Math.round((parseFloat(r.vote_average) || 6.5) * 10) / 10; } catch (e) {}
+
+      const cleanTitleKey = rawTitle.toLowerCase().replace(/\[.*?\]/g, '').trim();
+      let matchedTmdb = KNOWN_TMDB_MAP[cleanTitleKey];
+      if (!matchedTmdb) {
+        for (const [k, v] of Object.entries(KNOWN_TMDB_MAP)) {
+          if (cleanTitleKey.includes(k) || k.includes(cleanTitleKey)) {
+            matchedTmdb = v;
+            break;
+          }
+        }
+      }
+      const realTmdbId = matchedTmdb ? String(matchedTmdb) : mid;
+
+      results.push({
+        id: uid,
+        netmirrorId: mid,
+        tmdbId: realTmdbId,
+        title: rawTitle,
+        language: itemLang,
+        languageBadge: badgeText,
+        year: relYear,
+        rating: voteAvg,
+        match: '95%',
+        maturity: 'U/A 16+',
+        duration: '2h 25m',
+        genres: ['Drama', 'Action'],
+        qualities: ['4K', '1080p'],
+        platform: 'Direct',
+        platformBadge: badgeText.toUpperCase(),
+        platformColor: badgeColor,
+        poster: posterImg,
+        backdrop: posterImg,
+        mediaType: r.media_type || 'movie',
+        overview: `${rawTitle} streaming in ${itemLang} with Dolby Atmos & 4K Ultra HD on Movieshub.`,
+        cast: [],
+        director: 'Cinematic Director',
+        isTrending: true
+      });
+    }
+  } catch (err) {
+    console.error('[Search Netmirror Error]', err);
+  }
+
+  try {
+    const tmdbData = await fetchTmdbApi('/search/multi', { query, include_adult: 'false' });
+    for (const item of (tmdbData.results || [])) {
+      const m = normalizeMovie(item);
+      if (!seenIds.has(m.id) && !results.some(r => r.title.toLowerCase() === m.title.toLowerCase())) {
+        seenIds.add(m.id);
+        results.push(m);
+      }
+    }
+  } catch (err) {
+    console.error('[Search TMDB Error]', err);
+  }
+
+  if (lang && lang.toLowerCase() !== 'all') {
+    const filtered = results.filter(r => (r.language || '').toLowerCase() === lang.toLowerCase());
+    return filtered.length ? filtered : results;
+  }
+  return results;
+}
+
+function generateSvgPoster(title, year = '2026', lang = 'Cinema') {
+  const safeTitle = (title || 'Movieshub').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').slice(0, 26);
+  const safeLang = (lang || 'Cinema').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="750" viewBox="0 0 500 750">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14121f"/>
+      <stop offset="60%" stop-color="#0a0910"/>
+      <stop offset="100%" stop-color="#030206"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e50914"/>
+      <stop offset="100%" stop-color="#990000"/>
+    </linearGradient>
+  </defs>
+  <rect width="100%" height="100%" fill="url(#bg)"/>
+  <rect x="0" y="0" width="8" height="750" fill="url(#acc)"/>
+  <circle cx="250" cy="300" r="90" fill="rgba(229,9,20,0.12)"/>
+  <path d="M235 270 L285 300 L235 330 Z" fill="#ffffff"/>
+  <rect x="36" y="520" width="94" height="24" rx="4" fill="#e50914"/>
+  <text x="83" y="536" font-family="-apple-system, sans-serif" font-size="11" font-weight="900" fill="#fff" text-anchor="middle">MOVIESHUB</text>
+  <text x="36" y="580" font-family="-apple-system, sans-serif" font-size="28" font-weight="800" fill="#ffffff">${safeTitle}</text>
+  <text x="36" y="616" font-family="-apple-system, sans-serif" font-size="15" font-weight="600" fill="#9ca3af">${safeLang} • ${year} • 4K ULTRA HD</text>
+  <text x="36" y="644" font-family="-apple-system, sans-serif" font-size="13" fill="#22c55e" font-weight="700">★ 8.8 • DOLBY ATMOS 5.1</text>
+  <text x="36" y="700" font-family="-apple-system, sans-serif" font-size="11" fill="#666" font-weight="600">Created by Prem</text>
+</svg>`;
+}
+
+function resolveNetmirrorServers(tmId, mtype, lang, netId, year, title, prefix = '') {
+  const cleanLang = (lang && lang.toLowerCase() !== 'cinema') ? lang : 'Hindi';
+  const sTm = String(tmId).replace('netmirror-', '');
+  const sNet = String(netId || '').replace('netmirror-', '');
+  const relYear = year || '2024';
+
+  const ts = String(Math.floor(Date.now() / 1000));
+  const sig = crypto.createHmac('sha256', NETMIRROR_SECRET).update(`${sTm}:${ts}`).digest('hex');
+  const directCinemo = `https://webvp.watch21.shop/play/watchcinemo.php?tm_id=${sTm}&nid=${sNet}&year=${relYear}&se=0&ep=0&ts=${ts}&sig=${sig}&hasExt=true`;
+
+  const safeTitle = encodeURIComponent(title || 'Movie');
+  const cleanQLang = encodeURIComponent(cleanLang);
+
+  const fallbackVidsync = mtype === 'tv'
+    ? `https://vidsync.pro/embed/tv/${sTm}/1/1&dubLang=${cleanLang}&subtitle=English`
+    : `https://vidsync.pro/embed/movie/${sTm}&dubLang=${cleanLang}&subtitle=English`;
+  const fallbackVidlink = mtype === 'tv'
+    ? `https://vidlink.pro/tv/${sTm}/1/1`
+    : `https://vidlink.pro/movie/${sTm}`;
+
+  return [
+    {
+      name: `Server 1 (${cleanLang} HD · Fast)`,
+      label: `Fast 1080p · ${cleanLang}`,
+      url: `${prefix}/stream/netmirror/embed?url=${encodeURIComponent(directCinemo)}&lang=${cleanQLang}`
+    },
+    {
+      name: 'Server 2 (Direct CDN · 1080p)',
+      label: 'Direct MP4 · 1080p',
+      url: `${prefix}/stream/direct_mp4?tm_id=${sTm}&nid=${sNet}&year=${relYear}&lang=${cleanQLang}&title=${safeTitle}`
+    },
+    {
+      name: `Server 3 (${cleanLang} Dub · Cloud)`,
+      label: `${cleanLang} Dub · Cloud`,
+      url: fallbackVidsync
+    },
+    {
+      name: 'Server 4 (VidLink 4K · Cloud)',
+      label: 'VidLink 4K · Cloud',
+      url: fallbackVidlink
+    }
+  ];
+}
+
+function generatePlayerHtml(tmId, mtype, title, lang, netId, year, prefix = '') {
+  const servers = resolveNetmirrorServers(tmId, mtype, lang, netId, year, title, prefix);
+  const serversJson = JSON.stringify(servers);
+  const safeTitle = (title || 'Movie').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${safeTitle} - Movieshub Player</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .player-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    .player-frame-container { flex: 1; width: 100%; height: 100%; position: relative; background: #000; }
+    iframe { width: 100%; height: 100%; border: none; display: block; }
+    .server-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 13, 23, 0.95); border-top: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .server-pills { display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+    .srv-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #e5e7eb; padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; white-space: nowrap; }
+    .srv-btn:hover { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
+    .srv-btn.active { background: #e50914; border-color: #e50914; color: #fff; box-shadow: 0 0 12px rgba(229,9,20,0.5); }
+    .srv-badge { font-size: 10px; opacity: 0.8; padding: 1px 4px; background: rgba(0,0,0,0.3); border-radius: 3px; }
+    .download-player-btn { background: #22c55e; border: none; color: #000; font-weight: 800; font-size: 12px; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .download-player-btn:hover { background: #16a34a; color: #fff; }
+    .loader-overlay { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 20; transition: opacity 0.3s; }
+    .spinner { width: 44px; height: 44px; border: 4px solid rgba(255,255,255,0.15); border-top-color: #e50914; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { font-size: 15px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+    .loader-sub { font-size: 12px; color: #9ca3af; }
+    .hidden { display: none !important; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+  <div class="player-wrap">
+    <div class="player-frame-container">
+      <div class="loader-overlay" id="loader">
+        <div class="spinner"></div>
+        <div class="loader-text" id="loaderTitle">Connecting to Stream...</div>
+        <div class="loader-sub">Loading Full Movie Stream • Ad-Free</div>
+      </div>
+      <iframe id="mainStreamFrame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
+    </div>
+    
+    <div class="server-bar">
+      <div class="server-pills" id="serverPills"></div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-size:11px;color:#22c55e;font-weight:700;display:flex;align-items:center;gap:6px;">
+          <span>● LIVE</span>
+          <span style="color:#aaa;">4K ULTRA HD</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const servers = ${serversJson};
+    const iframe = document.getElementById("mainStreamFrame");
+    const pillsContainer = document.getElementById("serverPills");
+    const loader = document.getElementById("loader");
+    const loaderTitle = document.getElementById("loaderTitle");
+
+    function selectServer(idx) {
+      if (idx < 0 || idx >= servers.length) return;
+      const srv = servers[idx];
+      loader.classList.remove("hidden");
+      loaderTitle.textContent = "Connecting to " + (srv.name || "Server") + "...";
+
+      document.querySelectorAll(".srv-btn").forEach((b, i) => {
+        if (i === idx) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+
+      iframe.src = srv.url;
+      setTimeout(() => { loader.classList.add("hidden"); }, 2500);
+    }
+
+    iframe.addEventListener("load", () => {
+      if (iframe.src && iframe.src !== "about:blank") {
+        setTimeout(() => loader.classList.add("hidden"), 800);
+      }
+    });
+
+    servers.forEach((s, i) => {
+      const btn = document.createElement("button");
+      btn.className = "srv-btn" + (i === 0 ? " active" : "");
+      btn.innerHTML = \`<span>\${s.name || ("Server " + (i+1))}</span>\` + (s.label ? \`<span class="srv-badge">\${s.label}</span>\` : "");
+      btn.addEventListener("click", () => selectServer(i));
+      pillsContainer.appendChild(btn);
+    });
+
+    selectServer(0);
+
+    window.addEventListener("message", (e) => {
+      if (e.data === "stop" || e.data === "pause") {
+        iframe.src = "about:blank";
+      }
+    });
+    window.addEventListener("beforeunload", () => { iframe.src = "about:blank"; });
+    window.addEventListener("pagehide", () => { iframe.src = "about:blank"; });
+  </script>
+</body>
+</html>`;
+}
+
+module.exports = async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    return res.end();
+  }
+
+  const u = new URL(req.url, 'http://localhost');
+  let pathname = u.pathname;
+  let apiPrefix = '';
+  if (pathname.startsWith('/server/movieshub_api')) {
+    apiPrefix = '/server/movieshub_api';
+    pathname = pathname.slice('/server/movieshub_api'.length);
+  }
+  if (!pathname.startsWith('/')) {
+    pathname = '/' + pathname;
+  }
+
+  // 1. Health
+  if (pathname === '/api/health' || pathname === '/') {
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({
+      status: 'ok',
+      app: 'Movieshub',
+      creator: 'Prem',
+      streaming: 'active',
+      search: 'live'
+    }));
+  }
+
+  // 2. Dashboard
+  if (pathname === '/api/dashboard') {
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=600'
+    });
+    return res.end(JSON.stringify(cachedDashboard || { all: [], latest_six: [], trending: [] }));
+  }
+
+  // 3. Search
+  if (pathname === '/api/search') {
+    const q = u.searchParams.get('q') || '';
+    const lang = u.searchParams.get('lang') || null;
+    const results = q ? await searchMovies(q, lang) : [];
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    return res.end(JSON.stringify({ query: q, results }));
+  }
+
+  // 4. Latest & Movies by Language (Replicated from Netmirror)
+  if (pathname === '/api/latest' || pathname === '/api/movies') {
+    const lang = (u.searchParams.get('lang') || 'all').toLowerCase();
+    const origLang = LANG_CODE_MAP[lang];
+    const page = u.searchParams.get('page') || '1';
+    const params = {
+      sort_by: 'popularity.desc',
+      'primary_release_date.gte': '2024-01-01',
+      page: page
+    };
+    if (origLang) params.with_original_language = origLang;
+    const data = await fetchTmdbApi('/discover/movie', params);
+    const results = ((data && data.results) || []).slice(0, 24).map(m => normalizeMovie(m, apiPrefix));
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ language: lang, page: parseInt(page), results }));
+  }
+
+  // 5. Poster
+  if (pathname === '/api/poster') {
+    const title = u.searchParams.get('title') || 'Movieshub';
+    const year = u.searchParams.get('year') || '2026';
+    const lang = u.searchParams.get('lang') || 'Cinema';
+    const svg = generateSvgPoster(title, year, lang);
+    res.writeHead(200, {
+      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=86400'
+    });
+    return res.end(svg);
+  }
+
+  // 6. Image Proxy
+  if (pathname === '/api/image_proxy') {
+    const targetUrl = u.searchParams.get('url');
+    if (!targetUrl) {
+      res.writeHead(400);
+      return res.end('Missing url');
+    }
+    try {
+      const { buffer, headers, statusCode } = await fetchBuffer(targetUrl);
+      res.writeHead(statusCode || 200, {
+        'Content-Type': headers['content-type'] || 'image/jpeg',
+        'Cache-Control': 'public, max-age=604800'
+      });
+      return res.end(buffer);
+    } catch (err) {
+      res.writeHead(502);
+      return res.end('Proxy error');
+    }
+  }
+
+  // 7. Player embed
+  if (pathname === '/stream/player') {
+    const tmId = u.searchParams.get('id') || '949229';
+    const mtype = u.searchParams.get('type') || 'movie';
+    const title = u.searchParams.get('title') || 'Movie';
+    const lang = u.searchParams.get('lang') || 'Hindi';
+    const netId = u.searchParams.get('net_id') || '';
+    const year = u.searchParams.get('year') || '2024';
+
+    const html = generatePlayerHtml(tmId, mtype, title, lang, netId, year, apiPrefix);
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': "frame-ancestors *;", 'Access-Control-Allow-Origin': "*" });
+    return res.end(html);
+  }
+
+  // 8. Stream netmirror embed proxy
+  if (pathname === '/stream/netmirror/embed') {
+    let targetUrl = u.searchParams.get('url') || '';
+    if (!targetUrl) {
+      const tmId = u.searchParams.get('tm_id') || u.searchParams.get('id') || '';
+      const nid = u.searchParams.get('nid') || u.searchParams.get('net_id') || '';
+      const year = u.searchParams.get('year') || '2024';
+      if (tmId) {
+        const ts = String(Math.floor(Date.now() / 1000));
+        const sig = crypto.createHmac('sha256', NETMIRROR_SECRET).update(`${tmId}:${ts}`).digest('hex');
+        targetUrl = `https://webvp.watch21.shop/play/watchcinemo.php?tm_id=${tmId}&nid=${nid}&year=${year}&se=0&ep=0&ts=${ts}&sig=${sig}&hasExt=true`;
+      }
+    }
+    if (!targetUrl) {
+      res.writeHead(400);
+      return res.end('Missing url or id');
+    }
+    if (targetUrl.includes('hasExt=') && !targetUrl.includes('hasExt=true')) {
+      targetUrl = targetUrl.replace('hasExt=', 'hasExt=true');
+    } else if (!targetUrl.includes('hasExt=true')) {
+      targetUrl += '&hasExt=true';
+    }
+
+    try {
+      const { buffer } = await fetchBuffer(targetUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+          'Referer': 'https://netmirror.plus/'
+        }
+      });
+      let htmlStr = buffer.toString('utf8');
+      const baseTag = '<base href="https://webvp.watch21.shop/play/">';
+      if (htmlStr.includes('<head>')) {
+        htmlStr = htmlStr.replace('<head>', `<head>${baseTag}`);
+      }
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(htmlStr);
+    } catch (err) {
+      res.writeHead(502);
+      return res.end('Stream Proxy error');
+    }
+  }
+
+  // 9. Download
+  if (pathname === '/api/download') {
+    const tmId = u.searchParams.get('id') || '';
+    const fallbackUrl = `https://vidsync.pro/embed/movie/${tmId}`;
+    res.writeHead(302, { 'Location': fallbackUrl });
+    return res.end();
+  }
+
+  // Default: 404
+  res.writeHead(404, { 'Content-Type': 'application/json' });
+  res.end(JSON.stringify({ error: 'Endpoint not found', path: pathname }));
+};

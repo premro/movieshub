@@ -1,0 +1,9 @@
+{
+  "name": "movieshub",
+  "version": "1.0.0",
+  "description": "Movieshub - Premium Streaming & Live TV Platform",
+  "main": "api/index.js",
+  "scripts": {
+    "start": "node functions/movieshub_api/index.js"
+  }
+}
