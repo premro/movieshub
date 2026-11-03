@@ -623,8 +623,42 @@ class MovieshubPlayer {
         }
       }
 
-      const mtype = (movie?.mediaType === "tv" || movie?.isTv || String(movie?.duration || "").toLowerCase().includes("season")) ? "tv" : "movie";
-      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "/server/movieshub_api";
+      // Verified TV Series IDs & Titles
+      const KNOWN_TV_IDS = new Set([
+        "1399", "94997", "66732", "95396", "76479", "1396", "100088", "93405",
+        "84958", "82856", "71912", "71446", "119051", "70523", "126308", "106379",
+        "60574", "44217", "87108", "63351", "83121", "79352", "92783", "120998", "100757"
+      ]);
+      const KNOWN_TV_KEYWORDS = [
+        "game of thrones", "got", "house of the dragon", "hotd", "stranger things",
+        "severance", "the boys", "breaking bad", "the last of us", "squid game",
+        "loki", "the mandalorian", "witcher", "money heist", "wednesday",
+        "dark", "shogun", "fallout", "peaky blinders", "vikings", "chernobyl",
+        "narcos", "mirzapur", "sacred games", "the family man", "farzi", "panchayat"
+      ];
+
+      const isKnownTv = KNOWN_TV_IDS.has(String(resolvedTmdbId)) ||
+        KNOWN_TV_KEYWORDS.some(kw => cleanTitle === kw || cleanTitle.includes(kw) || kw.includes(cleanTitle));
+
+      const mtype = (
+        movie?.mediaType === "tv" ||
+        movie?.isTv ||
+        isKnownTv ||
+        String(movie?.duration || "").toLowerCase().includes("season") ||
+        String(movie?.duration || "").toLowerCase().includes("episode") ||
+        String(movie?.duration || "").toLowerCase().includes("series") ||
+        String(movie?.title || "").toLowerCase().includes("season")
+      ) ? "tv" : "movie";
+
+      if (tabFullMovie) {
+        tabFullMovie.innerHTML = mtype === "tv" 
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>TV Series</span>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg><span>Full Movie</span>`;
+      }
+
+      const pfx = (typeof window !== "undefined" && window.API_PREFIX)
+        ? window.API_PREFIX
+        : "https://movieshub-60079640926.development.catalystserverless.in/server/movieshub_api";
 
       // Verified, working, non-buffering streaming servers with Multi-Audio (Tamil, Hindi, English)
       const servers = [
@@ -633,8 +667,8 @@ class MovieshubPlayer {
           name: "Server 1",
           badge: "VidLink Multi-Lang HD",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=1`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=1`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=true`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=true`
         },
         {
           id: "s2",

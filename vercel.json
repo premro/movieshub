@@ -2,6 +2,8 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.js" },
-    { "source": "/stream/(.*)", "destination": "/api/index.js" }
+    { "source": "/stream/(.*)", "destination": "/api/index.js" },
+    { "source": "/server/movieshub_api/(.*)", "destination": "/api/index.js" },
+    { "source": "/server/(.*)", "destination": "/api/index.js" }
   ]
 }

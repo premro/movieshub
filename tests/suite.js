@@ -220,6 +220,16 @@ assert(playerCode.includes("Tamil Dubbed HD"), "Server 2 is Tamil Dubbed HD");
 assert(playerCode.includes("quickTamilAudioBtn"), "Quick Tamil Dubbed button present in player");
 assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio option present in popover");
 
+// 9. Testing TV Series URLs & Vercel Rewrite Configuration
+console.log("\n9. Testing TV Series URLs & Vercel Routing Configuration...");
+assert(playerCode.includes("KNOWN_TV_IDS") && playerCode.includes("1399"), "Player detects Game of Thrones TMDB 1399 as TV series");
+assert(playerCode.includes("multiLang=true"), "Player uses standard multiLang=true parameter");
+assert(!playerCode.includes("multiLang=1"), "Player no longer uses broken multiLang=1 that crashed Next.js");
+
+const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.json"), "utf8"));
+const hasServerRewrite = vercelJson.rewrites.some(r => r.source.includes("/server/"));
+assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on external deployments");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

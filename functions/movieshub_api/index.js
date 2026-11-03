@@ -244,6 +244,10 @@ async function searchMovies(query, lang = null) {
         }
       }
       const realTmdbId = matchedTmdb ? String(matchedTmdb) : mid;
+      const isTvShow = [
+        "1399", "94997", "66732", "95396", "76479", "1396", "100088", "93405",
+        "84958", "82856", "71912", "71446", "119051", "70523", "126308", "106379"
+      ].includes(String(realTmdbId)) || /game of thrones|house of the dragon|stranger things|severance|the boys|breaking bad|witcher|money heist|wednesday|fallout|shogun|dark|mirzapur|sacred games|farzi|panchayat/i.test(rawTitle);
 
       results.push({
         id: uid,
@@ -264,7 +268,7 @@ async function searchMovies(query, lang = null) {
         platformColor: badgeColor,
         poster: posterImg,
         backdrop: posterImg,
-        mediaType: r.media_type || 'movie',
+        mediaType: isTvShow ? 'tv' : (r.media_type || 'movie'),
         overview: `${rawTitle} streaming in ${itemLang} with Dolby Atmos & 4K Ultra HD on Movieshub.`,
         cast: [],
         director: 'Cinematic Director',
