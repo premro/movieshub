@@ -214,7 +214,9 @@ assert(appModule.includes("Game of Thrones"), "Dashboard showcases World TV & Mu
 console.log("\n8. Testing Server 3 & Tamil Dubbed Engine...");
 const playerCode = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
 assert(!playerCode.includes("vidsync.pro"), "Server 3 never points to broken vidsync.pro");
-assert(playerCode.includes("2Embed Multi-Audio") || playerCode.includes("2embed.org"), "Server 3 is 2Embed Multi-Audio");
+assert(!playerCode.includes("autoembed.pro"), "Server 1 never points to parked autoembed.pro");
+assert(playerCode.includes("VidSrc Dual Audio"), "Server 3 is VidSrc Dual Audio");
+assert(playerCode.includes("Tamil Dubbed HD"), "Server 2 is Tamil Dubbed HD");
 assert(playerCode.includes("quickTamilAudioBtn"), "Quick Tamil Dubbed button present in player");
 assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio option present in popover");
 

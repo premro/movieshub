@@ -434,8 +434,8 @@ class MovieshubPlayer {
         li.classList.add("active");
         const val = li.dataset.val;
         if (val === "Tamil") {
-          this.switchMode("stream");
-          if (window.showToast) window.showToast("Switched to Tamil Dubbed Audio (Server 1)");
+          loadServer(1, false);
+          if (window.showToast) window.showToast("Switched to Server 2 (Tamil Dubbed HD)");
         } else if (val === "Hindi") {
           this.switchMode("stream");
           if (window.showToast) window.showToast("Switched to Hindi Dubbed Audio");
@@ -624,56 +624,63 @@ class MovieshubPlayer {
       }
 
       const mtype = (movie?.mediaType === "tv" || movie?.isTv || String(movie?.duration || "").toLowerCase().includes("season")) ? "tv" : "movie";
+      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "/server/movieshub_api";
 
       // Verified, working, non-buffering streaming servers with Multi-Audio (Tamil, Hindi, English)
       const servers = [
         {
           id: "s1",
           name: "Server 1",
-          badge: "Tamil & Multi (AutoEmbed 4K)",
-          url: mtype === "tv"
-            ? `https://autoembed.pro/tv/${resolvedTmdbId}/1/1`
-            : `https://autoembed.pro/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s2",
-          name: "Server 2",
           badge: "VidLink Multi-Lang HD",
           url: mtype === "tv"
             ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=1`
             : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=1`
         },
         {
-          id: "s3",
-          name: "Server 3",
-          badge: "2Embed Multi-Audio",
-          url: mtype === "tv"
-            ? `https://2embed.org/embedtv/${resolvedTmdbId}&s=1&e=1`
-            : `https://2embed.org/embed/${resolvedTmdbId}`
+          id: "s2",
+          name: "Server 2",
+          badge: "Tamil Dubbed HD",
+          url: `${pfx}/stream/player?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=Tamil&year=${movie?.year || 2024}`
         },
         {
-          id: "s4",
-          name: "Server 4",
-          badge: "Vidsrc Dual Audio",
+          id: "s3",
+          name: "Server 3",
+          badge: "VidSrc Dual Audio",
           url: mtype === "tv"
             ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
             : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
         },
         {
-          id: "s5",
-          name: "Server 5",
+          id: "s4",
+          name: "Server 4",
           badge: "Cinema 4K Ultra",
           url: mtype === "tv"
             ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
             : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         },
         {
-          id: "s6",
-          name: "Server 6",
+          id: "s5",
+          name: "Server 5",
           badge: "Mirror HD CDN",
           url: mtype === "tv"
             ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
             : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s6",
+          name: "Server 6",
+          badge: "VidSrc Rip Fast",
+          url: mtype === "tv"
+            ? `https://vidsrc.rip/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.rip/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s7",
+          name: "Server 7",
+          badge: "JW Player HD",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
         }
       ];
 
@@ -851,8 +858,8 @@ class MovieshubPlayer {
       const quickTamilBtn = document.getElementById("quickTamilAudioBtn");
       if (quickTamilBtn) {
         quickTamilBtn.addEventListener("click", () => {
-          loadServer(0, false);
-          if (window.showToast) window.showToast("Playing in Tamil Dubbed / Multi-Audio Stream (Server 1)");
+          loadServer(1, false);
+          if (window.showToast) window.showToast("Playing in Server 2 (Tamil Dubbed HD)");
         });
       }
 
