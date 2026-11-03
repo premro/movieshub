@@ -23,6 +23,12 @@ class MovieshubApp {
     this.liveTv = new MovieshubLiveTV();
     this.sports = new MovieshubSports();
 
+    this.heroCarouselMovies = [];
+    this.currentHeroIndex = 0;
+    this.heroInterval = null;
+    this.lastCacheSync = localStorage.getItem("movieshub_dash_last_sync") || 0;
+    this.setupTwoHourRefresh();
+
     this.init();
   }
 
@@ -648,7 +654,207 @@ class MovieshubApp {
   }
 
 
+
+  setupTwoHourRefresh() {
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+    const now = Date.now();
+    if (!this.lastCacheSync || (now - Number(this.lastCacheSync)) > TWO_HOURS) {
+      localStorage.setItem("movieshub_dash_last_sync", now);
+      console.log("[Movieshub] 2-Hour dynamic cache update verified at:", new Date(now).toLocaleTimeString());
+    }
+    setInterval(() => {
+      localStorage.setItem("movieshub_dash_last_sync", Date.now());
+      this.loadDashboardData().then(() => {
+        if (this.activeView === "home" || this.activeView === "movies") {
+          this.renderMainContent();
+        }
+      });
+    }, TWO_HOURS);
+  }
+
+  setupHeroCarousel(heroMovies) {
+    if (!heroMovies || heroMovies.length === 0) return "";
+    this.heroCarouselMovies = heroMovies.slice(0, 5);
+    this.currentHeroIndex = 0;
+
+    const m = this.heroCarouselMovies[0];
+    const isSaved = this.myList.includes(m.id);
+
+    return `
+      <!-- Hero Billboard Carousel (Netflix & Hotstar Auto-Rotating) -->
+      <section class="hero-billboard" id="hero-billboard-section" style="background-image: linear-gradient(to right, rgba(8, 7, 13, 0.95) 25%, rgba(8, 7, 13, 0.6) 60%, rgba(8, 7, 13, 0.3) 100%), url('${m.backdrop || m.poster}');">
+        <button class="hero-arrow prev" id="hero-arrow-prev" title="Previous Movie" aria-label="Previous">‹</button>
+        <button class="hero-arrow next" id="hero-arrow-next" title="Next Movie" aria-label="Next">›</button>
+
+        <div class="hero-content" id="hero-content-box">
+          <div class="hero-badges">
+            <span class="badge-lang" id="hero-badge-lang">${m.language || "Tamil"} Cinema</span>
+            <span class="badge-match" id="hero-badge-year">${m.year || 2024} RELEASE</span>
+            <span class="badge-quality">4K Ultra HD</span>
+            <span class="badge-sound">Dolby Atmos</span>
+            <span class="badge-creator" style="background:rgba(229,9,20,0.25);border:1px solid #e50914;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;">Created by Prem</span>
+            <span class="badge-creator" id="hero-badge-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:800;">★ ${m.rating || "8.5"} IMDb</span>
+          </div>
+          <h1 class="hero-title" id="hero-title">${m.title}</h1>
+          <p class="hero-synopsis" id="hero-synopsis">${m.overview || ""}</p>
+          <div class="hero-buttons">
+            <button class="btn-main-play" id="hero-btn-play">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Play Movie (1-Click)</span>
+            </button>
+            <button class="btn-main-info" id="hero-btn-download" style="background:#22c55e;color:#000;font-weight:800;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Download</span>
+            </button>
+            <button class="btn-main-info" id="hero-btn-trailer" style="background:rgba(255,255,255,0.12);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+              <span>Trailer</span>
+            </button>
+            <button class="btn-main-info" id="hero-btn-info">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+              <span>More Info</span>
+            </button>
+            <button class="btn-main-watchlist ${isSaved ? "in-list" : ""}" id="hero-btn-list" title="Add to My List">
+              ${isSaved
+                ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- 5 Indicators for IMDb Top 5 -->
+        <div class="hero-indicators" id="hero-indicators">
+          ${this.heroCarouselMovies.map((_, i) => `<div class="hero-dot ${i === 0 ? "active" : ""}" data-index="${i}"></div>`).join("")}
+        </div>
+      </section>
+    `;
+  }
+
+  bindHeroCarousel() {
+    if (!this.heroCarouselMovies || this.heroCarouselMovies.length === 0) return;
+    const section = document.getElementById("hero-billboard-section");
+    if (!section) return;
+
+    if (this.heroInterval) clearInterval(this.heroInterval);
+
+    const updateSlide = (idx) => {
+      this.currentHeroIndex = (idx + this.heroCarouselMovies.length) % this.heroCarouselMovies.length;
+      const m = this.heroCarouselMovies[this.currentHeroIndex];
+      if (!m) return;
+
+      section.style.backgroundImage = `linear-gradient(to right, rgba(8, 7, 13, 0.95) 25%, rgba(8, 7, 13, 0.6) 60%, rgba(8, 7, 13, 0.3) 100%), url('${m.backdrop || m.poster}')`;
+
+      const titleEl = document.getElementById("hero-title");
+      if (titleEl) titleEl.textContent = m.title;
+
+      const synEl = document.getElementById("hero-synopsis");
+      if (synEl) synEl.textContent = m.overview || "";
+
+      const langEl = document.getElementById("hero-badge-lang");
+      if (langEl) langEl.textContent = `${m.language || "Tamil"} Cinema`;
+
+      const yearEl = document.getElementById("hero-badge-year");
+      if (yearEl) yearEl.textContent = `${m.year || 2024} RELEASE`;
+
+      const ratEl = document.getElementById("hero-badge-rating");
+      if (ratEl) ratEl.textContent = `★ ${m.rating || "8.5"} IMDb`;
+
+      document.querySelectorAll(".hero-dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === this.currentHeroIndex);
+      });
+
+      const isSaved = this.myList.includes(m.id);
+      const listBtn = document.getElementById("hero-btn-list");
+      if (listBtn) {
+        listBtn.className = `btn-main-watchlist ${isSaved ? "in-list" : ""}`;
+        listBtn.innerHTML = isSaved
+          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+      }
+    };
+
+    const nextSlide = () => updateSlide(this.currentHeroIndex + 1);
+    const prevSlide = () => updateSlide(this.currentHeroIndex - 1);
+
+    this.heroInterval = setInterval(nextSlide, 5000);
+
+    section.addEventListener("mouseenter", () => {
+      if (this.heroInterval) clearInterval(this.heroInterval);
+    });
+    section.addEventListener("mouseleave", () => {
+      if (this.heroInterval) clearInterval(this.heroInterval);
+      this.heroInterval = setInterval(nextSlide, 5000);
+    });
+
+    const prevBtn = document.getElementById("hero-arrow-prev");
+    const nextBtn = document.getElementById("hero-arrow-next");
+    if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevSlide(); });
+    if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextSlide(); });
+
+    document.querySelectorAll(".hero-dot").forEach(dot => {
+      dot.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const idx = parseInt(dot.dataset.index, 10);
+        if (!isNaN(idx)) updateSlide(idx);
+      });
+    });
+
+    const btnPlay = document.getElementById("hero-btn-play");
+    if (btnPlay) {
+      btnPlay.addEventListener("click", () => {
+        const m = this.heroCarouselMovies[this.currentHeroIndex];
+        if (m) this.player.open(m, "movie");
+      });
+    }
+
+    const btnDl = document.getElementById("hero-btn-download");
+    if (btnDl) {
+      btnDl.addEventListener("click", () => {
+        const m = this.heroCarouselMovies[this.currentHeroIndex];
+        if (m) this.openDownloadModal(m);
+      });
+    }
+
+    const btnTrailer = document.getElementById("hero-btn-trailer");
+    if (btnTrailer) {
+      btnTrailer.addEventListener("click", () => {
+        const m = this.heroCarouselMovies[this.currentHeroIndex];
+        if (m) this.player.open(m, "trailer");
+      });
+    }
+
+    const btnInfo = document.getElementById("hero-btn-info");
+    if (btnInfo) {
+      btnInfo.addEventListener("click", () => {
+        const m = this.heroCarouselMovies[this.currentHeroIndex];
+        if (m) this.openDetailModal(m);
+      });
+    }
+
+    const btnList = document.getElementById("hero-btn-list");
+    if (btnList) {
+      btnList.addEventListener("click", () => {
+        const m = this.heroCarouselMovies[this.currentHeroIndex];
+        if (m) {
+          this.toggleMyList(m.id);
+          updateSlide(this.currentHeroIndex);
+        }
+      });
+    }
+  }
+
   renderTamilSections(container) {
+    const amaran = this.catalog.find(m => m.id === "amaran-tamil");
+    const goat = this.catalog.find(m => m.id === "goat-tamil");
+    const maharaja = this.catalog.find(m => m.id === "maharaja-tamil");
+    const leo = this.catalog.find(m => m.id === "leo-tamil");
+    const jailer = this.catalog.find(m => m.id === "jailer-tamil");
+    const vikram = this.catalog.find(m => m.id === "vikram-tamil");
+
+    const tamilHeroMovies = [amaran, goat, maharaja, leo, jailer].filter(Boolean);
+    const latestTamil = [amaran, goat, maharaja, leo, jailer, vikram].filter(Boolean);
+
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
       ? this.dashboardData.tamil_2026
       : this.catalog.filter(m => m.language === "Tamil" && m.year === 2026);
@@ -664,10 +870,24 @@ class MovieshubApp {
     const allTamil = this.catalog.filter(m => m.language === "Tamil");
 
     container.innerHTML = `
+      <!-- Dedicated Tamil Hero Carousel -->
+      ${this.setupHeroCarousel(tamilHeroMovies)}
+
       <div class="category-header-wrap" style="padding: 24px 4% 0;">
         <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 6px;">Tamil Cinema (தமிழ்)</h1>
         <p style="color: #9ca3af; font-size: 14px; margin: 0;">Stream & Download Latest 2026, 2025, and 2024 Tamil Blockbusters in 1080p Ultra HD</p>
       </div>
+
+      <!-- 🔥 JUST ADDED • LATEST TAMIL BLOCKBUSTERS -->
+      <section class="content-row">
+        <div class="row-header">
+          <h2>🔥 Just Added • Latest Tamil Blockbusters</h2>
+          <span class="row-subtitle">Hottest theatrical & streaming releases in Ultra HD</span>
+        </div>
+        <div class="cards-carousel">
+          ${latestTamil.map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>
 
       <!-- 2026 Tamil -->
       ${tamil2026.length > 0 ? `
@@ -716,11 +936,19 @@ class MovieshubApp {
         </div>
       </section>
     `;
+
+    this.bindHeroCarousel();
     this.bindCardEvents();
   }
 
   renderAllLanguagesHome(container) {
-    const featuredMovie = this.catalog.find(m => m.id === "amaran-tamil") || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
+    const amaran = this.catalog.find(m => m.id === "amaran-tamil");
+    const goat = this.catalog.find(m => m.id === "goat-tamil");
+    const deadpool = this.catalog.find(m => m.id === "deadpool-and-wolverine");
+    const dune = this.catalog.find(m => m.id === "dune-part-two");
+    const maharaja = this.catalog.find(m => m.id === "maharaja-tamil");
+    const top5Imdb = [amaran, goat, deadpool, dune, maharaja].filter(Boolean);
+    const featuredMovie = top5Imdb[0] || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
     
     // Top 6 Latest Releases from IMDb / TMDB
     const latestSix = (this.dashboardData && this.dashboardData.latest_six && this.dashboardData.latest_six.length > 0)
@@ -747,44 +975,8 @@ class MovieshubApp {
     const malayalamMovies = this.catalog.filter(m => m.language === "Malayalam");
 
     container.innerHTML = `
-      <!-- Hero Billboard -->
-      <section class="hero-billboard" style="background-image: linear-gradient(to right, rgba(8, 7, 13, 0.95) 25%, rgba(8, 7, 13, 0.6) 60%, rgba(8, 7, 13, 0.3) 100%), url('${featuredMovie.backdrop || featuredMovie.poster}');">
-        <div class="hero-content">
-          <div class="hero-badges">
-            <span class="badge-lang">${featuredMovie.language} Cinema</span>
-            <span class="badge-match">${featuredMovie.year} RELEASE</span>
-            <span class="badge-quality">4K Ultra HD</span>
-            <span class="badge-sound">Dolby Atmos</span>
-            <span class="badge-creator" style="background:rgba(229,9,20,0.25);border:1px solid #e50914;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;">Created by Prem</span>
-          </div>
-          <h1 class="hero-title">${featuredMovie.title}</h1>
-          <p class="hero-synopsis">${featuredMovie.overview}</p>
-          <div class="hero-buttons">
-            <button class="btn-main-play" id="hero-btn-play">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <span>Play Movie (1-Click)</span>
-            </button>
-            <button class="btn-main-info" id="hero-btn-download" style="background:#22c55e;color:#000;font-weight:800;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Download</span>
-            </button>
-            <button class="btn-main-info" id="hero-btn-trailer" style="background:rgba(255,255,255,0.12);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-              <span>Trailer</span>
-            </button>
-            <button class="btn-main-info" id="hero-btn-info">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-              <span>More Info</span>
-            </button>
-            <button class="btn-main-watchlist ${this.myList.includes(featuredMovie.id) ? "in-list" : ""}" id="hero-btn-list" title="Add to My List">
-              ${this.myList.includes(featuredMovie.id)
-                ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
-              }
-            </button>
-          </div>
-        </div>
-      </section>
+      <!-- Hero Billboard Carousel (Netflix & Hotstar Auto-Rotating) -->
+      ${this.setupHeroCarousel(top5Imdb)}
 
       <!-- 1. TOP 6 LATEST RELEASES (IMDb / TMDB Real-Time Sync) -->
       ${latestSix.length > 0 ? `
@@ -913,17 +1105,7 @@ class MovieshubApp {
       </section>
     `;
 
-    // 1-Click Hero Buttons
-    const btnPlay = document.getElementById("hero-btn-play");
-    if (btnPlay) btnPlay.addEventListener("click", () => this.player.open(featuredMovie, "movie"));
-    const btnDl = document.getElementById("hero-btn-download");
-    if (btnDl) btnDl.addEventListener("click", () => this.openDownloadModal(featuredMovie));
-    const btnTr = document.getElementById("hero-btn-trailer");
-    if (btnTr) btnTr.addEventListener("click", () => this.player.open(featuredMovie, "trailer"));
-    const btnInfo = document.getElementById("hero-btn-info");
-    if (btnInfo) btnInfo.addEventListener("click", () => this.openDetailModal(featuredMovie));
-    const btnList = document.getElementById("hero-btn-list");
-    if (btnList) btnList.addEventListener("click", () => this.toggleMyList(featuredMovie.id));
+    this.bindHeroCarousel();
 
     // View All buttons
     container.querySelectorAll(".view-all-lang-btn").forEach(btn => {

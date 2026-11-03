@@ -197,6 +197,7 @@ const MOVIE_CATALOG = [
   {
     id: "amaran-tamil",
     tmdbId: 927342,
+    netmirrorId: "20669",
     mediaType: "movie",
     title: "Amaran",
     nativeTitle: "அமரன்",

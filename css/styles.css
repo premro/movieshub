@@ -398,6 +398,59 @@ body {
   overflow: hidden;
 }
 
+
+/* Hero Carousel Controls (Netflix / Hotstar style) */
+.hero-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+}
+.hero-arrow:hover {
+  background: #e50914;
+  border-color: #e50914;
+  transform: translateY(-50%) scale(1.12);
+  box-shadow: 0 0 15px rgba(229, 9, 20, 0.6);
+}
+.hero-arrow.prev { left: 20px; }
+.hero-arrow.next { right: 20px; }
+
+.hero-indicators {
+  position: absolute;
+  bottom: 24px;
+  right: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 15;
+}
+.hero-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.hero-dot.active {
+  width: 44px;
+  background: #e50914;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.85);
+}
+
 .hero-buttons {
   display: flex;
   align-items: center;
@@ -2280,13 +2333,13 @@ body {
    LIVE TV & SPORTS INTERFACE (1Tube.org Replications)
 ============================================================== */
 
-/* Live TV Layout */
+/* Live TV Layout - Cleared below fixed 72px header */
 .livetv-page-wrapper {
   display: flex;
   gap: 24px;
   min-height: calc(100vh - 120px);
-  margin-top: 10px;
-  padding: 0 4px;
+  margin-top: 86px;
+  padding: 0 40px;
 }
 
 .livetv-player-container {
@@ -2572,8 +2625,8 @@ body {
    SPORTS INTERFACE (1Tube Screenshot 4)
 ============================================================== */
 .sports-page-wrapper {
-  margin-top: 10px;
-  padding: 0 4px;
+  margin-top: 86px;
+  padding: 0 40px;
 }
 
 .sports-top-header {

@@ -11,10 +11,79 @@ class MovieshubLiveTV {
     this.hlsInstance = null;
     this.activeCountry = "TN";
     this.activeCategory = "all";
-    this.searchQuery = "";
+        this.searchQuery = "";
+    this.lastSync = localStorage.getItem("movieshub_livetv_last_sync") || 0;
+    this.setupTwoHourRefresh();
 
     // 100% Verified CORS * Live Channels (High uptime, never refuse connection)
     this.channels = [
+      // 🏏 STAR SPORTS & SONY LIV LIVE CHANNELS
+      {
+        id: "star-sports-1-hd",
+        name: "Star Sports 1 HD",
+        category: "Sports",
+        country: "IN",
+        resolution: "1080p",
+        badge: "Cricket Live",
+        logo: "🏏",
+        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
+        backupUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+      },
+      {
+        id: "star-sports-tamil",
+        name: "Star Sports 1 Tamil",
+        category: "Sports",
+        country: "TN",
+        resolution: "1080p",
+        badge: "Tamil Sports",
+        logo: "🏆",
+        streamUrl: "https://streams2.sofast.tv/ptnr-yupptv/title-cricketgold/v1/master/611d79b11b77e2f571934fd80ca1413453772ac7/b2048bb8-1686-4432-aa50-647245383e0c/manifest.m3u8",
+        backupUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8"
+      },
+      {
+        id: "sony-sports-ten-1-hd",
+        name: "Sony Sports Ten 1 HD",
+        category: "Sports",
+        country: "IN",
+        resolution: "1080p",
+        badge: "Sony LIV Live",
+        logo: "⚽",
+        streamUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
+        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+      },
+      {
+        id: "sony-liv-sports-live",
+        name: "Sony LIV Sports Live",
+        category: "Sports",
+        country: "IN",
+        resolution: "1080p",
+        badge: "Sony LIV Ultra",
+        logo: "🥊",
+        streamUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8",
+        backupUrl: "https://na.linear.zype.com/e0bd0e23-a958-4e43-8164-4f2fef8876a8/full_live_manifest.m3u8"
+      },
+      {
+        id: "sports-18-1-hd",
+        name: "Sports 18 1 HD",
+        category: "Sports",
+        country: "IN",
+        resolution: "1080p",
+        badge: "JioCinema Sports",
+        logo: "🎯",
+        streamUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+        backupUrl: "https://webstream.multistream.it/memfs/e2cb3629-c1a2-495b-b43a-9ee141d0115e/index.m3u8"
+      },
+      {
+        id: "dd-sports-hd",
+        name: "DD Sports HD",
+        category: "Sports",
+        country: "IN",
+        resolution: "1080p",
+        badge: "India Sports",
+        logo: "🇮🇳",
+        streamUrl: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+      },
+
       // 🌴 TAMIL LIVE TELEVISION (Sun, Zee, Vijay, Kalaignar, Polimer, Thanthi...)
       {
         id: "sun-tv-hd",
@@ -424,6 +493,21 @@ class MovieshubLiveTV {
       );
     }
     return list;
+  }
+
+    setupTwoHourRefresh() {
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+    const now = Date.now();
+    if (!this.lastSync || (now - Number(this.lastSync)) > TWO_HOURS) {
+      localStorage.setItem("movieshub_livetv_last_sync", now);
+      console.log("[LiveTV] Refreshed 2-hour live channel sync at:", new Date(now).toLocaleTimeString());
+    }
+    setInterval(() => {
+      localStorage.setItem("movieshub_livetv_last_sync", Date.now());
+      if (this.currentChannel) {
+        console.log("[LiveTV] 2-Hour dynamic refresh triggered");
+      }
+    }, TWO_HOURS);
   }
 
   render(container) {

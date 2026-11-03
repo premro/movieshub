@@ -506,7 +506,12 @@ class MovieshubPlayer {
         "master": 602211,
         "goat": 1148817,
         "the greatest of all time": 1148817,
-        "amaran": 1184918,
+        "amaran": 927342,
+        "vettaiyan": 1114513,
+        "thangalaan": 974950,
+        "meiyazhagan": 1241982,
+        "lubber pandhu": 1251249,
+        "raayan": 1144962,
         "kalki 2898 ad": 792307,
         "kalki": 792307,
         "aavesham": 1243644,
@@ -515,7 +520,7 @@ class MovieshubPlayer {
         "maharaja": 1114738,
         "stree 2": 1114513,
         "12th fail": 1181548,
-        "jawan": 872585,
+        "jawan": 872906,
         "animal": 781732,
         "salaar": 897087,
         "rrr": 579974,
@@ -551,6 +556,8 @@ class MovieshubPlayer {
       if (!netId && rawId.startsWith("netmirror-")) {
         netId = rawId.replace("netmirror-", "");
       }
+      if (!netId && cleanTitle.includes("amaran")) netId = "20669";
+      if (!netId && cleanTitle.includes("amaran")) netId = "20669";
       if (!netId && cleanTitle.includes("angamaly")) netId = "27939";
       if (!netId && cleanTitle.includes("blast")) netId = "112535";
       if (!netId && cleanTitle.includes("dune")) netId = "91764";
@@ -561,7 +568,7 @@ class MovieshubPlayer {
       // High-performance streaming servers:
       // When Netmirror source is present (or regional cinema like Malayalam/Tamil), prioritize Movieshub Cloud
       let servers = [];
-      const hasNetSource = !!netId || rawId.startsWith("netmirror-") || cleanTitle.includes("angamaly") || cleanTitle.includes("blast");
+      const hasNetSource = !!netId || rawId.startsWith("netmirror-") || cleanTitle.includes("amaran") || cleanTitle.includes("angamaly") || cleanTitle.includes("blast") || cleanTitle.includes("goat") || cleanTitle.includes("maharaja");
 
       if (hasNetSource) {
         servers = [
