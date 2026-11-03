@@ -465,12 +465,19 @@ class MovieshubPlayer {
     const trailerWrap = document.getElementById("player-screen-wrap");
 
     if (mode === "movie") {
-      tabFullMovie.classList.add("active");
-      tabTrailer.classList.remove("active");
-      streamWrap.classList.remove("hidden");
-      trailerWrap.classList.add("hidden");
+      if (tabFullMovie) tabFullMovie.classList.add("active");
+      if (tabTrailer) tabTrailer.classList.remove("active");
+      if (streamWrap) streamWrap.classList.remove("hidden");
+      if (trailerWrap) {
+        trailerWrap.classList.add("hidden");
+        trailerWrap.innerHTML = "";
+      }
 
-      // Pause trailer video completely
+      // Stop trailer video or iframe if playing
+      const trailerIframe = document.getElementById("player-trailer-iframe");
+      if (trailerIframe) {
+        trailerIframe.src = "about:blank";
+      }
       if (this.video) {
         this.video.pause();
         this.video.removeAttribute("src");
@@ -547,7 +554,6 @@ class MovieshubPlayer {
         if (KNOWN_TMDB_MAP[cleanTitle]) {
           resolvedTmdbId = String(KNOWN_TMDB_MAP[cleanTitle]);
         } else {
-          // Exact word match
           for (const [k, v] of Object.entries(KNOWN_TMDB_MAP)) {
             if (cleanTitle === k || cleanTitle.startsWith(k + " ") || cleanTitle.endsWith(" " + k) || cleanTitle.includes(" " + k + " ")) {
               resolvedTmdbId = String(v);
@@ -558,8 +564,8 @@ class MovieshubPlayer {
       }
 
       // 3. Fallback to rawId if numeric
+      const rawId = String(movie?.id || "").replace("tmdb-", "").replace("netmirror-", "");
       if (!resolvedTmdbId) {
-        let rawId = String(movie?.id || "").replace("tmdb-", "").replace("netmirror-", "");
         if (rawId && !isNaN(parseInt(rawId, 10)) && parseInt(rawId, 10) > 100) {
           resolvedTmdbId = rawId;
         } else {
@@ -568,24 +574,8 @@ class MovieshubPlayer {
       }
 
       const mtype = movie?.mediaType || "movie";
-      const year = movie?.year || 2024;
 
-      // Netmirror ID resolution:
-      let netId = String(movie?.netmirrorId || movie?.nid || "");
-      if (!netId && rawId.startsWith("netmirror-")) {
-        netId = rawId.replace("netmirror-", "");
-      }
-      if (!netId && cleanTitle.includes("amaran")) netId = "20669";
-      if (!netId && cleanTitle.includes("amaran")) netId = "20669";
-      if (!netId && cleanTitle.includes("angamaly")) netId = "27939";
-      if (!netId && cleanTitle.includes("blast")) netId = "112535";
-      if (!netId && cleanTitle.includes("dune")) netId = "91764";
-
-      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
-      const netmirrorEmbedUrl = `${pfx}/stream/netmirror/embed?tm_id=${netId || resolvedTmdbId}&nid=${netId || resolvedTmdbId}&year=${year}&lang=${encodeURIComponent(cleanLang)}`;
-
-      // High-performance streaming servers:
-      // Server 1 is ALWAYS Primary HD via VidLink (no iframe blocking, instant playback in 1-click)
+      // High-performance, buffer-free streaming servers
       const servers = [
         {
           id: "s1",
@@ -600,38 +590,32 @@ class MovieshubPlayer {
           name: "Server 2",
           badge: "Fast Stream",
           url: mtype === "tv"
-            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/1/1`
-            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
+            ? `https://player.autoembed.cc/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://player.autoembed.cc/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s3",
           name: "Server 3",
-          badge: "Global CDN",
-          url: mtype === "tv"
-            ? `https://player.vidsrc.nl/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://player.vidsrc.nl/embed/movie/${resolvedTmdbId}`
-        },
-        {
-          id: "s4",
-          name: "Server 4",
           badge: "Cinema 4K",
           url: mtype === "tv"
             ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
             : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         },
         {
-          id: "s5",
-          name: "Server 5",
-          badge: "Mirror HD",
+          id: "s4",
+          name: "Server 4",
+          badge: "Global CDN",
           url: mtype === "tv"
             ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
             : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
         },
         {
-          id: "s6",
-          name: "Server 6",
-          badge: "Movieshub Cloud",
-          url: netmirrorEmbedUrl
+          id: "s5",
+          name: "Server 5",
+          badge: "Mirror HD",
+          url: mtype === "tv"
+            ? `https://player.vidsrc.nl/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://player.vidsrc.nl/embed/movie/${resolvedTmdbId}`
         }
       ];
 
@@ -650,53 +634,54 @@ class MovieshubPlayer {
         });
       }
 
-      streamWrap.innerHTML = '<div class="player-preloader" id="player-preloader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;overflow:hidden;">' +
-        '<div style="background-image:url(\'' + safeBackdrop + '\');position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(30px) brightness(0.22);transform:scale(1.15);"></div>' +
-        '<div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;max-width:90%;">' +
-          '<div class="spinner" style="width:46px;height:46px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>' +
-          '<div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.8);">' + safeTitle + '</div>' +
-          '<div id="player-loader-status" style="font-size:14px;color:#22c55e;font-weight:700;margin-top:10px;">Connecting to Server 1...</div>' +
-          '<div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Block Stream • Smooth Fast-Forwarding</div>' +
-        '</div>' +
-      '</div>' +
-      '<div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">' +
-        '<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>' +
-      '</div>' +
-      '<div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">' +
-        '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
-          '<button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub">' +
-            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>' +
-            '<span>Back</span>' +
-          '</button>' +
-          '<div class="player-server-pills" id="playerModalServerPills">' +
-          servers.map((s, idx) =>
-            '<button class="srv-pill-btn ' + (idx === 0 ? "active" : "") + '" data-idx="' + idx + '">' +
-              '<span>' + s.name + '</span>' +
-              '<span class="srv-pill-badge">' + s.badge + '</span>' +
-            '</button>'
-          ).join("") +
-          '</div>' +
-        '</div>' +
-        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
-          '<button id="autoSwitchToggleBtn" class="auto-switch-toggle" title="Toggle Auto-Switch">' +
-            '<span>⚡ Auto-Switch: ON</span>' +
-          '</button>' +
-          '<button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck">' +
-            '<span>🔄 Reload</span>' +
-          '</button>' +
-          '<button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server">' +
-            '<span>Next Server ⏭</span>' +
-          '</button>' +
-          '<div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;">' +
-            '<span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>' +
-            '<span style="color:#888;">|</span>' +
-            '<span style="color:#e50914;font-weight:700;font-size:11px;">1080p HD</span>' +
-          '</div>' +
-        '</div>' +
-      '</div>';
-
-      const iframe = document.getElementById("player-stream-iframe");
-      this.streamIframe = iframe;
+      if (streamWrap) {
+        streamWrap.innerHTML = `
+          <div class="player-preloader" id="player-preloader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;overflow:hidden;">
+            <div style="background-image:url('${safeBackdrop}');position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(30px) brightness(0.22);transform:scale(1.15);"></div>
+            <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;max-width:90%;">
+              <div class="spinner" style="width:46px;height:46px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
+              <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.8);">${safeTitle}</div>
+              <div id="player-loader-status" style="font-size:14px;color:#22c55e;font-weight:700;margin-top:10px;">Connecting to Server 1 (Primary HD)...</div>
+              <div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Free Stream • Ultra HD Playback</div>
+            </div>
+          </div>
+          <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">
+            <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;display:block;"></iframe>
+          </div>
+          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+              <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                <span>Back</span>
+              </button>
+              <div class="player-server-pills" id="playerModalServerPills">
+                ${servers.map((s, idx) => `
+                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
+                    <span>${s.name}</span>
+                    <span class="srv-pill-badge">${s.badge}</span>
+                  </button>
+                `).join("")}
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button id="autoSwitchToggleBtn" class="auto-switch-toggle" title="Toggle Auto-Switch">
+                <span>⚡ Auto-Switch: ON</span>
+              </button>
+              <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck">
+                <span>🔄 Reload</span>
+              </button>
+              <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server">
+                <span>Next Server ⏭</span>
+              </button>
+              <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;">
+                <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
+                <span style="color:#888;">|</span>
+                <span style="color:#e50914;font-weight:700;font-size:11px;">1080p HD</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
 
       const preloader = document.getElementById("player-preloader");
       const hidePreloader = () => {
@@ -717,7 +702,7 @@ class MovieshubPlayer {
           this.autoSwitchTimer = null;
         }
 
-        const pills = streamWrap.querySelectorAll(".srv-pill-btn");
+        const pills = streamWrap ? streamWrap.querySelectorAll(".srv-pill-btn") : [];
         pills.forEach((b, i) => {
           if (i === idx) b.classList.add("active");
           else b.classList.remove("active");
@@ -726,19 +711,17 @@ class MovieshubPlayer {
         const statusEl = document.getElementById("player-loader-status");
         if (statusEl) {
           statusEl.textContent = isAuto 
-            ? "Auto-switched to " + srv.name + " (" + srv.badge + ")..."
-            : "Connecting to " + srv.name + "...";
+            ? `Auto-switched to ${srv.name} (${srv.badge})...`
+            : `Connecting to ${srv.name}...`;
         }
 
         const container = document.getElementById("playerStreamFrameContainer");
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = '<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>';
+            container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
-          } else {
-            curIframe.removeAttribute("sandbox");
           }
 
           curIframe.onload = () => {
@@ -753,7 +736,7 @@ class MovieshubPlayer {
             if (this.isAutoSwitchingEnabled) {
               if (this.autoSwitchTimer) clearTimeout(this.autoSwitchTimer);
               const nextIdx = (this.currentServerIdx + 1) % servers.length;
-              if (window.showToast) window.showToast("Server " + (this.currentServerIdx + 1) + " error. Switching to Server " + (nextIdx + 1) + "...");
+              if (window.showToast) window.showToast(`Server ${this.currentServerIdx + 1} slow. Switching to Server ${nextIdx + 1}...`);
               loadServer(nextIdx, true);
             }
           };
@@ -762,18 +745,18 @@ class MovieshubPlayer {
           curIframe.src = srv.url;
         }
 
-        // Auto-switch timer: If server doesn't respond or load within 8.5 seconds, auto-switch to next server
+        // Auto-switch timer: If server takes more than 7.5 seconds, auto-switch to next server
         if (this.isAutoSwitchingEnabled) {
           this.autoSwitchTimer = setTimeout(() => {
             if (!this.isAutoSwitchingEnabled) return;
             const nextIdx = (this.currentServerIdx + 1) % servers.length;
-            if (window.showToast) window.showToast("Server " + (this.currentServerIdx + 1) + " slow. Auto-switching to Server " + (nextIdx + 1) + "...");
+            if (window.showToast) window.showToast(`Server ${this.currentServerIdx + 1} slow. Auto-switching to Server ${nextIdx + 1}...`);
             loadServer(nextIdx, true);
-          }, 8500);
+          }, 7500);
         }
       };
 
-      // Fast preloader dismissal
+      // Fast preloader dismissal fallback
       setTimeout(hidePreloader, 2200);
 
       // Auto-Switch Toggle Button
@@ -799,22 +782,22 @@ class MovieshubPlayer {
         });
       }
 
-      // Reload Server Stream button (recovers from forward seek buffer stalls)
+      // Reload Server Stream button
       const reloadBtn = document.getElementById("reloadServerBtn");
       if (reloadBtn) {
         reloadBtn.addEventListener("click", () => {
           loadServer(this.currentServerIdx, false);
-          if (window.showToast) window.showToast("Reloaded " + servers[this.currentServerIdx].name);
+          if (window.showToast) window.showToast(`Reloaded ${servers[this.currentServerIdx].name}`);
         });
       }
 
-      // Manual skip server button
+      // Skip server button
       const skipBtn = document.getElementById("skipServerBtn");
       if (skipBtn) {
         skipBtn.addEventListener("click", () => {
           const nextIdx = (this.currentServerIdx + 1) % servers.length;
           loadServer(nextIdx, false);
-          if (window.showToast) window.showToast("Switched to " + servers[nextIdx].name);
+          if (window.showToast) window.showToast(`Switched to ${servers[nextIdx].name}`);
         });
       }
 
@@ -825,51 +808,93 @@ class MovieshubPlayer {
       }
 
       // Bind server switcher buttons
-      const pills = streamWrap.querySelectorAll(".srv-pill-btn");
-      pills.forEach(btn => {
-        btn.addEventListener("click", () => {
-          const idx = parseInt(btn.dataset.idx, 10);
-          loadServer(idx, false);
-          if (window.showToast) window.showToast("Switched to " + servers[idx].name);
+      if (streamWrap) {
+        const pills = streamWrap.querySelectorAll(".srv-pill-btn");
+        pills.forEach(btn => {
+          btn.addEventListener("click", () => {
+            const idx = parseInt(btn.dataset.idx, 10);
+            loadServer(idx, false);
+            if (window.showToast) window.showToast(`Switched to ${servers[idx].name}`);
+          });
         });
-      });
+      }
 
-      // Load initial server
+      // Load initial server (Server 1: VidLink Primary HD)
       loadServer(0, false);
 
-      if (window.showToast) window.showToast("Streaming Full Movie • Ad-Free");
+      if (window.showToast) window.showToast("Streaming Full Movie • Ultra HD");
     } else {
-      tabTrailer.classList.add("active");
-      tabFullMovie.classList.remove("active");
-      trailerWrap.classList.remove("hidden");
-      streamWrap.classList.add("hidden");
+      // TRAILER MODE
+      if (tabTrailer) tabTrailer.classList.add("active");
+      if (tabFullMovie) tabFullMovie.classList.remove("active");
+      if (trailerWrap) trailerWrap.classList.remove("hidden");
+      if (streamWrap) {
+        streamWrap.classList.add("hidden");
+        streamWrap.innerHTML = "";
+      }
 
-      // Stop and completely destroy stream iframe to prevent ANY audio leaks
+      // Stop and destroy stream iframe to prevent audio leak
       if (this.streamIframe) {
         try { this.streamIframe.contentWindow.postMessage("stop", "*"); } catch (e) {}
         this.streamIframe.src = "about:blank";
       }
-      if (streamWrap) {
-        streamWrap.innerHTML = "";
-      }
       this.streamIframe = null;
 
-      // Play local trailer (always start from 00:00)
+      // Play official high-definition trailer without buffering
       if (this.currentMovie) {
-        const streamSource = this.currentMovie.videoUrl || `assets/videos/${this.currentMovie.id}.mp4`;
-        this.video.src = streamSource;
-        this.video.currentTime = 0;
-        this.video.load();
-        this.video.play().then(() => {
-          this.isPlaying = true;
-          this.updatePlayStateUI();
-        }).catch(() => {
-          this.video.muted = true;
-          this.video.play().then(() => {
-            this.isPlaying = true;
-            this.updatePlayStateUI();
-          });
-        });
+        const TRAILER_MAP = {
+          "leo-tamil": "FZYhL_bVQUQ",
+          "jailer-tamil": "xenOE1Tma0A",
+          "vikram-tamil": "jJf35tEkW9E",
+          "amaran-tamil": "03d6d6W276E",
+          "maharaja-tamil": "Otcr-vRuaQs",
+          "goat-tamil": "B5GAjuSnNuQ",
+          "ps1-tamil": "sV-u0Qn7rO8",
+          "master-tamil": "UTiXQgk4CiY",
+          "dune-part-two": "oOKHVtgPJ00",
+          "oppenheimer": "hlZO437mwXQ",
+          "deadpool-and-wolverine": "dyq7hMlF9iY",
+          "interstellar": "PG5c2GgkA2w",
+          "stranger-things": "yQEondeGvLk",
+          "the-boys": "s8PvzY-WRgw",
+          "severance": "xEQP4VVuyrY",
+          "jawan-hindi": "MWOlnZSnXJo",
+          "stree2-hindi": "VlvOgk5BHS4",
+          "animal-hindi": "psnYuD4M6zY",
+          "twelfth-fail-hindi": "KjbtuqENvVE",
+          "rrr-telugu": "i4pjiLGUTtk",
+          "kalki-2898ad-telugu": "eWI9voiOt_k",
+          "salaar-telugu": "9Im1q4gvk1M",
+          "manjummel-boys-malayalam": "-Kq2MxoJVKo",
+          "aavesham-malayalam": "OsMqr3556F8",
+          "angamaly-diaries-malayalam": "qj_y80T-58c",
+          "bramayugam-malayalam": "7FLxInubR5Q"
+        };
+
+        const movieId = this.currentMovie.id || "";
+        const cleanId = movieId.replace("-tamil", "").replace("-hindi", "").replace("-telugu", "").replace("-malayalam", "");
+        const trailerKey = this.currentMovie.trailerKey || TRAILER_MAP[movieId] || TRAILER_MAP[cleanId];
+
+        let trailerEmbedUrl = "";
+        if (trailerKey) {
+          trailerEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+        } else {
+          trailerEmbedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(this.currentMovie.title + " Official Trailer")}&autoplay=1`;
+        }
+
+        if (trailerWrap) {
+          trailerWrap.innerHTML = `
+            <div style="width: 100%; height: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center;">
+              <iframe 
+                id="player-trailer-iframe"
+                src="${trailerEmbedUrl}" 
+                style="width: 100%; height: 100%; border: none; display: block;" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen
+              ></iframe>
+            </div>
+          `;
+        }
       }
       if (window.showToast) window.showToast("Playing Official Trailer");
     }
@@ -923,7 +948,16 @@ class MovieshubPlayer {
     }
     this.streamIframe = null;
 
-    // 100% Silence Trailer Video
+    // 100% Silence Trailer Iframe and Video
+    const trailerIframe = document.getElementById("player-trailer-iframe");
+    if (trailerIframe) {
+      trailerIframe.src = "about:blank";
+    }
+    const trailerWrap = document.getElementById("player-screen-wrap");
+    if (trailerWrap) {
+      trailerWrap.innerHTML = "";
+    }
+
     if (this.video) {
       this.video.pause();
       this.video.removeAttribute("src");
