@@ -160,10 +160,6 @@ class MovieshubPlayer {
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
               <span>Trailer</span>
             </button>
-            <button class="mode-tab-btn" id="tab-moviesda-mode" title="Watch on Moviesda Tamil HD" style="border:1px solid rgba(229,9,20,0.5);background:rgba(229,9,20,0.2);color:#ff4d4d;font-weight:700;">
-              <span style="color:#e50914;font-size:12px;">⚡</span>
-              <span>Moviesda HD</span>
-            </button>
           </div>
 
           <div style="display:flex;align-items:center;gap:12px;">
@@ -641,6 +637,12 @@ class MovieshubPlayer {
 
       // Verified 100% accurate TMDB ID database for blockbusters
       const KNOWN_TMDB_MAP = {
+        "immortal": 1505305,
+        "cold call": 126743,
+        "anakapalli": 123090,
+        "baththa": 1515692,
+        "the dark heaven": 1618200,
+        "dorothy": 1578079,
         "leo": 949229,
         "leo: bloody sweet": 949229,
         "jailer": 937020,
@@ -688,14 +690,22 @@ class MovieshubPlayer {
         "hotd": 94997
       };
 
+      let cleanTitle = (movie?.title || "").toLowerCase().replace(/\[.*?\]/g, "").trim();
+
       // 1. Prioritize explicit numeric tmdbId from movie object
       let resolvedTmdbId = null;
-      if (movie?.tmdbId && !isNaN(parseInt(movie.tmdbId, 10)) && parseInt(movie.tmdbId, 10) > 0) {
+      // If title is known, prioritize real TMDB ID over any 6-digit Moviesda upload ID
+      if (cleanTitle === "immortal" || cleanTitle.includes("immortal")) {
+        resolvedTmdbId = "1505305";
+      } else if (cleanTitle === "cold call") {
+        resolvedTmdbId = "126743";
+      } else if (cleanTitle === "anakapalli") {
+        resolvedTmdbId = "123090";
+      } else if (movie?.tmdbId && !isNaN(parseInt(movie.tmdbId, 10)) && parseInt(movie.tmdbId, 10) > 0 && movie.tmdbId !== 102966 && movie.tmdbId !== 103140 && movie.tmdbId !== 103147) {
         resolvedTmdbId = String(movie.tmdbId);
       }
 
       // 2. If tmdbId not present, resolve from title via verified map
-      let cleanTitle = (movie?.title || "").toLowerCase().replace(/\[.*?\]/g, "").trim();
       if (!resolvedTmdbId) {
         if (KNOWN_TMDB_MAP[cleanTitle]) {
           resolvedTmdbId = String(KNOWN_TMDB_MAP[cleanTitle]);
@@ -764,121 +774,80 @@ class MovieshubPlayer {
       const season = movie?.season || 1;
       const episode = movie?.episode || 1;
 
-      const isMoviesdaMovie = !!getVerifiedMoviesdaFileId(movie?.title) || movie?.platform === "Moviesda" || String(movie?.id || "").startsWith("moviesda-");
-      const fileId = getVerifiedMoviesdaFileId(movie?.title) || (String(movie?.id || "").startsWith("moviesda-") ? String(movie?.id).replace("moviesda-", "") : "102943");
-
       // MULTI-SERVER STREAMING NETWORK (js/player.js)
-      let servers = [];
-      if (isMoviesdaMovie) {
-        // Dedicated Moviesda Mirror Network for Moviesda Exclusive Releases
-        // Prevents passing Moviesda file ID (e.g. 102966) to external TMDB servers which plays wrong movies!
-        servers = [
-          {
-            id: "s1",
-            name: "Server 1",
-            badge: "Moviesda Tamil HD",
-            url: `https://play.onestream.today/stream/page/${fileId}`
-          },
-          {
-            id: "s2",
-            name: "Server 2",
-            badge: "Moviesda Mirror 1",
-            url: `https://play.onestream.today/stream/page/${fileId}`
-          },
-          {
-            id: "s3",
-            name: "Server 3",
-            badge: "Movieshub Cloud",
-            url: `${pfx}/stream/moviesda?id=${fileId}&clean=1`
-          },
-          {
-            id: "s4",
-            name: "Server 4",
-            badge: "Moviesda VIP",
-            url: `https://play.onestream.today/stream/page/${fileId}`
-          },
-          {
-            id: "s5",
-            name: "Server 5",
-            badge: "Direct MP4 Player",
-            url: `https://download.moviespage.xyz/download/file/${fileId}`
-          }
-        ];
-      } else {
-        // Standard Multi-Server Network (Servers 1 through 9)
-        servers = [
-          {
-            id: "s1",
-            name: "Server 1",
-            badge: "Movieshub Cloud",
-            url: mtype === "tv"
-              ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
-              : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
-          },
-          {
-            id: "s2",
-            name: "Server 2",
-            badge: "Primary HD (VidLink)",
-            url: mtype === "tv"
-              ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
-              : `https://vidlink.pro/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s3",
-            name: "Server 3",
-            badge: "Fast Forward (AutoEmbed)",
-            url: mtype === "tv"
-              ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
-              : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
-          },
-          {
-            id: "s4",
-            name: "Server 4",
-            badge: "Backup 1 (0vidads)",
-            url: mtype === "tv"
-              ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-              : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s5",
-            name: "Server 5",
-            badge: "Multi-Audio (VidSync)",
-            url: mtype === "tv"
-              ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-              : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s6",
-            name: "Server 6",
-            badge: "Cinema 4K (2Embed)",
-            url: mtype === "tv"
-              ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
-              : `https://www.2embed.cc/embed/${resolvedTmdbId}`
-          },
-          {
-            id: "s7",
-            name: "Server 7",
-            badge: "Mirror HD (VidSrc PM)",
-            url: mtype === "tv"
-              ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-              : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s8",
-            name: "Server 8",
-            badge: "Ultra CDN (VidSrc Net)",
-            url: mtype === "tv"
-              ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-              : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
-          },
-          {
-            id: "s9",
-            name: "Server 9",
-            badge: "Moviesda Tamil HD",
-            url: `https://moviezda.me/moviesda-tamil-movies-2026/`
-          }
-        ];
-      }
+      // Standard 9 Servers available for all movies
+      const servers = [
+        {
+          id: "s1",
+          name: "Server 1",
+          badge: "Movieshub Cloud",
+          url: mtype === "tv"
+            ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
+            : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
+        },
+        {
+          id: "s2",
+          name: "Server 2",
+          badge: "Primary HD (VidLink)",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s3",
+          name: "Server 3",
+          badge: "Fast Forward (AutoEmbed)",
+          url: mtype === "tv"
+            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
+            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
+        },
+        {
+          id: "s4",
+          name: "Server 4",
+          badge: "Backup 1 (0vidads)",
+          url: mtype === "tv"
+            ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s5",
+          name: "Server 5",
+          badge: "Multi-Audio (VidSync)",
+          url: mtype === "tv"
+            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s6",
+          name: "Server 6",
+          badge: "Cinema 4K (2Embed)",
+          url: mtype === "tv"
+            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
+            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+        },
+        {
+          id: "s7",
+          name: "Server 7",
+          badge: "Mirror HD (VidSrc PM)",
+          url: mtype === "tv"
+            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s8",
+          name: "Server 8",
+          badge: "Ultra CDN (VidSrc Net)",
+          url: mtype === "tv"
+            ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s9",
+          name: "Server 9",
+          badge: "Moviesda Tamil HD",
+          url: `https://moviezda.me/moviesda-tamil-movies-2026/`
+        }
+      ];
 
       this.currentServerIdx = 0;
       this.isAutoSwitchingEnabled = false;
@@ -915,19 +884,9 @@ class MovieshubPlayer {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 <span>Back</span>
               </button>
-              ${isMoviesdaMovie ? `
-                <span class="moviesda-live-badge" style="background:#e50914;color:#fff;font-size:11px;font-weight:800;padding:5px 10px;border-radius:6px;letter-spacing:0.5px;display:flex;align-items:center;gap:5px;box-shadow:0 0 10px rgba(229,9,20,0.5);">
-                  <span>⚡</span>
-                  <span>MOVIESDA 1080P ORIGINAL</span>
-                </span>
-              ` : `
-                <button class="srv-pill-btn moviesda-direct-btn" id="directMoviesdaPillBtn" title="Direct Switch to Moviesda Tamil HD" style="border:1.5px solid #e50914;background:linear-gradient(135deg, rgba(229,9,20,0.35), rgba(0,0,0,0.5));color:#fff;font-weight:800;box-shadow:0 0 10px rgba(229,9,20,0.3);">
-                  <span>⚡ Moviesda Tamil HD</span>
-                </button>
-              `}
               <div class="player-server-pills" id="playerModalServerPills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
                 ${servers.map((s, idx) => `
-                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""} ${s.badge.includes("Moviesda") ? "moviesda-pill-active" : ""}" data-idx="${idx}">
+                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
                     <span>${s.name}</span>
                     <span class="srv-pill-badge">${s.badge}</span>
                   </button>
@@ -1019,16 +978,6 @@ class MovieshubPlayer {
             }
           };
 
-          // For Moviesda exclusive releases (like Immortal, Cold Call, Anakapalli, Baththa, etc.):
-          // ALL servers route to the verified Moviesda stream so Server 2/3/4/5 NEVER queries VidLink/AutoEmbed
-          // with a Moviesda file ID (which would play a 1934 cowboy movie!)
-          if (isMoviesdaMovie) {
-            curIframe.removeAttribute("src");
-            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(fileId || resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
-            hidePreloader();
-            return;
-          }
-
           if (srv.id === "s9") {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
@@ -1037,6 +986,10 @@ class MovieshubPlayer {
           }
 
           if (srv.id === "s1") {
+            curIframe.removeAttribute("srcdoc");
+            curIframe.src = mtype === "tv"
+              ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
+              : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`;
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
             fetch(srv.url)
               .then(res => {
@@ -1141,30 +1094,6 @@ class MovieshubPlayer {
           if (window.showToast) window.showToast(`Switched to ${servers[nextIdx].name}`);
         });
       }
-
-      // Top bar Moviesda HD Tab
-      const tabMoviesdaMode = document.getElementById("tab-moviesda-mode");
-      if (tabMoviesdaMode) {
-        tabMoviesdaMode.addEventListener("click", () => {
-          if (isMoviesdaMovie) {
-            loadServer(0, false);
-            if (window.showToast) window.showToast("Streaming Moviesda Tamil HD (Watermark-Free)");
-          } else {
-            loadServer(servers.length - 1, false);
-            if (window.showToast) window.showToast("Switched to Server 9 (Moviesda Tamil HD)");
-          }
-        });
-      }
-
-      // Bottom bar direct Moviesda button
-      const directMoviesdaBtn = document.getElementById("directMoviesdaPillBtn");
-      if (directMoviesdaBtn) {
-        directMoviesdaBtn.addEventListener("click", () => {
-          loadServer(servers.length - 1, false);
-          if (window.showToast) window.showToast("Switched to Server 9 (Moviesda Tamil HD)");
-        });
-      }
-
       // Bottom bar back button
       const bottomBackBtn = document.getElementById("bottomPlayerBackBtn");
       if (bottomBackBtn) {

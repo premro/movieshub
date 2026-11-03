@@ -237,9 +237,8 @@ assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on exte
 console.log("\n10. Testing Multi-Server Network (Servers 1 to 9) & Server Integrity...");
 assert(playerCode.includes("Server 9") && playerCode.includes("Moviesda Tamil HD"), "Server 9 (Moviesda Tamil HD) registered in player");
 assert(playerCode.includes("generateMoviesdaPlayerSrcdoc"), "Moviesda routes to dedicated clean player engine");
-assert(playerCode.includes("isMoviesdaMovie") && playerCode.includes("Moviesda exclusive releases"), "Moviesda exclusive titles prevent passing Moviesda file ID to external TMDB servers");
-assert(playerCode.includes("tab-moviesda-mode"), "Moviesda quick switch tab present in player header");
-assert(playerCode.includes("directMoviesdaPillBtn") || playerCode.includes("moviesda-live-badge"), "Moviesda server button prominently visible in bottom bar");
+assert(playerCode.includes("1505305"), "Immortal mapped to verified TMDB 1505305 preventing wrong cowboy movie on Server 2");
+assert(!playerCode.includes("badge: \"Moviesda Mirror 1\""), "Standard multi-servers intact (only Server 9 is Moviesda, not all servers)");
 
 // Verify Servers 1 to 8 remain completely intact per specification
 assert(playerCode.includes("Server 1") && playerCode.includes("Movieshub Cloud"), "Server 1 (Movieshub Cloud) is intact");

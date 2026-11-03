@@ -34,7 +34,7 @@
     },
     {
       "id": "moviesda-immortal-2026",
-      "tmdbId": 102966,
+      "tmdbId": 1505305,
       "title": "Immortal",
       "nativeTitle": "\u0b87\u0bae\u0bcd\u0bae\u0bbe\u0bb0\u0bcd\u0b9f\u0bb2\u0bcd",
       "language": "Tamil",
@@ -60,11 +60,12 @@
       "backdrop": "https://moviezda.me/uploads/shots/102966-moviesdamobi-immortal-2026-original-1080p-hd.jpg",
       "mediaType": "movie",
       "overview": "A gripping Tamil fantasy thriller exploring power, mystery and eternal life starring G. V. Prakash Kumar.",
-      "isTrending": true
+      "isTrending": true,
+      "netId": "123957"
     },
     {
       "id": "moviesda-cold-call-2026",
-      "tmdbId": 103140,
+      "tmdbId": 126743,
       "title": "Cold Call",
       "nativeTitle": "\u0b95\u0bcb\u0bb2\u0bcd\u0b9f\u0bcd \u0b95\u0bbe\u0bb2\u0bcd",
       "language": "Tamil",
@@ -89,7 +90,8 @@
       "backdrop": "https://moviezda.me/uploads/shots/103140-moviesdamobi-cold-call-2026-original-720p-hd.jpg",
       "mediaType": "movie",
       "overview": "A high stakes comedy thriller centering on an unexpected cold call that turns a normal day upside down.",
-      "isTrending": true
+      "isTrending": true,
+      "netId": "126743"
     },
     {
       "id": "tmdb-1618200",
@@ -122,7 +124,7 @@
     },
     {
       "id": "moviesda-anakapalli-2026",
-      "tmdbId": 103147,
+      "tmdbId": 123090,
       "title": "Anakapalli",
       "nativeTitle": "\u0b85\u0ba9\u0b95\u0bbe\u0baa\u0bb3\u0bcd\u0bb3\u0bbf",
       "language": "Tamil",
@@ -147,7 +149,8 @@
       "backdrop": "https://moviezda.me/uploads/shots/103147-moviesdamobi-anakapalli-2026-original-720p-hd.jpg",
       "mediaType": "movie",
       "overview": "Set in Anakapalli, a gripping drama following power struggles, loyalty and courage.",
-      "isTrending": true
+      "isTrending": true,
+      "netId": "123090"
     },
     {
       "id": "tmdb-1578079",
@@ -557,7 +560,8 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "netId": "123957"
     }
   ],
   "tamil_2025": [
@@ -2387,7 +2391,8 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "netId": "123957"
     },
     {
       "id": "tmdb-1398980",
@@ -5363,7 +5368,8 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "netId": "123957"
     },
     {
       "id": "tmdb-1398980",
