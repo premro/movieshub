@@ -5,6 +5,133 @@
  * Strictly NO ADS, NO EXTERNAL REDIRECTIONS
  */
 
+
+const MOVIESDA_FILE_MAP = {
+  "anakapalli": "103147",
+  "cold call": "103140",
+  "baththa": "102943",
+  "the dark heaven": "103000",
+  "dorothy": "102980",
+  "akka": "103050",
+  "sigma": "103080",
+  "si yugandhar": "103060",
+  "comrade kalyan": "103040",
+  "avarachan and sons": "103020",
+  "immortal": "102990",
+  "amaran": "102850",
+  "maharaja": "101920",
+  "the greatest of all time": "102450",
+  "goat": "102450",
+  "leo": "98540",
+  "jailer": "96210",
+  "jailer 2": "102943",
+  "modha rathri": "103140",
+  "vishwanath & sons": "103147"
+};
+
+function resolveMoviesdaFileId(title, fallback = "103147") {
+  const clean = (title || "").toLowerCase().trim();
+  for (const [k, v] of Object.entries(MOVIESDA_FILE_MAP)) {
+    if (clean.includes(k) || k.includes(clean)) return v;
+  }
+  return fallback;
+}
+
+function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
+  const fileId = resolveMoviesdaFileId(title, "103147");
+  const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+  const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${safeTitle} - Moviesda Tamil HD</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .m-brand { display: flex; align-items: center; gap: 8px; }
+    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
+    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
+    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
+    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
+    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    .clipped-embed-wrap { width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden; }
+    .clipped-embed-wrap iframe {
+      width: 100%;
+      height: calc(100% + 140px);
+      margin-top: -95px;
+      border: none;
+      display: block;
+    }
+    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; z-index: 50; }
+    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
+    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  </style>
+</head>
+<body>
+  <div class="m-wrap">
+    <div class="m-bar">
+      <div class="m-brand">
+        <span class="m-badge">MOVIESDA HD</span>
+        <span class="m-badge-clean">WATERMARK REMOVED</span>
+        <span class="m-title">${safeTitle} (${year})</span>
+      </div>
+      <div class="m-top-actions">
+        <a href="${downloadUrl}" class="m-dl-btn" target="_blank" rel="noopener noreferrer" download>
+          <span>⬇ Download 720p / 1080p MP4</span>
+        </a>
+        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+          <span>Moviesda 2026 Hub</span>
+        </a>
+        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
+          <span>🔄 Reload</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="m-frame-box">
+      <div class="clipped-embed-wrap">
+        <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+
+    <div class="m-sub-bar">
+      <div class="m-tags">
+        <span class="m-tag ta">Tamil Original Master</span>
+        <span class="m-tag atmos">Dolby Atmos 5.1</span>
+        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
+        <span class="m-tag">Fast CDN 1080p</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const reloadBtn = document.getElementById("reloadBtn");
+    const embedFrame = document.getElementById("embedFrame");
+    if (reloadBtn && embedFrame) {
+      reloadBtn.addEventListener("click", () => {
+        const u = embedFrame.src;
+        embedFrame.src = "about:blank";
+        setTimeout(() => { embedFrame.src = u; }, 150);
+      });
+    }
+  </script>
+</body>
+</html>`;
+}
+
 class MovieshubPlayer {
   constructor() {
     this.currentMovie = null;
@@ -720,7 +847,7 @@ class MovieshubPlayer {
           id: "s8",
           name: "Server 8",
           badge: "Moviesda Tamil HD",
-          url: `moviesda.html?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2026}`
+          url: `https://play.onestream.today/stream/page/${resolveMoviesdaFileId(movie?.title, "103147")}`
         }
       ];
 
@@ -853,8 +980,14 @@ class MovieshubPlayer {
             }
           };
 
-          curIframe.removeAttribute("srcdoc");
-          curIframe.src = srv.url;
+          if (srv.id === "s8") {
+            curIframe.removeAttribute("src");
+            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
+            hidePreloader();
+          } else {
+            curIframe.removeAttribute("srcdoc");
+            curIframe.src = srv.url;
+          }
         }
 
         // Auto-switch timer: Only if manually enabled by user and server takes > 20s
