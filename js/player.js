@@ -913,10 +913,19 @@ class MovieshubPlayer {
       this.video.currentTime = 0;
     }
 
-    document.getElementById("player-title").textContent = movie.title;
-    document.getElementById("player-badge").textContent = movie.platformBadge || "MOVIESHUB";
-    document.getElementById("player-badge").style.backgroundColor = movie.platformColor || "#E50914";
-    document.getElementById("player-extra").textContent = `${movie.language ? movie.language.toUpperCase() : "CINEMA"} • 4K ULTRA HD • Dolby Atmos 5.1`;
+    const titleEl = document.getElementById("player-title");
+    if (titleEl) titleEl.textContent = movie.title || "Movie";
+
+    const badgeEl = document.getElementById("player-badge");
+    if (badgeEl) {
+      badgeEl.textContent = movie.platformBadge || "MOVIESHUB";
+      badgeEl.style.backgroundColor = movie.platformColor || "#E50914";
+    }
+
+    const extraEl = document.getElementById("player-extra");
+    if (extraEl) {
+      extraEl.textContent = `${movie.language ? movie.language.toUpperCase() : "CINEMA"} • 4K ULTRA HD • Dolby Atmos 5.1`;
+    }
 
     this.modal.classList.remove("hidden");
     document.body.style.overflow = "hidden";

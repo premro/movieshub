@@ -6,6 +6,8 @@
 class MovieshubApp {
   constructor() {
     this.catalog = [...MOVIE_CATALOG];
+    this.movieMap = new Map();
+    this.catalog.forEach(m => this.registerMovie(m));
     this.activeLanguage = "all"; // 'all', 'tamil', 'english', 'hindi', 'telugu', 'malayalam'
     this.activeGenre = "All";
     this.activeView = "home"; // 'home', 'tamil', 'english', 'hindi', 'mylist'
@@ -52,6 +54,95 @@ class MovieshubApp {
     setInterval(() => this.loadDashboardData(true), 15 * 60 * 1000);
   }
 
+  /* ================= MOVIE REGISTRY & LOOKUP ================= */
+  registerMovie(m) {
+    if (!m || !m.title) return;
+    if (m.id) {
+      const strId = String(m.id);
+      this.movieMap.set(strId, m);
+      if (strId.startsWith("tmdb-")) this.movieMap.set(strId.replace("tmdb-", ""), m);
+      if (strId.startsWith("netmirror-")) this.movieMap.set(strId.replace("netmirror-", ""), m);
+    }
+    if (m.tmdbId) {
+      this.movieMap.set(String(m.tmdbId), m);
+    }
+    const cleanTitle = (m.title || "").toLowerCase().trim();
+    if (cleanTitle) this.movieMap.set("t:" + cleanTitle, m);
+  }
+
+  getMovieById(id, fallbackCard = null) {
+    if (!id && !fallbackCard) return null;
+    const strId = String(id || "").trim();
+
+    // 1. Direct from movieMap
+    if (strId && this.movieMap.has(strId)) return this.movieMap.get(strId);
+    if (strId.startsWith("tmdb-") && this.movieMap.has(strId.replace("tmdb-", ""))) {
+      return this.movieMap.get(strId.replace("tmdb-", ""));
+    }
+
+    // 2. Main catalog search
+    let found = this.catalog.find(c => c.id === strId || String(c.id) === strId || (c.tmdbId && String(c.tmdbId) === strId));
+    if (found) {
+      this.registerMovie(found);
+      return found;
+    }
+
+    // 3. Continue watching
+    if (this.continueWatching) {
+      found = this.continueWatching.find(c => c.id === strId || String(c.id) === strId || (c.tmdbId && String(c.tmdbId) === strId));
+      if (found) {
+        this.registerMovie(found);
+        return found;
+      }
+    }
+
+    // 4. Dashboard cache all sections
+    if (this.dashboardData) {
+      const allSections = [
+        ...(this.dashboardData.tamil_2026 || []),
+        ...(this.dashboardData.tamil_2025 || []),
+        ...(this.dashboardData.tamil_2024 || []),
+        ...(this.dashboardData.latest_six || []),
+        ...(this.dashboardData.trending || []),
+        ...(this.dashboardData.latest || []),
+        ...(this.dashboardData.all || [])
+      ];
+      if (this.dashboardData.languages && typeof this.dashboardData.languages === "object") {
+        Object.values(this.dashboardData.languages).forEach(arr => {
+          if (Array.isArray(arr)) allSections.push(...arr);
+        });
+      }
+      found = allSections.find(c => c && (c.id === strId || String(c.id) === strId || (c.tmdbId && String(c.tmdbId) === strId)));
+      if (found) {
+        this.registerMovie(found);
+        return found;
+      }
+    }
+
+    // 5. Fallback reconstruction from DOM card element if present
+    if (fallbackCard) {
+      const titleEl = fallbackCard.querySelector(".card-title");
+      const title = titleEl ? titleEl.textContent.trim() : (fallbackCard.querySelector(".card-img")?.getAttribute("alt") || "Movie");
+      const poster = fallbackCard.querySelector(".card-img")?.getAttribute("src") || "";
+      const lang = fallbackCard.querySelector(".card-lang-badge")?.textContent || "Tamil";
+      const cleanNumId = strId.replace("tmdb-", "").replace("netmirror-", "");
+      const tmdbId = (!isNaN(parseInt(cleanNumId, 10)) && parseInt(cleanNumId, 10) > 0) ? parseInt(cleanNumId, 10) : 927342;
+      const reconstructed = {
+        id: strId || `tmdb-${tmdbId}`,
+        tmdbId: tmdbId,
+        title: title,
+        poster: poster,
+        language: lang,
+        year: 2026,
+        rating: 8.0
+      };
+      this.registerMovie(reconstructed);
+      return reconstructed;
+    }
+
+    return null;
+  }
+
   /* ================= 2-HOUR DASHBOARD SYNC ================= */
   async loadDashboardData(silent = false) {
     try {
@@ -64,8 +155,7 @@ class MovieshubApp {
 
         const mergeMovie = (m) => {
           if (!m || !m.title) return;
-          // Filter out unreleased future titles (must be released with valid streams)
-          if (m.year && m.year > 2024) return;
+          this.registerMovie(m);
           const exists = this.catalog.some(c => 
             (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) ||
             (c.id && m.id && c.id === m.id) ||
@@ -80,6 +170,9 @@ class MovieshubApp {
         (data.all || []).forEach(mergeMovie);
         (data.latest_six || []).forEach(mergeMovie);
         (data.trending || []).forEach(mergeMovie);
+        (data.tamil_2026 || []).forEach(mergeMovie);
+        (data.tamil_2025 || []).forEach(mergeMovie);
+        (data.tamil_2024 || []).forEach(mergeMovie);
 
         if (data.languages && typeof data.languages === "object") {
           Object.values(data.languages).forEach(arr => {
@@ -1123,6 +1216,7 @@ class MovieshubApp {
   }
 
   renderMovieCard(movie) {
+    if (movie) this.registerMovie(movie);
     const isSaved = this.myList.includes(movie.id);
     const posterSrc = movie.poster || `${(typeof window !== "undefined" && window.API_PREFIX) || ""}/api/poster?title=${encodeURIComponent(movie.title)}&year=${movie.year || 2026}`;
     const cleanTitle = (movie.title || "Movie").replace(/[<>"']/g, "");
@@ -1249,7 +1343,7 @@ class MovieshubApp {
     // Movie Cards -> 1-Click Instant Play on card click!
     container.querySelectorAll(".movie-card").forEach(card => {
       const id = card.dataset.id;
-      const movie = this.catalog.find(m => m.id === id || String(m.id) === String(id) || String(m.tmdbId) === String(id));
+      const movie = this.getMovieById(id, card);
       if (!movie) return;
 
       const playBtn = card.querySelector(".card-btn-play");
@@ -1294,7 +1388,7 @@ class MovieshubApp {
     // Top 10 items -> 1-Click Instant Play
     container.querySelectorAll(".top10-item").forEach(item => {
       const id = item.dataset.id;
-      const movie = this.catalog.find(m => m.id === id || String(m.id) === String(id) || String(m.tmdbId) === String(id));
+      const movie = this.getMovieById(id, item);
       if (!movie) return;
 
       const playBtn = item.querySelector(".top10-play-btn");
