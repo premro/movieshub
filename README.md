@@ -1,4 +1,4 @@
-# OOT🎬
+# OTT🎬
 
 A modern, high-performance streaming web portal inspired by **netmirror.plus**. NetMirror aggregates and organizes premium movies and television series from major OTT platforms (Netflix, Amazon Prime Video, HBO Max, Disney+, Apple TV+, Paramount+) in a sleek, cinematic interface with advanced search and full theater playback controls.
 
