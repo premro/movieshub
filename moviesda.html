@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Moviesda 2026 Tamil HD Player (Watermark Free)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    
+    /* Top Header Bar */
+    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .m-brand { display: flex; align-items: center; gap: 8px; }
+    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
+    
+    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
+    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
+    
+    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
+    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+
+    /* Video Viewport Area (Shielded from Watermark & Ads) */
+    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+    
+    /* Native Video Player Mode */
+    #nativeVideo { width: 100%; height: 100%; max-height: calc(100vh - 84px); object-fit: contain; background: #000; display: none; }
+    
+    /* Shielded Embed Mode - Clips h1 & h2 watermarks */
+    .clipped-embed-wrap { width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden; }
+    .clipped-embed-wrap iframe {
+      width: 100%;
+      height: calc(100% + 140px);
+      margin-top: -95px; /* Crops Moviesda.io and Moviesda.Mobi text completely */
+      border: none;
+      display: block;
+    }
+
+    /* Bottom Info & Feature Bar */
+    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; z-index: 50; }
+    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
+    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+
+    .m-sub-actions { display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="m-wrap">
+    <div class="m-bar">
+      <div class="m-brand">
+        <span class="m-badge">MOVIESDA HD</span>
+        <span class="m-badge-clean">WATERMARK REMOVED</span>
+        <span class="m-title" id="dispTitle">Loading Movie...</span>
+      </div>
+      <div class="m-top-actions">
+        <a href="#" class="m-dl-btn" id="topDlBtn" target="_blank" rel="noopener noreferrer" download>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>⬇ Download 720p / 1080p MP4</span>
+        </a>
+        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          <span>Moviesda 2026 Hub</span>
+        </a>
+        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
+          <span>🔄 Reload</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="m-frame-box" id="frameBox">
+      <!-- Mode 1: Native HTML5 MP4 Player -->
+      <video id="nativeVideo" controls playsinline preload="auto"></video>
+      
+      <!-- Mode 2: Shielded Clean Embed (Watermark Cropped) -->
+      <div class="clipped-embed-wrap" id="embedWrap">
+        <iframe id="embedFrame" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+      </div>
+    </div>
+
+    <div class="m-sub-bar">
+      <div class="m-tags">
+        <span class="m-tag ta">Tamil Original Master</span>
+        <span class="m-tag atmos">Dolby Atmos 5.1</span>
+        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
+        <span class="m-tag">Fast CDN 1080p</span>
+      </div>
+      <div class="m-sub-actions">
+        <a href="#" class="m-link-btn" id="fallbackToggle">
+          <span>Switch Multi-Lang Audio</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MOVIESDA_FILE_MAP = {
+      "anakapalli": "103147",
+      "cold call": "103140",
+      "baththa": "102943",
+      "the dark heaven": "103000",
+      "dorothy": "102980",
+      "akka": "103050",
+      "sigma": "103080",
+      "si yugandhar": "103060",
+      "comrade kalyan": "103040",
+      "avarachan and sons": "103020",
+      "immortal": "102990",
+      "amaran": "102850",
+      "maharaja": "101920",
+      "the greatest of all time": "102450",
+      "goat": "102450",
+      "leo": "98540",
+      "jailer": "96210",
+      "jailer 2": "102943",
+      "modha rathri": "103140",
+      "vishwanath & sons": "103147"
+    };
+
+    function resolveFileId(title, fallback) {
+      const clean = (title || "").toLowerCase().trim();
+      for (const [k, v] of Object.entries(MOVIESDA_FILE_MAP)) {
+        if (clean.includes(k) || k.includes(clean)) return v;
+      }
+      return fallback || "103147";
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const tmId = params.get("id") || "1515692";
+    const mtype = params.get("type") || "movie";
+    const title = params.get("title") || "Baththa";
+    const year = params.get("year") || "2026";
+    const fileId = params.get("file_id") || resolveFileId(title, "103147");
+
+    document.getElementById("dispTitle").textContent = `${title} (${year})`;
+    const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+    const topDlBtn = document.getElementById("topDlBtn");
+    topDlBtn.href = downloadUrl;
+
+    const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
+    const embedFrame = document.getElementById("embedFrame");
+    const nativeVideo = document.getElementById("nativeVideo");
+    const embedWrap = document.getElementById("embedWrap");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const fallbackToggle = document.getElementById("fallbackToggle");
+
+    const fallbackStream = mtype === "tv"
+      ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true`
+      : `https://vidlink.pro/movie/${tmId}?multiLang=true`;
+
+    if (fallbackToggle) {
+      fallbackToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        embedWrap.style.display = "block";
+        nativeVideo.style.display = "none";
+        embedFrame.src = fallbackStream;
+      });
+    }
+
+    // Try API stream extraction for 100% native video
+    let nativeLoaded = false;
+    const apiPfx = window.location.pathname.includes("/server/movieshub_api")
+      ? "/server/movieshub_api"
+      : "";
+
+    fetch(`${apiPfx}/api/moviesda_stream?file_id=${fileId}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data && data.streamUrl) {
+          nativeVideo.src = data.streamUrl;
+          nativeVideo.style.display = "block";
+          embedWrap.style.display = "none";
+          nativeLoaded = true;
+          nativeVideo.play().catch(() => {});
+        } else {
+          loadEmbedFallback();
+        }
+      })
+      .catch(() => {
+        loadEmbedFallback();
+      });
+
+    function loadEmbedFallback() {
+      if (nativeLoaded) return;
+      embedWrap.style.display = "block";
+      nativeVideo.style.display = "none";
+      embedFrame.src = embedUrl;
+    }
+
+    // Timeout safety fallback
+    setTimeout(() => {
+      if (!nativeLoaded && (!nativeVideo.src || nativeVideo.style.display === "none")) {
+        loadEmbedFallback();
+      }
+    }, 2500);
+
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", () => {
+        if (nativeLoaded) {
+          nativeVideo.load();
+          nativeVideo.play().catch(() => {});
+        } else {
+          embedFrame.src = "about:blank";
+          setTimeout(() => { embedFrame.src = embedUrl; }, 200);
+        }
+      });
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.data === "stop" || e.data === "pause") {
+        if (nativeVideo) nativeVideo.pause();
+        embedFrame.src = "about:blank";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -720,7 +720,7 @@ class MovieshubPlayer {
           id: "s8",
           name: "Server 8",
           badge: "Moviesda Tamil HD",
-          url: `${pfx}/stream/moviesda?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2026}`
+          url: `moviesda.html?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2026}`
         }
       ];
 

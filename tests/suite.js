@@ -233,7 +233,7 @@ assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on exte
 // 10. Testing Server 8 (Moviesda 2026 Tamil HD Engine) & Server Integrity
 console.log("\n10. Testing Server 8 (Moviesda Tamil HD) & Server Integrity...");
 assert(playerCode.includes("Server 8") && playerCode.includes("Moviesda Tamil HD"), "Server 8 (Moviesda Tamil HD) registered in player");
-assert(playerCode.includes("/stream/moviesda"), "Server 8 routes to dedicated Moviesda streaming proxy");
+assert(playerCode.includes("moviesda.html"), "Server 8 routes to dedicated Moviesda player page");
 
 // Verify Servers 1 to 7 remain completely intact and unbroken
 assert(playerCode.includes("Server 1") && playerCode.includes("VidLink Multi-Lang HD"), "Server 1 is intact");

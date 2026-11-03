@@ -908,7 +908,45 @@ module.exports = async (req, res) => {
   }
 
   // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
-  // 7b. Moviesda 2026 Engine Route (Tamil HD - Watermark Removed & Direct Download)
+  // 6b. Moviesda Stream Extractor API
+  if (pathname === "/api/moviesda_stream") {
+    const fileId = u.searchParams.get("file_id") || "103147";
+    try {
+      const targetUrl = `https://play.onestream.today/stream/page/${fileId}`;
+      const { buffer } = await fetchBuffer(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+          "Referer": "https://movies.downloadpage.xyz/"
+        }
+      });
+      const html = buffer.toString("utf8");
+      const m = html.match(/<source\s+src="([^"]+)"/);
+      const rawStream = m ? m[1].replace(/&amp;/g, "&") : "";
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      });
+      return res.end(JSON.stringify({
+        success: !!rawStream,
+        fileId,
+        streamUrl: rawStream,
+        downloadUrl: `https://download.moviespage.xyz/download/file/${fileId}`
+      }));
+    } catch (e) {
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      });
+      return res.end(JSON.stringify({
+        success: false,
+        fileId,
+        streamUrl: "",
+        downloadUrl: `https://download.moviespage.xyz/download/file/${fileId}`
+      }));
+    }
+  }
+
+    // 7b. Moviesda 2026 Engine Route (Tamil HD - Watermark Removed & Direct Download)
   if (pathname === "/stream/moviesda") {
     const tmId = u.searchParams.get("id") || "1515692";
     const mtype = u.searchParams.get("type") || "movie";
