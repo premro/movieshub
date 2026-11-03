@@ -3,20 +3,50 @@
   "last_synced_human": "2026-11-02 21:04:25",
   "latest_six": [
     {
-      "id": "goat-tamil",
-      "tmdbId": 1129608,
-      "title": "The Greatest of All Time (G.O.A.T)",
-      "nativeTitle": "\u0ba4\u0bbf \u0b95\u0bbf\u0bb0\u0bc7\u0b9f\u0bcd\u0b9f\u0bb8\u0bcd\u0b9f\u0bcd \u0b86\u0b83\u0baa\u0bcd \u0b86\u0bb2\u0bcd \u0b9f\u0bc8\u0bae\u0bcd",
+      "id": "tmdb-1515692",
+      "tmdbId": 1515692,
+      "title": "Baththa",
+      "nativeTitle": "\u0baa\u0ba4\u0bcd\u0ba4\u0bbe",
       "language": "Tamil",
       "languageBadge": "Tamil",
-      "year": 2024,
-      "rating": 8.4,
+      "year": 2026,
+      "rating": 8.9,
       "match": "99%",
       "maturity": "U/A 16+",
-      "duration": "3h 03m",
+      "duration": "2h 30m",
+      "genres": [
+        "Drama",
+        "Action",
+        "Comedy"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/7wHBYs8HHmTGe4nXLpMEAoDSK2o.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/5sBnZMT1aJ6cBvehKOzOOLdI6bz.jpg",
+      "mediaType": "movie",
+      "overview": "In 1986 Madras, a timid eight-year-old boy accidentally traps a feared gangster inside a deserted school toilet.",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1234139",
+      "tmdbId": 1234139,
+      "title": "Jailer 2",
+      "nativeTitle": "\u0b9c\u0bc6\u0baf\u0bbf\u0bb2\u0bb0\u0bcd 2",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.8,
+      "match": "98%",
+      "maturity": "U/A 16+",
+      "duration": "2h 45m",
       "genres": [
         "Action",
-        "Sci-Fi",
+        "Crime",
         "Thriller"
       ],
       "qualities": [
@@ -26,34 +56,112 @@
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "assets/posters/goat-tamil.png",
-      "backdrop": "assets/posters/goat-tamil.png",
+      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
       "mediaType": "movie",
-      "overview": "Gandhi, an elite hostage negotiator and field operative for SATS, gets pulled out of retirement when a mission in Thailand reveals ghosts from his past.",
-      "cast": [
-        "Thalapathy Vijay",
-        "Prashanth",
-        "Prabhu Deva",
-        "Sneha",
-        "Meenakshi Chaudhary"
-      ],
-      "director": "Venkat Prabhu",
+      "overview": "When a dangerous syndicate expands its reach, retired jailer Tiger Muthuvel Pandian goes undercover to protect his home.",
       "isTrending": true
     },
     {
-      "id": "maharaja-tamil",
-      "tmdbId": 1118224,
-      "title": "Maharaja",
-      "nativeTitle": "\u0bae\u0b95\u0bbe\u0bb0\u0bbe\u0b9c\u0bbe",
+      "id": "moviesda-cold-call-2026",
+      "tmdbId": 103140,
+      "title": "Cold Call",
+      "nativeTitle": "\u0b95\u0bcb\u0bb2\u0bcd\u0b9f\u0bcd \u0b95\u0bbe\u0bb2\u0bcd",
       "language": "Tamil",
       "languageBadge": "Tamil",
-      "year": 2024,
-      "rating": 8.5,
-      "match": "99%",
+      "year": 2026,
+      "rating": 8.6,
+      "match": "96%",
       "maturity": "U/A 16+",
-      "duration": "2h 21m",
+      "duration": "2h 15m",
       "genres": [
-        "Action",
+        "Comedy",
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Moviesda",
+      "platformBadge": "MOVIESDA",
+      "platformColor": "#E50914",
+      "poster": "https://moviezda.me/uploads/shots/103140-moviesdamobi-cold-call-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103140-moviesdamobi-cold-call-2026-original-720p-hd.jpg",
+      "mediaType": "movie",
+      "overview": "A high stakes comedy thriller centering on an unexpected cold call that turns a normal day upside down.",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1618200",
+      "tmdbId": 1618200,
+      "title": "The Dark Heaven",
+      "nativeTitle": "\u0ba4\u0bc0 \u0b9f\u0bbe\u0bb0\u0bcd\u0b95\u0bcd \u0bb9\u0bc6\u0bb5\u0ba9\u0bcd",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.8,
+      "match": "95%",
+      "maturity": "U/A 16+",
+      "duration": "2h 20m",
+      "genres": [
+        "Crime",
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/xFr0Q7j2JmOwBJnvImIgTAWBk4U.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/4ercU8wa7OAexszQG3SSNuyB8fy.jpg",
+      "mediaType": "movie",
+      "overview": "In the Hill Village of Mekkarai, where men die every seven years, a newly appointed inspector investigates mysterious murders.",
+      "isTrending": true
+    },
+    {
+      "id": "moviesda-anakapalli-2026",
+      "tmdbId": 103147,
+      "title": "Anakapalli",
+      "nativeTitle": "\u0b85\u0ba9\u0b95\u0bbe\u0baa\u0bb3\u0bcd\u0bb3\u0bbf",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.5,
+      "match": "94%",
+      "maturity": "U/A 16+",
+      "duration": "2h 31m",
+      "genres": [
+        "Drama",
+        "Action"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Moviesda",
+      "platformBadge": "MOVIESDA",
+      "platformColor": "#E50914",
+      "poster": "https://moviezda.me/uploads/shots/103147-moviesdamobi-anakapalli-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103147-moviesdamobi-anakapalli-2026-original-720p-hd.jpg",
+      "mediaType": "movie",
+      "overview": "Set in Anakapalli, a gripping drama following power struggles, loyalty and courage.",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1578079",
+      "tmdbId": 1578079,
+      "title": "Dorothy",
+      "nativeTitle": "\u0b9f\u0bcb\u0bb0\u0ba4\u0bbf",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 9.0,
+      "match": "98%",
+      "maturity": "U/A 16+",
+      "duration": "2h 25m",
+      "genres": [
         "Crime",
         "Drama"
       ],
@@ -64,164 +172,10 @@
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "assets/posters/maharaja-tamil.png",
-      "backdrop": "assets/posters/maharaja-tamil.png",
+      "poster": "https://image.tmdb.org/t/p/w500/o3r5DmWhOKdFmeIUoRJj4CvCqOP.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/fPByMSinDUlJ05pMVw2sbqYF6Ew.jpg",
       "mediaType": "movie",
-      "overview": "A quiet barber files a complaint reporting a missing trash bin from his home, baffling the police until dark secrets and explosive retribution unfold.",
-      "cast": [
-        "Vijay Sethupathi",
-        "Anurag Kashyap",
-        "Mamta Mohandas",
-        "Natty"
-      ],
-      "director": "Nithilan Saminathan",
-      "isTrending": true
-    },
-    {
-      "id": "deadpool-and-wolverine",
-      "tmdbId": 533535,
-      "title": "Deadpool & Wolverine",
-      "nativeTitle": "Deadpool & Wolverine",
-      "language": "English",
-      "languageBadge": "English",
-      "year": 2024,
-      "rating": 7.9,
-      "match": "98%",
-      "maturity": "A 18+",
-      "duration": "2h 08m",
-      "genres": [
-        "Action",
-        "Comedy",
-        "Sci-Fi"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "assets/posters/deadpool-and-wolverine.png",
-      "backdrop": "assets/posters/deadpool-and-wolverine.png",
-      "mediaType": "movie",
-      "overview": "A listless Wade Wilson toils away in civilian life with his days as the morally flexible mercenary Deadpool behind him, until a planetary existential threat pulls him back.",
-      "cast": [
-        "Ryan Reynolds",
-        "Hugh Jackman",
-        "Emma Corrin",
-        "Matthew Macfadyen"
-      ],
-      "director": "Shawn Levy",
-      "isTrending": true
-    },
-    {
-      "id": "dune-part-two",
-      "tmdbId": 693134,
-      "title": "Dune: Part Two",
-      "nativeTitle": "Dune: Part Two",
-      "language": "English",
-      "languageBadge": "English",
-      "year": 2024,
-      "rating": 8.6,
-      "match": "99%",
-      "maturity": "U/A 16+",
-      "duration": "2h 46m",
-      "genres": [
-        "Sci-Fi",
-        "Adventure",
-        "Action"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "assets/posters/dune-part-two.png",
-      "backdrop": "assets/posters/dune-part-two.png",
-      "mediaType": "movie",
-      "overview": "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.",
-      "cast": [
-        "Timoth\u00e9e Chalamet",
-        "Zendaya",
-        "Rebecca Ferguson",
-        "Javier Bardem"
-      ],
-      "director": "Denis Villeneuve",
-      "isTrending": true
-    },
-    {
-      "id": "kalki-2898ad-telugu",
-      "tmdbId": 801688,
-      "title": "Kalki 2898 AD",
-      "nativeTitle": "\u0c15\u0c32\u0c4d\u0c15\u0c3f 2898 AD",
-      "language": "Telugu",
-      "languageBadge": "Telugu",
-      "year": 2024,
-      "rating": 8.2,
-      "match": "97%",
-      "maturity": "U/A 13+",
-      "duration": "3h 01m",
-      "genres": [
-        "Sci-Fi",
-        "Action",
-        "Mythology"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "assets/posters/kalki-2898ad-telugu.png",
-      "backdrop": "assets/posters/kalki-2898ad-telugu.png",
-      "mediaType": "movie",
-      "overview": "In the post-apocalyptic dystopian city of Kasi in 2898 AD, an enigmatic bounty hunter Bhairava crosses paths with Ashwatthama guarding the prophesied avatar.",
-      "cast": [
-        "Prabhas",
-        "Amitabh Bachchan",
-        "Kamal Haasan",
-        "Deepika Padukone"
-      ],
-      "director": "Nag Ashwin",
-      "isTrending": true
-    },
-    {
-      "id": "stree2-hindi",
-      "tmdbId": 1112426,
-      "title": "Stree 2: Sarkate Ka Aatank",
-      "nativeTitle": "\u0938\u094d\u0924\u094d\u0930\u0940 2",
-      "language": "Hindi",
-      "languageBadge": "Hindi",
-      "year": 2024,
-      "rating": 8.3,
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 27m",
-      "genres": [
-        "Comedy",
-        "Horror"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "assets/posters/stree2-hindi.png",
-      "backdrop": "assets/posters/stree2-hindi.png",
-      "mediaType": "movie",
-      "overview": "The town of Chanderi faces a terrifying new menace, Sarkata, who abducts modern independent women, forcing Vicky and friends to summon the original protector.",
-      "cast": [
-        "Shraddha Kapoor",
-        "Rajkummar Rao",
-        "Pankaj Tripathi",
-        "Abhishek Banerjee"
-      ],
-      "director": "Amar Kaushik",
+      "overview": "In rural Tamil Nadu, two inseparable childhood friends navigate a complex world when a compassionate woman enters their lives.",
       "isTrending": true
     }
   ],

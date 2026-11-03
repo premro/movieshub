@@ -346,6 +346,17 @@ class MovieshubApp {
             <button class="btn-start-download">Download 1080p</button>
           </div>
 
+          <div class="download-opt-card" data-quality="moviesda" data-id="${movie.tmdbId || movie.id}" style="border:1px solid rgba(229,9,20,0.4);background:rgba(229,9,20,0.06);">
+            <div class="download-opt-left">
+              <span class="download-badge-fhd" style="background:#e50914;">MOVIESDA</span>
+              <div>
+                <strong style="font-size:14px;color:#fff;">Moviesda 2026 Master (Watermark Removed)</strong>
+                <span class="download-opt-meta">Direct MP4 • 1080p/720p Clean Print • ~1.2 GB</span>
+              </div>
+            </div>
+            <button class="btn-start-download" style="background:#e50914;">Fast Download</button>
+          </div>
+
           <div class="download-opt-card" data-quality="720p" data-id="${movie.tmdbId || movie.id}">
             <div class="download-opt-left">
               <span class="download-badge-hd">720p</span>
@@ -1048,10 +1059,24 @@ class MovieshubApp {
     const top5Imdb = sortedCatalog.slice(0, 5);
     const featuredMovie = top5Imdb[0] || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
     
-    // Top 6 Latest Releases from IMDb / TMDB
-    const latestSix = (this.dashboardData && this.dashboardData.latest_six && this.dashboardData.latest_six.length > 0)
-      ? this.dashboardData.latest_six
-      : this.catalog.slice(0, 6);
+    // Top 6 Latest Releases from IMDb / TMDB (Strictly 2026/2025 releases - remove 2024)
+    let latestSix = (this.dashboardData && this.dashboardData.latest_six && this.dashboardData.latest_six.length > 0)
+      ? this.dashboardData.latest_six.filter(m => (m.year || 2026) >= 2025)
+      : [];
+
+    if (latestSix.length < 6) {
+      const candidates = [
+        ...(this.dashboardData?.tamil_2026 || []),
+        ...(this.dashboardData?.tamil_2025 || []),
+        ...this.catalog.filter(m => (m.year || 0) >= 2025)
+      ];
+      for (const c of candidates) {
+        if (!latestSix.some(m => m.id === c.id || m.title === c.title)) {
+          latestSix.push(c);
+          if (latestSix.length >= 6) break;
+        }
+      }
+    }
 
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
       ? this.dashboardData.tamil_2026

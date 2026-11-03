@@ -661,6 +661,151 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 </html>`;
 }
 
+const MOVIESDA_FILE_MAP = {
+  "anakapalli": "103147",
+  "cold call": "103140",
+  "baththa": "102943",
+  "the dark heaven": "103000",
+  "dorothy": "102980",
+  "akka": "103050",
+  "sigma": "103080",
+  "si yugandhar": "103060",
+  "comrade kalyan": "103040",
+  "avarachan and sons": "103020",
+  "immortal": "102990",
+  "amaran": "102850",
+  "maharaja": "101920",
+  "the greatest of all time": "102450",
+  "goat": "102450",
+  "leo": "98540",
+  "jailer": "96210",
+  "jailer 2": "102943",
+  "modha rathri": "103140",
+  "vishwanath & sons": "103147"
+};
+
+function resolveMoviesdaFileId(title) {
+  const clean = (title || "").toLowerCase().trim();
+  for (const [k, v] of Object.entries(MOVIESDA_FILE_MAP)) {
+    if (clean.includes(k) || k.includes(clean)) return v;
+  }
+  return "103147";
+}
+
+function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
+  const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const cleanTitle = (title || "Movie").replace(/\[.*?\]/g, "").replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+  const fileId = resolveMoviesdaFileId(cleanTitle);
+  const embedUrl = `${prefix}/stream/moviesda/embed?file_id=${fileId}&title=${encodeURIComponent(cleanTitle)}&year=${year}`;
+  const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+  const isTv = mtype === "tv";
+  const fallbackStream = isTv 
+    ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true`
+    : `https://vidlink.pro/movie/${tmId}?multiLang=true`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${safeTitle} - Moviesda 2026 Tamil HD (No Watermark)</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .m-brand { display: flex; align-items: center; gap: 8px; }
+    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
+    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
+    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
+    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
+    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; display: flex; flex-direction: column; }
+    iframe { width: 100%; height: 100%; border: none; display: block; flex: 1; }
+    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; }
+    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
+    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+    .m-sub-actions { display: flex; align-items: center; gap: 8px; }
+  </style>
+</head>
+<body>
+  <div class="m-wrap">
+    <div class="m-bar">
+      <div class="m-brand">
+        <span class="m-badge">MOVIESDA HD</span>
+        <span class="m-badge-clean">WATERMARK REMOVED</span>
+        <span class="m-title">${safeTitle} (${year})</span>
+      </div>
+      <div class="m-top-actions">
+        <a href="${downloadUrl}" class="m-dl-btn" target="_blank" rel="noopener noreferrer" download>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>⬇ Download 720p / 1080p MP4</span>
+        </a>
+        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+          <span>Moviesda 2026 Hub</span>
+        </a>
+        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
+          <span>🔄 Reload</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="m-frame-box">
+      <iframe id="mainFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+    </div>
+
+    <div class="m-sub-bar">
+      <div class="m-tags">
+        <span class="m-tag ta">Tamil Original Master</span>
+        <span class="m-tag atmos">Dolby Atmos 5.1</span>
+        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
+        <span class="m-tag">Fast CDN 1080p</span>
+      </div>
+      <div class="m-sub-actions">
+        <a href="${fallbackStream}" class="m-link-btn" id="fallbackToggle">
+          <span>Switch Multi-Lang Audio</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const frame = document.getElementById("mainFrame");
+    const reloadBtn = document.getElementById("reloadBtn");
+    const fallbackToggle = document.getElementById("fallbackToggle");
+
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", () => {
+        const cur = frame.src;
+        frame.src = "about:blank";
+        setTimeout(() => { frame.src = cur; }, 200);
+      });
+    }
+
+    if (fallbackToggle) {
+      fallbackToggle.addEventListener("click", (e) => {
+        e.preventDefault();
+        frame.src = "${fallbackStream}";
+      });
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.data === "stop" || e.data === "pause") {
+        frame.src = "about:blank";
+      }
+    });
+  </script>
+</body>
+</html>`;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -763,7 +908,108 @@ module.exports = async (req, res) => {
   }
 
   // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
-  if (pathname === '/stream/1tamilmv') {
+  // 7b. Moviesda 2026 Engine Route (Tamil HD - Watermark Removed & Direct Download)
+  if (pathname === "/stream/moviesda") {
+    const tmId = u.searchParams.get("id") || "1515692";
+    const mtype = u.searchParams.get("type") || "movie";
+    const title = u.searchParams.get("title") || "Baththa";
+    const lang = u.searchParams.get("lang") || "Tamil";
+    const year = u.searchParams.get("year") || "2026";
+    const prefix = getPrefix(pathname);
+
+    const html = generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix);
+    res.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8",
+      "Content-Security-Policy": "frame-ancestors *;",
+      "Access-Control-Allow-Origin": "*"
+    });
+    return res.end(html);
+  }
+
+  // 7c. Moviesda Direct Watermark-Free Stream Proxy
+  if (pathname === "/stream/moviesda/embed") {
+    const fileId = u.searchParams.get("file_id") || "103147";
+    try {
+      const targetUrl = `https://play.onestream.today/stream/page/${fileId}`;
+      const { buffer, statusCode } = await fetchBuffer(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Referer": "https://movies.downloadpage.xyz/"
+        }
+      });
+      let html = buffer.toString("utf8");
+
+      // 1. Strip all watermarks and brand text
+      html = html.replace(/<h1>.*?<\/h1>/gis, "")
+                 .replace(/<h2>.*?<\/h2>/gis, "")
+                 .replace(/<div class="buffer-note">.*?<\/div>/gis, "");
+
+      // 2. Strip popunder ads and trackers
+      html = html.replace(/<script[^>]*src="[^"]*aclib[^"]*"[^>]*>.*?<\/script>/gis, "")
+                 .replace(/<script[^>]*>[\s\S]*?aclib[\s\S]*?<\/script>/gis, "")
+                 .replace(/<script[^>]*googletagmanager.*?<\/script>/gis, "");
+
+      // 3. Inject Watermark-Killer CSS & Floating Download Button
+      const injectCss = `
+<style>
+  body, html { margin: 0; padding: 0; background: #000 !important; width: 100%; height: 100%; overflow: hidden; }
+  .wrapper { max-width: 100% !important; padding: 0 !important; margin: 0 !important; height: 100vh; display: flex; flex-direction: column; justify-content: center; }
+  .player-container { max-width: 100% !important; height: 100% !important; border-radius: 0 !important; border: none !important; }
+  #videoPlayer { width: 100% !important; height: 100% !important; max-height: calc(100vh - 46px) !important; object-fit: contain !important; }
+  .controls { margin-top: 4px !important; }
+  h1, h2, .buffer-note, [class*="watermark"], [id*="watermark"] { display: none !important; opacity: 0 !important; pointer-events: none !important; }
+  .movieshub-dl-bar {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .movieshub-dl-btn {
+    background: #e50914;
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 12px rgba(229,9,20,0.4);
+    transition: transform 0.15s, background 0.15s;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  .movieshub-dl-btn:hover {
+    background: #ff1f2f;
+    transform: scale(1.04);
+  }
+</style>
+<div class="movieshub-dl-bar">
+  <a href="https://download.moviespage.xyz/download/file/${fileId}" target="_blank" class="movieshub-dl-btn" rel="noopener noreferrer">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>⬇ Download Movie (MP4 HD)</span>
+  </a>
+</div>
+`;
+      html = html.replace("</head>", injectCss + "</head>");
+
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "frame-ancestors *;",
+        "Access-Control-Allow-Origin": "*"
+      });
+      return res.end(html);
+    } catch (e) {
+      const fallbackHtml = `<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:sans-serif;"><a href="https://download.moviespage.xyz/download/file/${fileId}" target="_blank" style="color:#fff;background:#e50914;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">⬇ Download Movie (720p / 1080p MP4)</a></body></html>`;
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+      return res.end(fallbackHtml);
+    }
+  }
+
+    if (pathname === '/stream/1tamilmv') {
     const tmId = u.searchParams.get('id') || '949229';
     const mtype = u.searchParams.get('type') || 'movie';
     const title = u.searchParams.get('title') || 'Movie';
@@ -837,10 +1083,19 @@ module.exports = async (req, res) => {
   }
 
   // 9. Download
-  if (pathname === '/api/download') {
-    const tmId = u.searchParams.get('id') || '';
+  if (pathname === "/api/download") {
+    const tmId = u.searchParams.get("id") || "";
+    const title = u.searchParams.get("title") || "";
+    const quality = u.searchParams.get("quality") || "";
+    
+    if (quality === "moviesda" || (title && resolveMoviesdaFileId(title) !== "103147")) {
+      const fileId = resolveMoviesdaFileId(title);
+      const moviesdaDl = `https://download.moviespage.xyz/download/file/${fileId}`;
+      res.writeHead(302, { "Location": moviesdaDl });
+      return res.end();
+    }
     const fallbackUrl = `https://vidlink.pro/movie/${tmId}`;
-    res.writeHead(302, { 'Location': fallbackUrl });
+    res.writeHead(302, { "Location": fallbackUrl });
     return res.end();
   }
 

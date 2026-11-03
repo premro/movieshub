@@ -719,8 +719,8 @@ class MovieshubPlayer {
         {
           id: "s8",
           name: "Server 8",
-          badge: "1TamilMV Multi-Lang",
-          url: `${pfx}/stream/1tamilmv?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2024}`
+          badge: "Moviesda Tamil HD",
+          url: `${pfx}/stream/moviesda?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2026}`
         }
       ];
 

@@ -230,10 +230,10 @@ const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.js
 const hasServerRewrite = vercelJson.rewrites.some(r => r.source.includes("/server/"));
 assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on external deployments");
 
-// 10. Testing Server 8 (1TamilMV Multi-Lang Engine) & Mirror Resiliency
-console.log("\n10. Testing Server 8 (1TamilMV Multi-Lang) & Server Integrity...");
-assert(playerCode.includes("Server 8") && playerCode.includes("1TamilMV Multi-Lang"), "Server 8 (1TamilMV Multi-Lang) registered in player");
-assert(playerCode.includes("/stream/1tamilmv"), "Server 8 routes to dedicated 1TamilMV streaming proxy");
+// 10. Testing Server 8 (Moviesda 2026 Tamil HD Engine) & Server Integrity
+console.log("\n10. Testing Server 8 (Moviesda Tamil HD) & Server Integrity...");
+assert(playerCode.includes("Server 8") && playerCode.includes("Moviesda Tamil HD"), "Server 8 (Moviesda Tamil HD) registered in player");
+assert(playerCode.includes("/stream/moviesda"), "Server 8 routes to dedicated Moviesda streaming proxy");
 
 // Verify Servers 1 to 7 remain completely intact and unbroken
 assert(playerCode.includes("Server 1") && playerCode.includes("VidLink Multi-Lang HD"), "Server 1 is intact");
@@ -245,9 +245,27 @@ assert(playerCode.includes("Server 6") && playerCode.includes("VidSrc Rip Fast")
 assert(playerCode.includes("Server 7") && playerCode.includes("JW Player HD"), "Server 7 is intact");
 
 const indexApiCode = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
-assert(indexApiCode.includes("pathname === '/stream/1tamilmv'"), "1TamilMV route present in backend");
-assert(indexApiCode.includes("1tamilmv.insure"), "1TamilMV defaults to active .insure domain");
-assert(indexApiCode.includes("mirrorSelect") && indexApiCode.includes("movieshub_1tamilmv_mirror"), "Dynamic domain switcher handles changing TLDs");
+assert(indexApiCode.includes("pathname === \"/stream/moviesda\""), "Moviesda route present in backend");
+assert(indexApiCode.includes("pathname === \"/stream/moviesda/embed\""), "Moviesda clean watermark-free embed proxy present in backend");
+assert(indexApiCode.includes("resolveMoviesdaFileId"), "Moviesda file ID resolver handles 2026/2025 movies");
+assert(indexApiCode.includes("WATERMARK REMOVED"), "Watermark removal indicator present in Moviesda player");
+assert(indexApiCode.includes("download.moviespage.xyz"), "Direct Moviesda download route integrated");
+
+// 11. Testing UI Latest 6 Releases (2026 Verification & 2024 Removal)
+console.log("\n11. Testing UI Latest 6 Releases & Watermark Removal...");
+const appCode = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
+assert(appCode.includes("this.dashboardData.latest_six.filter(m => (m.year || 2026) >= 2025)"), "App strictly filters out 2024 releases from Latest 6 Releases");
+
+const backendCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/dashboard_cache.json"), "utf8"));
+const rootCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../dashboard_cache.json"), "utf8"));
+
+const backend2024Count = (backendCache.latest_six || []).filter(m => m.year === 2024).length;
+const root2024Count = (rootCache.latest_six || []).filter(m => m.year === 2024).length;
+
+assert(backend2024Count === 0, "Backend dashboard cache contains zero 2024 movies in latest_six");
+assert(root2024Count === 0, "Root dashboard cache contains zero 2024 movies in latest_six");
+assert(backendCache.latest_six.every(m => m.year >= 2025), "All latest_six movies are 2026 or 2025 releases");
+assert(appCode.includes("Moviesda 2026 Master (Watermark Removed)"), "Download modal has direct Moviesda watermark-free download option");
 
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
