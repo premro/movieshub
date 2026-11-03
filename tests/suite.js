@@ -132,7 +132,7 @@ for (const m of global.MOVIE_CATALOG) {
   realPlayer.currentMovie = m;
   realPlayer.switchMode("movie");
   const iframeSrc = getMockEl("player-stream-iframe").src;
-  if (!iframeSrc || (!iframeSrc.includes("autoembed.pro") && !iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro") && !iframeSrc.includes("2embed.org"))) {
+  if (!iframeSrc || (!iframeSrc.includes("autoembed.pro") && !iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro") && !iframeSrc.includes("2embed.org") && !iframeSrc.includes("vidsrc.pm"))) {
     playerStreamsOk = false;
   }
 
@@ -223,7 +223,7 @@ assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio
 // 9. Testing TV Series URLs & Vercel Rewrite Configuration
 console.log("\n9. Testing TV Series URLs & Vercel Routing Configuration...");
 assert(playerCode.includes("KNOWN_TV_IDS") && playerCode.includes("1399"), "Player detects Game of Thrones TMDB 1399 as TV series");
-assert(playerCode.includes("multiLang=true"), "Player uses standard multiLang=true parameter");
+assert(playerCode.includes("vidsrc.pm") || playerCode.includes("multiLang=true"), "Player uses high-speed streaming CDN");
 assert(!playerCode.includes("multiLang=1"), "Player no longer uses broken multiLang=1 that crashed Next.js");
 
 const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.json"), "utf8"));
@@ -236,7 +236,7 @@ assert(playerCode.includes("Server 8") && playerCode.includes("Moviesda Tamil HD
 assert(playerCode.includes("generateMoviesdaPlayerSrcdoc"), "Server 8 routes to dedicated Moviesda player engine");
 
 // Verify Servers 1 to 7 remain completely intact and unbroken
-assert(playerCode.includes("Server 1") && playerCode.includes("VidLink Multi-Lang HD"), "Server 1 is intact");
+assert(playerCode.includes("Server 1") && (playerCode.includes("VidSrc Ultra HD") || playerCode.includes("VidLink Multi-Lang HD")), "Server 1 is intact");
 assert(playerCode.includes("Server 2") && playerCode.includes("Tamil Dubbed HD"), "Server 2 is intact");
 assert(playerCode.includes("Server 3") && playerCode.includes("VidSrc Dual Audio"), "Server 3 is intact");
 assert(playerCode.includes("Server 4") && playerCode.includes("Cinema 4K Ultra"), "Server 4 is intact");

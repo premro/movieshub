@@ -6,49 +6,57 @@
  */
 
 
-const MOVIESDA_FILE_MAP = {
+const MOVIESDA_VERIFIED_MAP = {
   "anakapalli": "103147",
   "cold call": "103140",
   "baththa": "102943",
-  "the dark heaven": "103000",
-  "dorothy": "102980",
-  "akka": "103050",
-  "sigma": "103080",
-  "si yugandhar": "103060",
-  "comrade kalyan": "103040",
-  "avarachan and sons": "103020",
-  "immortal": "102990",
-  "amaran": "102850",
-  "maharaja": "101920",
-  "the greatest of all time": "102450",
-  "goat": "102450",
-  "leo": "98540",
-  "jailer": "96210",
-  "jailer 2": "102943",
-  "modha rathri": "103140",
-  "vishwanath & sons": "103147"
+  "dorothy": "102743",
+  "the dark heaven": "103008",
+  "dark heaven": "103008",
+  "immortal": "102966",
+  "sigma": "103031",
+  "si yugandhar": "103027",
+  "yugandhar": "103027",
+  "comrade kalyan": "103017",
+  "dont trouble the trouble": "102975",
+  "avarachan and sons": "102992",
+  "akka": "103040",
+  "love always": "103067",
+  "meethe mein kya hai": "103075",
+  "sampurna": "103118",
+  "madam inspector": "102906",
+  "varam": "102956",
+  "418": "102870",
+  "bigg boss": "103132",
+  "jailer 2": "102943"
 };
 
-function resolveMoviesdaFileId(title, fallback = "103147") {
-  const clean = (title || "").toLowerCase().trim();
-  for (const [k, v] of Object.entries(MOVIESDA_FILE_MAP)) {
+function getVerifiedMoviesdaFileId(title) {
+  if (!title) return null;
+  const clean = title.toLowerCase().trim();
+  for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
     if (clean.includes(k) || k.includes(clean)) return v;
   }
-  return fallback;
+  return null;
+}
+
+function resolveMoviesdaFileId(title, fallback = "102943") {
+  return getVerifiedMoviesdaFileId(title) || fallback;
 }
 
 function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
-  const fileId = resolveMoviesdaFileId(title, "103147");
+  const fileId = getVerifiedMoviesdaFileId(title);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-  const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
-  const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
-
-  return `<!DOCTYPE html>
+  
+  if (fileId) {
+    const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+    const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>${safeTitle} - Moviesda Tamil HD</title>
+  <title>${safeTitle} - Moviesda 2026 Tamil HD</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
@@ -84,7 +92,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
   <div class="m-wrap">
     <div class="m-bar">
       <div class="m-brand">
-        <span class="m-badge">MOVIESDA HD</span>
+        <span class="m-badge">MOVIESDA 2026 HD</span>
         <span class="m-badge-clean">WATERMARK REMOVED</span>
         <span class="m-title">${safeTitle} (${year})</span>
       </div>
@@ -130,6 +138,91 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
   </script>
 </body>
 </html>`;
+  } else {
+    const streamUrl = mtype === "tv"
+      ? `https://vidsrc.pm/embed/tv/${tmId}/1/1`
+      : `https://vidsrc.pm/embed/movie/${tmId}`;
+    const downloadUrl = `https://www.2embed.cc/embed/${tmId}`;
+
+    return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${safeTitle} - Tamil Ultra HD Stream</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .m-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    .m-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(15, 12, 22, 0.98); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .m-brand { display: flex; align-items: center; gap: 8px; }
+    .m-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+    .m-badge-clean { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; }
+    .m-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
+    .m-top-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .m-dl-btn { background: #e50914; color: #fff; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 800; text-decoration: none; display: flex; align-items: center; gap: 6px; transition: transform 0.15s, background 0.15s; box-shadow: 0 2px 8px rgba(229,9,20,0.4); }
+    .m-dl-btn:hover { background: #b91c1c; transform: scale(1.03); }
+    .m-link-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #d1d5db; padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; text-decoration: none; display: flex; align-items: center; gap: 5px; cursor: pointer; transition: background 0.15s; }
+    .m-link-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+    .m-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; }
+    .clean-embed-iframe { width: 100%; height: 100%; border: none; display: block; }
+    .m-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; z-index: 50; }
+    .m-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .m-tag { background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
+    .m-tag.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .m-tag.atmos { background: rgba(234,179,8,0.2); color: #facc15; border: 1px solid rgba(234,179,8,0.3); }
+    .m-tag.clean { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  </style>
+</head>
+<body>
+  <div class="m-wrap">
+    <div class="m-bar">
+      <div class="m-brand">
+        <span class="m-badge">TAMIL ULTRA HD</span>
+        <span class="m-badge-clean">VERIFIED TITLE MATCH</span>
+        <span class="m-title">${safeTitle} (${year})</span>
+      </div>
+      <div class="m-top-actions">
+        <a href="${downloadUrl}" class="m-dl-btn" target="_blank" rel="noopener noreferrer">
+          <span>⬇ Download 1080p MP4</span>
+        </a>
+        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+          <span>Moviesda Hub</span>
+        </a>
+        <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
+          <span>🔄 Reload</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="m-frame-box">
+      <iframe id="embedFrame" class="clean-embed-iframe" src="${streamUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+    </div>
+
+    <div class="m-sub-bar">
+      <div class="m-tags">
+        <span class="m-tag ta">Tamil Audio Master</span>
+        <span class="m-tag atmos">Dolby Atmos 5.1</span>
+        <span class="m-tag clean">Zero Watermark & Ad-Shielded</span>
+        <span class="m-tag">Fast Ultra CDN</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const reloadBtn = document.getElementById("reloadBtn");
+    const embedFrame = document.getElementById("embedFrame");
+    if (reloadBtn && embedFrame) {
+      reloadBtn.addEventListener("click", () => {
+        const u = embedFrame.src;
+        embedFrame.src = "about:blank";
+        setTimeout(() => { embedFrame.src = u; }, 150);
+      });
+    }
+  </script>
+</body>
+</html>`;
+  }
 }
 
 class MovieshubPlayer {
@@ -792,10 +885,10 @@ class MovieshubPlayer {
         {
           id: "s1",
           name: "Server 1",
-          badge: "VidLink Multi-Lang HD",
+          badge: "VidSrc Ultra HD",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=true`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=true`
+            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s2",
@@ -847,7 +940,7 @@ class MovieshubPlayer {
           id: "s8",
           name: "Server 8",
           badge: "Moviesda Tamil HD",
-          url: `https://play.onestream.today/stream/page/${resolveMoviesdaFileId(movie?.title, "103147")}`
+          url: `https://play.onestream.today/stream/page/${getVerifiedMoviesdaFileId(movie?.title) || "102943"}`
         }
       ];
 

@@ -661,35 +661,42 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 </html>`;
 }
 
-const MOVIESDA_FILE_MAP = {
+const MOVIESDA_VERIFIED_MAP = {
   "anakapalli": "103147",
   "cold call": "103140",
   "baththa": "102943",
-  "the dark heaven": "103000",
-  "dorothy": "102980",
-  "akka": "103050",
-  "sigma": "103080",
-  "si yugandhar": "103060",
-  "comrade kalyan": "103040",
-  "avarachan and sons": "103020",
-  "immortal": "102990",
-  "amaran": "102850",
-  "maharaja": "101920",
-  "the greatest of all time": "102450",
-  "goat": "102450",
-  "leo": "98540",
-  "jailer": "96210",
-  "jailer 2": "102943",
-  "modha rathri": "103140",
-  "vishwanath & sons": "103147"
+  "dorothy": "102743",
+  "the dark heaven": "103008",
+  "dark heaven": "103008",
+  "immortal": "102966",
+  "sigma": "103031",
+  "si yugandhar": "103027",
+  "yugandhar": "103027",
+  "comrade kalyan": "103017",
+  "dont trouble the trouble": "102975",
+  "avarachan and sons": "102992",
+  "akka": "103040",
+  "love always": "103067",
+  "meethe mein kya hai": "103075",
+  "sampurna": "103118",
+  "madam inspector": "102906",
+  "varam": "102956",
+  "418": "102870",
+  "bigg boss": "103132",
+  "jailer 2": "102943"
 };
 
-function resolveMoviesdaFileId(title) {
-  const clean = (title || "").toLowerCase().trim();
-  for (const [k, v] of Object.entries(MOVIESDA_FILE_MAP)) {
+function getVerifiedMoviesdaFileId(title) {
+  if (!title) return null;
+  const clean = title.toLowerCase().trim();
+  for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
     if (clean.includes(k) || k.includes(clean)) return v;
   }
-  return "103147";
+  return null;
+}
+
+function resolveMoviesdaFileId(title, fallback = "102943") {
+  return getVerifiedMoviesdaFileId(title) || fallback;
 }
 
 function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
