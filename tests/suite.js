@@ -132,7 +132,7 @@ for (const m of global.MOVIE_CATALOG) {
   realPlayer.currentMovie = m;
   realPlayer.switchMode("movie");
   const iframeSrc = getMockEl("player-stream-iframe").src;
-  if (!iframeSrc || !iframeSrc.includes("vidlink.pro")) {
+  if (!iframeSrc || (!iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro"))) {
     playerStreamsOk = false;
   }
 

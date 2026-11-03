@@ -534,10 +534,18 @@ class MovieshubSports {
     if (window.Hls && window.Hls.isSupported()) {
       const hls = new window.Hls({
         enableWorker: true,
-        lowLatencyMode: true,
-        backBufferLength: 30,
-        manifestLoadingTimeOut: 8000,
-        manifestLoadingMaxRetry: 3
+        lowLatencyMode: false,
+        backBufferLength: 60,
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        maxBufferSize: 60 * 1000 * 1000,
+        maxBufferHole: 0.5,
+        manifestLoadingTimeOut: 15000,
+        manifestLoadingMaxRetry: 5,
+        levelLoadingTimeOut: 15000,
+        levelLoadingMaxRetry: 5,
+        fragLoadingTimeOut: 20000,
+        fragLoadingMaxRetry: 5
       });
       this.hlsInstance = hls;
       hls.loadSource(url);

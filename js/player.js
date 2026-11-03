@@ -580,10 +580,10 @@ class MovieshubPlayer {
         {
           id: "s1",
           name: "Server 1",
-          badge: "Primary HD",
+          badge: "Ultra Fast HD",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}`
+            ? `https://autoembed.me/tv/tmdb/${resolvedTmdbId}/1/1`
+            : `https://autoembed.me/movie/tmdb/${resolvedTmdbId}`
         },
         {
           id: "s2",
@@ -596,31 +596,31 @@ class MovieshubPlayer {
         {
           id: "s3",
           name: "Server 3",
-          badge: "Cinema 4K",
+          badge: "VidSrc CDN",
           url: mtype === "tv"
-            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
-            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+            ? `https://vidsrc.icu/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.icu/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s4",
           name: "Server 4",
-          badge: "Global CDN",
+          badge: "VidLink Stream",
           url: mtype === "tv"
-            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}`
         },
         {
           id: "s5",
           name: "Server 5",
-          badge: "Mirror HD",
+          badge: "Cinema 4K",
           url: mtype === "tv"
-            ? `https://player.vidsrc.nl/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://player.vidsrc.nl/embed/movie/${resolvedTmdbId}`
+            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
+            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         }
       ];
 
       this.currentServerIdx = 0;
-      this.isAutoSwitchingEnabled = true;
+      this.isAutoSwitchingEnabled = false;
 
       // Prevent unauthorized external redirects
       if (!window._movieshubRedirectGuarded) {
@@ -646,7 +646,7 @@ class MovieshubPlayer {
             </div>
           </div>
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">
-            <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;display:block;"></iframe>
+            <iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
           <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -664,8 +664,8 @@ class MovieshubPlayer {
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <button id="autoSwitchToggleBtn" class="auto-switch-toggle" title="Toggle Auto-Switch">
-                <span>⚡ Auto-Switch: ON</span>
+              <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch">
+                <span>⏸ Auto-Switch: OFF</span>
               </button>
               <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck">
                 <span>🔄 Reload</span>
@@ -719,7 +719,7 @@ class MovieshubPlayer {
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+            container.innerHTML = `<iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
           }
@@ -745,19 +745,19 @@ class MovieshubPlayer {
           curIframe.src = srv.url;
         }
 
-        // Auto-switch timer: If server takes more than 7.5 seconds, auto-switch to next server
+        // Auto-switch timer: Only if manually enabled by user and server takes > 20s
         if (this.isAutoSwitchingEnabled) {
           this.autoSwitchTimer = setTimeout(() => {
             if (!this.isAutoSwitchingEnabled) return;
             const nextIdx = (this.currentServerIdx + 1) % servers.length;
             if (window.showToast) window.showToast(`Server ${this.currentServerIdx + 1} slow. Auto-switching to Server ${nextIdx + 1}...`);
             loadServer(nextIdx, true);
-          }, 7500);
+          }, 20000);
         }
       };
 
       // Fast preloader dismissal fallback
-      setTimeout(hidePreloader, 2200);
+      setTimeout(hidePreloader, 1200);
 
       // Auto-Switch Toggle Button
       const autoSwitchBtn = document.getElementById("autoSwitchToggleBtn");
