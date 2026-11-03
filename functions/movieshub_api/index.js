@@ -476,6 +476,191 @@ function generatePlayerHtml(tmId, mtype, title, lang, netId, year, prefix = '') 
 </html>`;
 }
 
+function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
+  const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+  const cleanSearchTitle = (title || "Movie").replace(/\[.*?\]/g, "").replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+  const isTv = mtype === "tv";
+  const fallbackStream = isTv 
+    ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true`
+    : `https://vidlink.pro/movie/${tmId}?multiLang=true`;
+
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>${safeTitle} - 1TamilMV Multi-Lang HD</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { width: 100%; height: 100%; background: #07070a; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
+    .t-wrap { display: flex; flex-direction: column; width: 100%; height: 100%; position: relative; }
+    .t-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: rgba(12, 10, 18, 0.96); border-bottom: 1px solid rgba(255,255,255,0.08); z-index: 50; flex-wrap: wrap; gap: 8px; }
+    .t-brand { display: flex; align-items: center; gap: 8px; }
+    .t-badge { background: #e50914; color: #fff; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 4px; letter-spacing: 0.5px; }
+    .t-title { font-size: 13px; font-weight: 700; color: #f3f4f6; }
+    .t-mirror-wrap { display: flex; align-items: center; gap: 6px; }
+    .t-mirror-label { font-size: 11px; color: #9ca3af; font-weight: 600; }
+    .t-mirror-select { background: #1c1929; border: 1px solid rgba(255,255,255,0.2); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 8px; border-radius: 6px; outline: none; cursor: pointer; }
+    .t-mirror-select:focus { border-color: #e50914; }
+    .t-frame-box { flex: 1; width: 100%; height: 100%; position: relative; background: #000; display: flex; flex-direction: column; }
+    iframe { width: 100%; height: 100%; border: none; display: block; flex: 1; }
+    .t-sub-bar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px; background: rgba(10, 9, 15, 0.95); border-top: 1px solid rgba(255,255,255,0.08); font-size: 11px; flex-wrap: wrap; gap: 8px; }
+    .t-audios { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+    .t-audio-pill { background: rgba(255,255,255,0.08); padding: 2px 7px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #d1d5db; }
+    .t-audio-pill.ta { background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.3); }
+    .t-audio-pill.hi { background: rgba(249,115,22,0.2); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+    .t-audio-pill.te { background: rgba(244,63,94,0.2); color: #fb7185; border: 1px solid rgba(244,63,94,0.3); }
+    .t-audio-pill.en { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .t-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .t-action-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; text-decoration: none; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: all 0.2s; }
+    .t-action-btn:hover { background: #e50914; border-color: #e50914; }
+    .t-action-btn.search { background: #e50914; border-color: #e50914; }
+    .t-action-btn.search:hover { background: #b91c1c; }
+  </style>
+</head>
+<body>
+  <div class="t-wrap">
+    <div class="t-bar">
+      <div class="t-brand">
+        <span class="t-badge">1TamilMV HD</span>
+        <span class="t-title">${safeTitle} (${year})</span>
+      </div>
+      <div class="t-mirror-wrap">
+        <span class="t-mirror-label">Dynamic Mirror:</span>
+        <select class="t-mirror-select" id="mirrorSelect">
+          <option value="https://www.1tamilmv.insure/">1tamilmv.insure (Default Active)</option>
+          <option value="https://www.1tamilmv.click/">1tamilmv.click</option>
+          <option value="https://1tamilmv.vet/">1tamilmv.vet</option>
+          <option value="https://1tamilmv.wf/">1tamilmv.wf</option>
+          <option value="https://1tamilmv.yt/">1tamilmv.yt</option>
+          <option value="https://1tamilmv.cz/">1tamilmv.cz</option>
+          <option value="https://1tamilmv.pe/">1tamilmv.pe</option>
+          <option value="https://1tamilmv.fi/">1tamilmv.fi</option>
+          <option value="custom">✏️ Custom Domain...</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="t-frame-box">
+      <iframe id="mainStreamFrame" src="${fallbackStream}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </div>
+
+    <div class="t-sub-bar">
+      <div class="t-audios">
+        <span style="color:#9ca3af;font-weight:700;">Audios:</span>
+        <span class="t-audio-pill ta">Tamil</span>
+        <span class="t-audio-pill te">Telugu</span>
+        <span class="t-audio-pill hi">Hindi</span>
+        <span class="t-audio-pill en">English</span>
+        <span class="t-audio-pill">Malayalam</span>
+        <span class="t-audio-pill">Kannada</span>
+      </div>
+      <div class="t-actions">
+        <a id="searchBtn" class="t-action-btn search" target="_blank" rel="noopener noreferrer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Search on 1TamilMV</span>
+        </a>
+        <a id="visitForumBtn" class="t-action-btn" target="_blank" rel="noopener noreferrer">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span>Open Forum</span>
+        </a>
+        <button id="reloadStreamBtn" class="t-action-btn" title="Reload Video Stream">
+          <span>🔄 Reload Stream</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "movieshub_1tamilmv_mirror";
+    const select = document.getElementById("mirrorSelect");
+    const searchBtn = document.getElementById("searchBtn");
+    const forumBtn = document.getElementById("visitForumBtn");
+    const reloadBtn = document.getElementById("reloadStreamBtn");
+    const streamFrame = document.getElementById("mainStreamFrame");
+    const searchTitle = "${cleanSearchTitle}";
+
+    function getSavedMirror() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return saved;
+      } catch (e) {}
+      return "https://www.1tamilmv.insure/";
+    }
+
+    function setSavedMirror(val) {
+      try {
+        localStorage.setItem(STORAGE_KEY, val);
+      } catch (e) {}
+    }
+
+    function updateUrls(domain) {
+      let base = domain.trim();
+      if (!base.endsWith("/")) base += "/";
+      searchBtn.href = base + "index.php?/search/&q=" + encodeURIComponent(searchTitle) + "&quick=1";
+      forumBtn.href = base;
+    }
+
+    let activeMirror = getSavedMirror();
+    let hasOption = false;
+    for (let opt of select.options) {
+      if (opt.value === activeMirror) {
+        select.value = activeMirror;
+        hasOption = true;
+        break;
+      }
+    }
+    if (!hasOption && activeMirror) {
+      const newOpt = document.createElement("option");
+      newOpt.value = activeMirror;
+      newOpt.textContent = activeMirror + " (Custom)";
+      select.insertBefore(newOpt, select.lastElementChild);
+      select.value = activeMirror;
+    }
+
+    updateUrls(activeMirror);
+
+    select.addEventListener("change", () => {
+      let val = select.value;
+      if (val === "custom") {
+        const userDomain = prompt("Enter active 1TamilMV domain (e.g. https://www.1tamilmv.insure/):", activeMirror);
+        if (userDomain && userDomain.trim().startsWith("http")) {
+          let cleanDomain = userDomain.trim();
+          if (!cleanDomain.endsWith("/")) cleanDomain += "/";
+          const opt = document.createElement("option");
+          opt.value = cleanDomain;
+          opt.textContent = cleanDomain + " (Custom)";
+          select.insertBefore(opt, select.lastElementChild);
+          select.value = cleanDomain;
+          val = cleanDomain;
+        } else {
+          select.value = activeMirror;
+          return;
+        }
+      }
+      activeMirror = val;
+      setSavedMirror(val);
+      updateUrls(val);
+    });
+
+    if (reloadBtn) {
+      reloadBtn.addEventListener("click", () => {
+        const cur = streamFrame.src;
+        streamFrame.src = "about:blank";
+        setTimeout(() => { streamFrame.src = cur; }, 200);
+      });
+    }
+
+    window.addEventListener("message", (e) => {
+      if (e.data === "stop" || e.data === "pause") {
+        streamFrame.src = "about:blank";
+      }
+    });
+  </script>
+</body>
+</html>`;
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -575,6 +760,23 @@ module.exports = async (req, res) => {
       res.writeHead(502);
       return res.end('Proxy error');
     }
+  }
+
+  // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
+  if (pathname === '/stream/1tamilmv') {
+    const tmId = u.searchParams.get('id') || '949229';
+    const mtype = u.searchParams.get('type') || 'movie';
+    const title = u.searchParams.get('title') || 'Movie';
+    const lang = u.searchParams.get('lang') || 'Tamil';
+    const year = u.searchParams.get('year') || '2024';
+
+    const html = generate1TamilMVHtml(tmId, mtype, title, lang, year, apiPrefix);
+    res.writeHead(200, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Security-Policy': "frame-ancestors *;",
+      'Access-Control-Allow-Origin': "*"
+    });
+    return res.end(html);
   }
 
   // 7. Player embed

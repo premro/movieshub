@@ -230,6 +230,25 @@ const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.js
 const hasServerRewrite = vercelJson.rewrites.some(r => r.source.includes("/server/"));
 assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on external deployments");
 
+// 10. Testing Server 8 (1TamilMV Multi-Lang Engine) & Mirror Resiliency
+console.log("\n10. Testing Server 8 (1TamilMV Multi-Lang) & Server Integrity...");
+assert(playerCode.includes("Server 8") && playerCode.includes("1TamilMV Multi-Lang"), "Server 8 (1TamilMV Multi-Lang) registered in player");
+assert(playerCode.includes("/stream/1tamilmv"), "Server 8 routes to dedicated 1TamilMV streaming proxy");
+
+// Verify Servers 1 to 7 remain completely intact and unbroken
+assert(playerCode.includes("Server 1") && playerCode.includes("VidLink Multi-Lang HD"), "Server 1 is intact");
+assert(playerCode.includes("Server 2") && playerCode.includes("Tamil Dubbed HD"), "Server 2 is intact");
+assert(playerCode.includes("Server 3") && playerCode.includes("VidSrc Dual Audio"), "Server 3 is intact");
+assert(playerCode.includes("Server 4") && playerCode.includes("Cinema 4K Ultra"), "Server 4 is intact");
+assert(playerCode.includes("Server 5") && playerCode.includes("Mirror HD CDN"), "Server 5 is intact");
+assert(playerCode.includes("Server 6") && playerCode.includes("VidSrc Rip Fast"), "Server 6 is intact");
+assert(playerCode.includes("Server 7") && playerCode.includes("JW Player HD"), "Server 7 is intact");
+
+const indexApiCode = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
+assert(indexApiCode.includes("pathname === '/stream/1tamilmv'"), "1TamilMV route present in backend");
+assert(indexApiCode.includes("1tamilmv.insure"), "1TamilMV defaults to active .insure domain");
+assert(indexApiCode.includes("mirrorSelect") && indexApiCode.includes("movieshub_1tamilmv_mirror"), "Dynamic domain switcher handles changing TLDs");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

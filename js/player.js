@@ -715,6 +715,12 @@ class MovieshubPlayer {
           url: mtype === "tv"
             ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
             : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
+        },
+        {
+          id: "s8",
+          name: "Server 8",
+          badge: "1TamilMV Multi-Lang",
+          url: `${pfx}/stream/1tamilmv?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=${encodeURIComponent(safeLang)}&year=${movie?.year || 2024}`
         }
       ];
 
