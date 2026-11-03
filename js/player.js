@@ -153,10 +153,11 @@ class MovieshubPlayer {
                     <div>
                       <h4>Audio Track</h4>
                       <ul id=\"audio-track-list\">
-                        <li class="active" data-val="Original">Original (Dolby Atmos)</li>
-                        <li data-val="Tamil">Tamil (5.1)</li>
-                        <li data-val="English">English (Dolby 5.1)</li>
-                        <li data-val="Hindi">Hindi (Stereo)</li>
+                        <li class="active" data-val="Original">Original (Dolby Atmos 7.1.4)</li>
+                        <li data-val="Cinema">Dolby Atmos Cinema Hall</li>
+                        <li data-val="Dialogue">Dolby Atmos Dialogue Boost</li>
+                        <li data-val="Night">Dolby Atmos Night Mode</li>
+                        <li data-val="Direct">Direct Stereo Pass-Through</li>
                       </ul>
                     </div>
                     <div>
@@ -169,6 +170,12 @@ class MovieshubPlayer {
                     </div>
                   </div>
                 </div>
+
+                <!-- Dolby Atmos 3D Spatial Audio Button -->
+                <button class="ctrl-dolby-atmos-btn" id="ctrl-dolby-atmos-btn" title="Open Dolby Atmos 3D Sound Stage">
+                  <div class="atmos-pulse-dot"></div>
+                  <span>Dolby Atmos</span>
+                </button>
 
                 <!-- Speed Selector -->
                 <button class="ctrl-btn-pill" id="ctrl-speed-btn" title="Playback Speed">1.0x</button>
@@ -190,6 +197,9 @@ class MovieshubPlayer {
     document.body.appendChild(this.modal);
     this.video = document.getElementById("player-video-element");
     this.streamIframe = document.getElementById("player-stream-iframe");
+    if (this.video && window.DolbyAtmos) {
+      window.DolbyAtmos.attach(this.video);
+    }
     this.bindEvents();
   }
 
@@ -404,12 +414,33 @@ class MovieshubPlayer {
       });
     });
 
-    // Audio items
+    // Dolby Atmos 3D Sound Stage Button
+    const dolbyBtn = document.getElementById("ctrl-dolby-atmos-btn");
+    if (dolbyBtn) {
+      dolbyBtn.addEventListener("click", () => {
+        if (window.DolbyAtmos) {
+          if (this.video) window.DolbyAtmos.attach(this.video);
+          window.DolbyAtmos.openSoundStageModal();
+        }
+      });
+    }
+
+    // Audio items with Dolby Atmos profile switching
     document.querySelectorAll("#audio-track-list li").forEach(li => {
       li.addEventListener("click", () => {
         document.querySelectorAll("#audio-track-list li").forEach(l => l.classList.remove("active"));
         li.classList.add("active");
-        if (window.showToast) window.showToast(`Audio Track: ${li.textContent}`);
+        const val = li.dataset.val;
+        if (window.DolbyAtmos) {
+          if (this.video) window.DolbyAtmos.attach(this.video);
+          if (val === "Original") window.DolbyAtmos.applyPreset("atmos_3d");
+          else if (val === "Cinema") window.DolbyAtmos.applyPreset("cinema");
+          else if (val === "Dialogue") window.DolbyAtmos.applyPreset("dialogue");
+          else if (val === "Night") window.DolbyAtmos.applyPreset("night");
+          else window.DolbyAtmos.applyPreset("bypass");
+        } else {
+          if (window.showToast) window.showToast(`Audio Track: ${li.textContent}`);
+        }
         audioSubPopover.classList.add("hidden");
       });
     });
@@ -664,6 +695,10 @@ class MovieshubPlayer {
               </div>
             </div>
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage">
+                <div class="atmos-pulse-dot"></div>
+                <span>Dolby Atmos</span>
+              </button>
               <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch">
                 <span>⏸ Auto-Switch: OFF</span>
               </button>
@@ -778,6 +813,16 @@ class MovieshubPlayer {
             autoSwitchBtn.classList.add("off");
             autoSwitchBtn.innerHTML = "<span>⏸ Auto-Switch: OFF</span>";
             if (window.showToast) window.showToast("Server Auto-Switch OFF");
+          }
+        });
+      }
+
+      // Dolby Atmos Sound Stage Button in Server Bar
+      const streamDolbyBtn = document.getElementById("stream-dolby-btn");
+      if (streamDolbyBtn) {
+        streamDolbyBtn.addEventListener("click", () => {
+          if (window.DolbyAtmos) {
+            window.DolbyAtmos.openSoundStageModal();
           }
         });
       }

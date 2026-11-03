@@ -3086,3 +3086,375 @@ body {
   border-color: #e50914;
   color: #fff;
 }
+
+/* ========================================================
+   DOLBY ATMOS 3D SPATIAL AUDIO STYLES
+   ======================================================== */
+.ctrl-dolby-atmos-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.25), rgba(13, 148, 136, 0.25));
+  border: 1px solid rgba(229, 9, 20, 0.5);
+  color: #fff;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.ctrl-dolby-atmos-btn:hover {
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.5), rgba(13, 148, 136, 0.5));
+  border-color: #22d3ee;
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.4);
+}
+
+.ctrl-dolby-atmos-btn .atmos-pulse-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22d3ee;
+  box-shadow: 0 0 8px #22d3ee;
+  animation: atmosPulse 1.8s infinite;
+}
+
+@keyframes atmosPulse {
+  0% { transform: scale(0.9); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 12px #22d3ee; }
+  100% { transform: scale(0.9); opacity: 0.7; }
+}
+
+.dolby-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dolby-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 8, 0.88);
+  backdrop-filter: blur(16px);
+}
+
+.dolby-dialog {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 680px;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: #0d0e15;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.9), 0 0 40px rgba(229, 9, 20, 0.15);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dolby-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 14px;
+}
+
+.dolby-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dolby-double-d {
+  font-size: 26px;
+  background: linear-gradient(135deg, #e50914, #22d3ee);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dolby-title {
+  font-size: 17px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.8px;
+}
+
+.dolby-sub {
+  font-size: 11.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.dolby-close-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  color: #94a3b8;
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.dolby-close-btn:hover {
+  background: #e50914;
+  color: #fff;
+}
+
+/* 3D Soundstage Arena */
+.dolby-stage-container {
+  background: radial-gradient(circle at center, #171822 0%, #090a0f 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+
+.dolby-stage-screen {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #64748b;
+  border-bottom: 2px solid #e50914;
+  padding-bottom: 4px;
+  width: 60%;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.dolby-stage-arena {
+  width: 100%;
+  max-width: 440px;
+  height: 250px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dolby-height-ring {
+  position: absolute;
+  width: 220px;
+  height: 150px;
+  border: 1.5px dashed rgba(34, 211, 238, 0.35);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dolby-ring-tag {
+  position: absolute;
+  top: -9px;
+  background: #090a0f;
+  padding: 0 8px;
+  font-size: 8.5px;
+  font-weight: 800;
+  color: #22d3ee;
+  letter-spacing: 0.8px;
+}
+
+.dolby-bed-ring {
+  position: absolute;
+  width: 380px;
+  height: 230px;
+  border: 1.5px solid rgba(229, 9, 20, 0.3);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stage-spk {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e202e;
+  border: 1.5px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 8.5px;
+  font-weight: 800;
+  z-index: 5;
+}
+
+.stage-spk .spk-meter {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid #e50914;
+  pointer-events: none;
+  opacity: 0.3;
+  transition: transform 0.08s ease-out, opacity 0.08s ease-out;
+}
+
+/* Height Speakers (Cyan Accent) */
+.stage-spk[data-spk^="T"] {
+  border-color: rgba(34, 211, 238, 0.6);
+  background: #0e2430;
+  color: #22d3ee;
+  width: 28px;
+  height: 28px;
+}
+.stage-spk[data-spk^="T"] .spk-meter {
+  border-color: #22d3ee;
+}
+
+/* Coordinates in Arena */
+.spk-fl  { top: 12px; left: 45px; }
+.spk-c   { top: 2px; left: calc(50% - 16px); width: 44px; border-color: #e50914; }
+.spk-fr  { top: 12px; right: 45px; }
+.spk-lfe { top: 40px; right: 85px; font-size: 7.5px; width: 40px; border-color: #f59e0b; color: #f59e0b; }
+.spk-sl  { top: calc(50% - 16px); left: 8px; }
+.spk-sr  { top: calc(50% - 16px); right: 8px; }
+.spk-rl  { bottom: 12px; left: 55px; }
+.spk-rr  { bottom: 12px; right: 55px; }
+
+.spk-tfl { top: 10px; left: 20px; }
+.spk-tfr { top: 10px; right: 20px; }
+.spk-trl { bottom: 10px; left: 25px; }
+.spk-trr { bottom: 10px; right: 25px; }
+
+/* Listener in center */
+.stage-listener {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  gap: 2px;
+}
+
+.stage-listener .listener-icon {
+  font-size: 24px;
+}
+
+.stage-listener span {
+  font-size: 8px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+}
+
+/* Presets Bar */
+.dolby-presets-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.dolby-preset-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.dolby-preset-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dolby-preset-btn.active {
+  background: linear-gradient(135deg, rgba(229, 9, 20, 0.25), rgba(34, 211, 238, 0.15));
+  border-color: #e50914;
+  box-shadow: 0 0 16px rgba(229, 9, 20, 0.3);
+}
+
+.dolby-preset-btn .preset-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.dolby-preset-btn .preset-sub {
+  font-size: 9.5px;
+  color: #94a3b8;
+}
+
+/* Controls Grid */
+.dolby-controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.dolby-ctrl-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dolby-ctrl-box .ctrl-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.dolby-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 5px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  outline: none;
+}
+
+.dolby-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #e50914;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(229, 9, 20, 0.6);
+  transition: transform 0.15s;
+}
+
+.dolby-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.25);
+  background: #22d3ee;
+}
+
+.dolby-footer-tag {
+  font-size: 10.5px;
+  color: #64748b;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 10px;
+}

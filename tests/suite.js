@@ -158,6 +158,36 @@ const sportsText = fs.readFileSync(path.join(__dirname, '../js/sports.js'), 'utf
 assert(sportsText.includes("sportsBackToMoviesBtn") && sportsText.includes("sportsModalBackBtn"), "Sports Hub back buttons present");
 assert(!sportsText.includes("cricketgold"), "No looping cricket streams in Sports Hub");
 
+// 5. Test Dolby Atmos 3D Spatial Audio Engine (Frontend)
+console.log("\n5. Testing Dolby Atmos 3D Spatial Audio Engine...");
+const dolbyText = fs.readFileSync(path.join(__dirname, "../js/dolby-atmos.js"), "utf8");
+const dolbyFn = new Function(dolbyText + "; return DolbyAtmosEngine;");
+const DolbyAtmosEngine = dolbyFn();
+const atmos = new DolbyAtmosEngine();
+
+assert(Object.keys(atmos.SPEAKER_COORDS).length === 12, "Dolby Atmos 7.1.4 configured with 12 virtual speaker channels");
+assert(atmos.SPEAKER_COORDS.TFL && atmos.SPEAKER_COORDS.TFR && atmos.SPEAKER_COORDS.TRL && atmos.SPEAKER_COORDS.TRR, "Overhead height object speakers (TFL, TFR, TRL, TRR) present");
+
+atmos.applyPreset("cinema");
+assert(atmos.currentPreset === "cinema", "Dolby Atmos preset switched to Cinema Immersion");
+atmos.applyPreset("dialogue");
+assert(atmos.currentPreset === "dialogue", "Dolby Atmos preset switched to Dialogue Clarity");
+atmos.applyPreset("atmos_3d");
+assert(atmos.currentPreset === "atmos_3d", "Dolby Atmos preset switched to 3D Spatial Atmos");
+
+// 6. Test Dolby Atmos Backend / CLI Encoder (tools/dolby_atmos_encoder.py)
+console.log("\n6. Testing Dolby Atmos Backend Encoder & Spatializer...");
+const { execSync } = require("child_process");
+try {
+  const encOut = execSync("python3 " + path.join(__dirname, "../tools/dolby_atmos_encoder.py") + " encode -o /tmp/suite_atmos.emdf").toString();
+  assert(encOut.includes("Generated EMDF Container") && encOut.includes("0x5838"), "Dolby Atmos encoder builds compliant EMDF + OAMD + JOC containers");
+
+  const inspOut = execSync("python3 " + path.join(__dirname, "../tools/dolby_atmos_encoder.py") + " inspect /tmp/suite_atmos.emdf").toString();
+  assert(inspOut.includes("0x5838 (Valid)") && inspOut.includes("OAMD & JOC:        Verified Present"), "Dolby Atmos inspector validates ETSI TS 103 420 metadata");
+} catch (e) {
+  assert(false, "Dolby Atmos encoder failed: " + e.message);
+}
+
 // Summary
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
