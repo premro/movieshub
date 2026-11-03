@@ -13,7 +13,6 @@ class MovieshubLiveTV {
     this.activeCategory = "all";
         this.searchQuery = "";
     this.lastSync = localStorage.getItem("movieshub_livetv_last_sync") || 0;
-    this.setupTwoHourRefresh();
 
     // 100% Verified CORS * Live Channels (High uptime, never refuse connection)
     this.channels = [
@@ -468,6 +467,8 @@ class MovieshubLiveTV {
         streamUrl: "https://bloomberg.com/media-manifest/streams/us.m3u8"
       }
     ];
+
+    this.setupTwoHourRefresh();
   }
 
   getFilteredChannels() {

@@ -13,7 +13,6 @@ class MovieshubSports {
     this.hlsInstance = null;
         this.currentMatch = null;
     this.lastSync = localStorage.getItem("movieshub_sports_last_sync") || 0;
-    this.setupTwoHourRefresh();
 
     // Sports events with 100% verified CORS * zero-buffering feeds
     this.matches = [
@@ -215,6 +214,8 @@ class MovieshubSports {
         streamUrl2: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
       }
     ];
+
+    this.setupTwoHourRefresh();
   }
 
   getFilteredMatches() {
@@ -250,6 +251,7 @@ class MovieshubSports {
   }
 
   refreshMatchData() {
+    if (!this.matches || !Array.isArray(this.matches)) return;
     this.matches.forEach(m => {
       // Simulate live fluctuating viewer counts
       const delta = Math.floor((Math.random() - 0.45) * 150);
