@@ -879,67 +879,81 @@ class MovieshubPlayer {
         ? window.API_PREFIX
         : "https://movieshub-60079640926.development.catalystserverless.in/server/movieshub_api";
 
-      // Verified, working, non-buffering streaming servers with Multi-Audio (Tamil, Hindi, English)
+      const netId = movie?.netId || movie?.nid || "";
+      const season = movie?.season || 1;
+      const episode = movie?.episode || 1;
+
+      // MULTI-SERVER STREAMING NETWORK (js/player.js)
       const servers = [
         {
           id: "s1",
           name: "Server 1",
-          badge: "VidSrc Ultra HD",
+          badge: "Movieshub Cloud",
           url: mtype === "tv"
-            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
+            ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
+            : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
         },
         {
           id: "s2",
           name: "Server 2",
-          badge: "Tamil Dubbed HD",
-          url: `${pfx}/stream/player?id=${resolvedTmdbId}&type=${mtype}&title=${encodeURIComponent(movie?.title || "")}&lang=Tamil&year=${movie?.year || 2024}`
+          badge: "Primary HD (VidLink)",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}`
         },
         {
           id: "s3",
           name: "Server 3",
-          badge: "VidSrc Dual Audio",
+          badge: "Fast Forward (AutoEmbed)",
           url: mtype === "tv"
-            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
+            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
+            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
         },
         {
           id: "s4",
           name: "Server 4",
-          badge: "Cinema 4K Ultra",
+          badge: "Backup 1 (0vidads)",
           url: mtype === "tv"
-            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
-            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+            ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s5",
           name: "Server 5",
-          badge: "Mirror HD CDN",
+          badge: "Multi-Audio (VidSync)",
           url: mtype === "tv"
-            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s6",
           name: "Server 6",
-          badge: "VidSrc Rip Fast",
+          badge: "Cinema 4K (2Embed)",
           url: mtype === "tv"
-            ? `https://vidsrc.rip/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.rip/embed/movie/${resolvedTmdbId}`
+            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
+            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         },
         {
           id: "s7",
           name: "Server 7",
-          badge: "JW Player HD",
+          badge: "Mirror HD (VidSrc PM)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
+            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s8",
           name: "Server 8",
+          badge: "Ultra CDN (VidSrc Net)",
+          url: mtype === "tv"
+            ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
+        },
+        {
+          id: "s9",
+          name: "Server 9",
           badge: "Moviesda Tamil HD",
-          url: `https://play.onestream.today/stream/page/${getVerifiedMoviesdaFileId(movie?.title) || "102943"}`
+          url: `https://moviezda.me/moviesda-tamil-movies-2026/`
         }
       ];
 
@@ -1073,10 +1087,35 @@ class MovieshubPlayer {
           };
 
           const isMoviesdaMovie = !!getVerifiedMoviesdaFileId(movie?.title) || movie?.platform === "Moviesda" || String(movie?.id || "").startsWith("moviesda-");
-          if (srv.id === "s8" || (srv.id === "s1" && isMoviesdaMovie)) {
+          
+          if (srv.id === "s9" || (srv.id === "s1" && isMoviesdaMovie)) {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
             hidePreloader();
+          } else if (srv.id === "s1") {
+            // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
+            fetch(srv.url)
+              .then(res => {
+                if (!res.ok) throw new Error("HTTP " + res.status);
+                return res.text();
+              })
+              .then(html => {
+                if (html && html.includes("<") && !html.includes("Stream Proxy error")) {
+                  curIframe.removeAttribute("src");
+                  curIframe.srcdoc = html;
+                  hidePreloader();
+                } else {
+                  throw new Error("Invalid stream HTML");
+                }
+              })
+              .catch(err => {
+                console.warn("[Movieshub] Server 1 fetch failed, falling back to clean upstream:", err);
+                curIframe.removeAttribute("srcdoc");
+                curIframe.src = mtype === "tv"
+                  ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
+                  : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`;
+                hidePreloader();
+              });
           } else {
             curIframe.removeAttribute("srcdoc");
             curIframe.src = srv.url;

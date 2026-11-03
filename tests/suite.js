@@ -213,13 +213,13 @@ assert(!appModule.includes("(!m.year || m.year <= 2024)"), "Hero billboard is no
 assert(appModule.includes("Game of Thrones"), "Dashboard showcases World TV & Multi-Audio series");
 
 
-// 8. Testing Server 3 & Tamil Dubbed Playback
-console.log("\n8. Testing Server 3 & Tamil Dubbed Engine...");
+// 8. Testing Multi-Server Streaming Architecture & Tamil Dubbed Engine
+console.log("\n8. Testing Multi-Server Streaming Architecture & Tamil Dubbed Engine...");
 const playerCode = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
-assert(!playerCode.includes("vidsync.pro"), "Server 3 never points to broken vidsync.pro");
 assert(!playerCode.includes("autoembed.pro"), "Server 1 never points to parked autoembed.pro");
-assert(playerCode.includes("VidSrc Dual Audio"), "Server 3 is VidSrc Dual Audio");
-assert(playerCode.includes("Tamil Dubbed HD"), "Server 2 is Tamil Dubbed HD");
+assert(playerCode.includes("Movieshub Cloud"), "Server 1 is Movieshub Cloud internal stream proxy");
+assert(playerCode.includes("vidlink.pro"), "Server 2 is Primary HD (VidLink)");
+assert(playerCode.includes("autoembed.co"), "Server 3 is Fast Forward (AutoEmbed)");
 assert(playerCode.includes("quickTamilAudioBtn"), "Quick Tamil Dubbed button present in player");
 assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio option present in popover");
 
@@ -233,19 +233,20 @@ const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.js
 const hasServerRewrite = vercelJson.rewrites.some(r => r.source.includes("/server/"));
 assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on external deployments");
 
-// 10. Testing Server 8 (Moviesda 2026 Tamil HD Engine) & Server Integrity
-console.log("\n10. Testing Server 8 (Moviesda Tamil HD) & Server Integrity...");
-assert(playerCode.includes("Server 8") && playerCode.includes("Moviesda Tamil HD"), "Server 8 (Moviesda Tamil HD) registered in player");
-assert(playerCode.includes("generateMoviesdaPlayerSrcdoc"), "Server 8 routes to dedicated Moviesda player engine");
+// 10. Testing Multi-Server Network (Servers 1 to 9) & Server Integrity
+console.log("\n10. Testing Multi-Server Network (Servers 1 to 9) & Server Integrity...");
+assert(playerCode.includes("Server 9") && playerCode.includes("Moviesda Tamil HD"), "Server 9 (Moviesda Tamil HD) registered in player");
+assert(playerCode.includes("generateMoviesdaPlayerSrcdoc"), "Moviesda routes to dedicated clean player engine");
 
-// Verify Servers 1 to 7 remain completely intact and unbroken
-assert(playerCode.includes("Server 1") && (playerCode.includes("VidSrc Ultra HD") || playerCode.includes("VidLink Multi-Lang HD")), "Server 1 is intact");
-assert(playerCode.includes("Server 2") && playerCode.includes("Tamil Dubbed HD"), "Server 2 is intact");
-assert(playerCode.includes("Server 3") && playerCode.includes("VidSrc Dual Audio"), "Server 3 is intact");
-assert(playerCode.includes("Server 4") && playerCode.includes("Cinema 4K Ultra"), "Server 4 is intact");
-assert(playerCode.includes("Server 5") && playerCode.includes("Mirror HD CDN"), "Server 5 is intact");
-assert(playerCode.includes("Server 6") && playerCode.includes("VidSrc Rip Fast"), "Server 6 is intact");
-assert(playerCode.includes("Server 7") && playerCode.includes("JW Player HD"), "Server 7 is intact");
+// Verify Servers 1 to 8 remain completely intact per specification
+assert(playerCode.includes("Server 1") && playerCode.includes("Movieshub Cloud"), "Server 1 (Movieshub Cloud) is intact");
+assert(playerCode.includes("Server 2") && playerCode.includes("VidLink"), "Server 2 (VidLink) is intact");
+assert(playerCode.includes("Server 3") && playerCode.includes("AutoEmbed"), "Server 3 (AutoEmbed) is intact");
+assert(playerCode.includes("Server 4") && playerCode.includes("0vidads"), "Server 4 (0vidads) is intact");
+assert(playerCode.includes("Server 5") && playerCode.includes("VidSync"), "Server 5 (VidSync) is intact");
+assert(playerCode.includes("Server 6") && playerCode.includes("2Embed"), "Server 6 (2Embed) is intact");
+assert(playerCode.includes("Server 7") && playerCode.includes("VidSrc PM"), "Server 7 (VidSrc PM) is intact");
+assert(playerCode.includes("Server 8") && playerCode.includes("VidSrc Net"), "Server 8 (VidSrc Net) is intact");
 
 const indexApiCode = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
 assert(indexApiCode.includes("pathname === \"/stream/moviesda\""), "Moviesda route present in backend");
