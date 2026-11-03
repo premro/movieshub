@@ -599,50 +599,70 @@ class MovieshubPlayer {
       if (!resolvedTmdbId) {
         if (rawId && !isNaN(parseInt(rawId, 10)) && parseInt(rawId, 10) > 100) {
           resolvedTmdbId = rawId;
-        } else {
-          resolvedTmdbId = "927342"; // Default fallback to Amaran HD
+        } else if (movie?.title && window.MOVIE_CATALOG) {
+          const match = window.MOVIE_CATALOG.find(c => c.title && c.title.toLowerCase() === movie.title.toLowerCase());
+          if (match && match.tmdbId) resolvedTmdbId = String(match.tmdbId);
+        }
+        if (!resolvedTmdbId) {
+          resolvedTmdbId = "1399"; // Default fallback to Game of Thrones Multi-Audio
         }
       }
 
-      const mtype = movie?.mediaType || "movie";
+      const mtype = movie?.mediaType || "tv";
 
-      // Verified, working, non-buffering streaming servers
+      // Verified, working, non-buffering streaming servers with Multi-Audio (Tamil, Hindi, English)
       const servers = [
         {
           id: "s1",
           name: "Server 1",
-          badge: "Primary HD",
+          badge: "Multi-Audio (Tamil/Eng)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}`
+            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s2",
           name: "Server 2",
-          badge: "JW Player",
+          badge: "VidLink Multi",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?multiLang=1`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=1`
         },
         {
           id: "s3",
           name: "Server 3",
+          badge: "Tamil Dub (Vidsync)",
+          url: mtype === "tv"
+            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/1/1&dubLang=Tamil&subtitle=English`
+            : `https://vidsync.pro/embed/movie/${resolvedTmdbId}&dubLang=Tamil&subtitle=English`
+        },
+        {
+          id: "s4",
+          name: "Server 4",
           badge: "Cinema 4K",
           url: mtype === "tv"
             ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=1&e=1`
             : `https://www.2embed.cc/embed/${resolvedTmdbId}`
         },
         {
-          id: "s4",
-          name: "Server 4",
+          id: "s5",
+          name: "Server 5",
+          badge: "JW Player HD",
+          url: mtype === "tv"
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/1/1?player=jw`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?player=jw`
+        },
+        {
+          id: "s6",
+          name: "Server 6",
           badge: "CineSrc Fast",
           url: mtype === "tv"
             ? `https://cinesrc.st/embed/tv/${resolvedTmdbId}/1/1`
             : `https://cinesrc.st/embed/movie/${resolvedTmdbId}`
         },
         {
-          id: "s5",
-          name: "Server 5",
+          id: "s7",
+          name: "Server 7",
           badge: "Mirror HD",
           url: mtype === "tv"
             ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`

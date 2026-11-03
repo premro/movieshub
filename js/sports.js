@@ -18,7 +18,7 @@ class MovieshubSports {
     this.matches = [
       {
         id: "star-sports-india",
-        title: "Star Sports 1 HD - Sky Sports World Cricket & News",
+        title: "Star Sports 1 HD - Live Cricket & ICC Tournament",
         sport: "Cricket",
         subtitle: "ICC Tournament & International Cricket • Star Sports HD",
         badge: "Star Sports 1 HD",
@@ -27,8 +27,8 @@ class MovieshubSports {
         status: "LIVE",
         logo: "🏏",
         bgGradient: "linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%)",
-        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
-        streamUrl2: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        streamUrl2: "https://fta.ektv.in/live/697/master.m3u8"
       },
       {
         id: "star-sports-tamil-match",
@@ -55,7 +55,7 @@ class MovieshubSports {
         status: "LIVE",
         logo: "⚽",
         bgGradient: "linear-gradient(135deg, #170d2b 0%, #3b0764 100%)",
-        streamUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
+        streamUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
         streamUrl2: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
@@ -69,8 +69,22 @@ class MovieshubSports {
         status: "LIVE",
         logo: "🥊",
         bgGradient: "linear-gradient(135deg, #3f0909 0%, #831843 100%)",
-        streamUrl: "https://5c7b683162943.streamlock.net/live/ngrp:sportsone_all/playlist.m3u8",
-        streamUrl2: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
+        streamUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
+        streamUrl2: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+      },
+      {
+        id: "sky-sports-world-news",
+        title: "Sky Sports World News HD",
+        sport: "Football",
+        subtitle: "Global Sports News & Breaking Headlines • Sky Sports HD",
+        badge: "Sky Sports HD",
+        quality: "1080p Ultra",
+        viewers: 3500,
+        status: "LIVE",
+        logo: "🌐",
+        bgGradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+        streamUrl2: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
         id: "ind-vs-aus",

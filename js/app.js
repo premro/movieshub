@@ -184,9 +184,9 @@ class MovieshubApp {
           this.searchEngine.catalog = this.catalog;
         }
 
-        if (addedCount > 0 && !this.searchQuery && this.activeView === "home") {
+        if (!this.searchQuery && (this.activeView === "home" || this.activeView === "movies")) {
           this.renderMainContent();
-          if (!silent) this.showToast(`Loaded ${addedCount} latest releases`);
+          if (addedCount > 0 && !silent) this.showToast(`Synced ${addedCount} latest releases`);
         }
       }
     } catch (e) {
@@ -1008,17 +1008,16 @@ class MovieshubApp {
         </div>
       </section>` : ""}
 
-      <!-- 2024 Tamil -->
-      ${tamil2024.length > 0 ? `
+      <!-- ⚔️ Multi-Audio Series & TV Shows -->
       <section class="content-row">
         <div class="row-header">
-          <h2>🏆 2024 Tamil Blockbusters</h2>
-          <span class="row-subtitle">Record-breakers: Amaran, Maharaja, GOAT</span>
+          <h2>⚔️ Multi-Audio Series & TV Shows</h2>
+          <span class="row-subtitle">Game of Thrones, House of the Dragon in Tamil & English Multi-Audio</span>
         </div>
         <div class="cards-carousel">
-          ${tamil2024.map(m => this.renderMovieCard(m)).join("")}
+          ${this.catalog.filter(m => m.mediaType === "tv").map(m => this.renderMovieCard(m)).join("")}
         </div>
-      </section>` : ""}
+      </section>
 
       <!-- All Tamil -->
       <section class="content-row">
@@ -1037,11 +1036,13 @@ class MovieshubApp {
   }
 
   renderAllLanguagesHome(container) {
-    // Top 5 Verified Released Blockbusters for the Auto-Rotating Billboard
+    // Top 5 Verified Released Blockbusters for the Auto-Rotating Billboard (Prioritizing 2026/2025 releases)
     const sortedCatalog = [...this.catalog]
-      .filter(m => (m.backdrop || m.poster) && (!m.year || m.year <= 2024))
+      .filter(m => (m.backdrop || m.poster))
       .sort((a, b) => {
-        if ((b.year || 0) !== (a.year || 0)) return (b.year || 0) - (a.year || 0);
+        const yearA = a.year || 2024;
+        const yearB = b.year || 2024;
+        if (yearB !== yearA) return yearB - yearA;
         return (b.rating || 0) - (a.rating || 0);
       });
     const top5Imdb = sortedCatalog.slice(0, 5);
@@ -1123,17 +1124,16 @@ class MovieshubApp {
         </div>
       </section>` : ""}
 
-      <!-- 5. 2024 TAMIL BLOCKBUSTERS -->
-      ${tamil2024.length > 0 ? `
+      <!-- 5. WORLD TV & MULTI-AUDIO SERIES (Game of Thrones, House of the Dragon) -->
       <section class="content-row">
         <div class="row-header">
-          <h2>🏆 2024 Tamil Blockbusters</h2>
-          <span class="row-subtitle">Record-breakers: Amaran, Maharaja, GOAT</span>
+          <h2>⚔️ World TV & Multi-Audio Series</h2>
+          <span class="row-subtitle">Game of Thrones, House of the Dragon & Premium Series in Tamil & English Multi-Audio</span>
         </div>
         <div class="cards-carousel">
-          ${tamil2024.map(m => this.renderMovieCard(m)).join("")}
+          ${this.catalog.filter(m => m.mediaType === "tv").map(m => this.renderMovieCard(m)).join("")}
         </div>
-      </section>` : ""}
+      </section>
 
       <!-- 6. TOP 10 IN MOVIESHUB TODAY -->
       <section class="content-row">

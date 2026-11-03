@@ -132,7 +132,7 @@ for (const m of global.MOVIE_CATALOG) {
   realPlayer.currentMovie = m;
   realPlayer.switchMode("movie");
   const iframeSrc = getMockEl("player-stream-iframe").src;
-  if (!iframeSrc || (!iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro"))) {
+  if (!iframeSrc || (!iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro"))) {
     playerStreamsOk = false;
   }
 
@@ -189,6 +189,26 @@ try {
 }
 
 // Summary
+
+// 7. Testing Game of Thrones Multi-Audio & World Channels & Dashboard Sync
+console.log("\n7. Testing Game of Thrones, FTV, KTV & Dashboard Sync...");
+const got = global.MOVIE_CATALOG.find(m => m.id === "game-of-thrones");
+assert(got && got.tmdbId === 1399, "Game of Thrones (TMDB 1399) exists in catalog");
+assert(got.audioLanguages && got.audioLanguages.includes("Tamil"), "Game of Thrones has Tamil audio tag");
+assert(got.mediaType === "tv", "Game of Thrones mediaType is tv");
+
+const hotd = global.MOVIE_CATALOG.find(m => m.id === "house-of-the-dragon");
+assert(hotd && hotd.tmdbId === 94997, "House of the Dragon (TMDB 94997) exists in catalog");
+
+const livetvModule = fs.readFileSync(path.join(__dirname, "../js/livetv.js"), "utf8");
+assert(livetvModule.includes("ftv-paris-hd") && livetvModule.includes("Fashion TV"), "Fashion TV (FTV) present in Live TV");
+assert(livetvModule.includes("ktv-tamil-movies") && livetvModule.includes("KTV HD"), "KTV Tamil Movies 24/7 present in Live TV");
+assert(livetvModule.includes("star-sports-1-hd") && livetvModule.includes("sony-sports-ten-1-hd"), "Star Sports 1 HD and Sony LIV present in Live TV");
+
+const appModule = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
+assert(!appModule.includes("(!m.year || m.year <= 2024)"), "Hero billboard is no longer restricted to 2024");
+assert(appModule.includes("Game of Thrones"), "Dashboard showcases World TV & Multi-Audio series");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

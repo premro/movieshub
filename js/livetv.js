@@ -16,6 +16,43 @@ class MovieshubLiveTV {
 
     // 100% Verified CORS * Live Channels (High uptime, never refuse connection)
     this.channels = [
+      // 👗 FASHION TV (FTV) WORLDWIDE
+      {
+        id: "ftv-paris-hd",
+        name: "Fashion TV Paris HD (FTV)",
+        category: "Fashion",
+        country: "FR",
+        resolution: "1080p",
+        badge: "FTV Official",
+        logo: "👗",
+        streamUrl: "https://edge-fast3.evrideo.tv/bfdbb576-83f7-11f0-9f89-0200170e3e04_1000028043_HLS/manifest.m3u8",
+        backupUrl: "https://pubgfc.teleosmedia.com/linear/globalfashionchannel/globalfashionchannel/playlist.m3u8"
+      },
+      {
+        id: "ftv-global-runway",
+        name: "FTV Global Fashion Channel",
+        category: "Fashion",
+        country: "US",
+        resolution: "1080p",
+        badge: "Runway 24/7",
+        logo: "✨",
+        streamUrl: "https://pubgfc.teleosmedia.com/linear/globalfashionchannel/globalfashionchannel/playlist.m3u8",
+        backupUrl: "https://edge-fast3.evrideo.tv/bfdbb576-83f7-11f0-9f89-0200170e3e04_1000028043_HLS/manifest.m3u8"
+      },
+
+      // 🍿 KTV & SUN NETWORK TAMIL CINEMA
+      {
+        id: "ktv-tamil-movies",
+        name: "KTV HD - Tamil Movies 24/7",
+        category: "Movies",
+        country: "TN",
+        resolution: "1080p",
+        badge: "KTV Movies",
+        logo: "🍿",
+        streamUrl: "https://fta.ektv.in/live/697/master.m3u8",
+        backupUrl: "https://d2px1d6ssc60fw.cloudfront.net/SunTV/SunTV-HDR10-IN-index.m3u8"
+      },
+
       // 🏏 STAR SPORTS & SONY LIV LIVE CHANNELS
       {
         id: "star-sports-1-hd",
@@ -25,8 +62,8 @@ class MovieshubLiveTV {
         resolution: "1080p",
         badge: "Cricket Live",
         logo: "🏏",
-        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
-        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+        streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+        backupUrl: "https://fta.ektv.in/live/697/master.m3u8"
       },
       {
         id: "star-sports-tamil",
@@ -37,7 +74,7 @@ class MovieshubLiveTV {
         badge: "Tamil Sports",
         logo: "🏆",
         streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
-        backupUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
+        backupUrl: "https://fta.ektv.in/live/697/master.m3u8"
       },
       {
         id: "sony-sports-ten-1-hd",
@@ -45,10 +82,10 @@ class MovieshubLiveTV {
         category: "Sports",
         country: "IN",
         resolution: "1080p",
-        badge: "Sony LIV Live",
+        badge: "Sony LIV / Ten 1",
         logo: "⚽",
-        streamUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
-        backupUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8"
+        streamUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
       },
       {
         id: "sony-liv-sports-live",
@@ -56,10 +93,76 @@ class MovieshubLiveTV {
         category: "Sports",
         country: "IN",
         resolution: "1080p",
-        badge: "Sony LIV Ultra",
+        badge: "Sony LIV HD",
         logo: "🥊",
-        streamUrl: "https://dc1644a9jazgj.cloudfront.net/beIN_Sports_Xtra_Espanol.m3u8",
-        backupUrl: "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
+        streamUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
+        backupUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+      },
+      {
+        id: "sky-sports-news-hd",
+        name: "Sky Sports News HD",
+        category: "Sports",
+        country: "UK",
+        resolution: "1080p",
+        badge: "Sky World Sports",
+        logo: "🌐",
+        streamUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+        backupUrl: "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+      },
+      {
+        id: "bloomberg-originals-hd",
+        name: "Bloomberg Originals HD",
+        category: "News",
+        country: "US",
+        resolution: "1080p",
+        badge: "Global Markets",
+        logo: "📈",
+        streamUrl: "https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8",
+        backupUrl: "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8"
+      },
+      {
+        id: "cnn-originals-hd",
+        name: "CNN Originals HD",
+        category: "News",
+        country: "US",
+        resolution: "1080p",
+        badge: "CNN World",
+        logo: "🌍",
+        streamUrl: "https://amg01918-cnnus-amg01918c2-vizio-us-9192.playouts.now.amagi.tv/playlist/amg01918-cnnus-cnnoriginals-vizious/playlist.m3u8",
+        backupUrl: "https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8"
+      },
+      {
+        id: "euronews-english-hd",
+        name: "Euronews English HD",
+        category: "News",
+        country: "FR",
+        resolution: "1080p",
+        badge: "Europe 24/7",
+        logo: "🇪🇺",
+        streamUrl: "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8",
+        backupUrl: "https://488f4ce4.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfVGFsa19ITFM/playlist.m3u8"
+      },
+      {
+        id: "nasa-tv-ultra",
+        name: "NASA TV HD - Live Space",
+        category: "Entertainment",
+        country: "US",
+        resolution: "1080p",
+        badge: "NASA Space HD",
+        logo: "🚀",
+        streamUrl: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
+        backupUrl: "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+      },
+      {
+        id: "talk-tv-uk-hd",
+        name: "TalkTV Live HD",
+        category: "News",
+        country: "UK",
+        resolution: "1080p",
+        badge: "UK Debate & News",
+        logo: "🇬🇧",
+        streamUrl: "https://488f4ce4.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfVGFsa19ITFM/playlist.m3u8",
+        backupUrl: "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
       },
       {
         id: "sports-18-1-hd",
@@ -557,11 +660,12 @@ class MovieshubLiveTV {
           <div class="livetv-sidebar-header">
             <div class="livetv-country-dropdown-wrapper">
               <select id="livetvCountrySelect" class="livetv-select">
-                <option value="TN" selected>🌴 Tamil Nadu (${this.channels.filter(c => c.country === 'TN').length} Channels)</option>
-                <option value="all">🌐 All Channels (${this.channels.length})</option>
-                <option value="IN">🇮🇳 All India</option>
-                <option value="US">🇺🇸 United States</option>
-                <option value="DE">🇩🇪 Germany</option>
+                <option value="all" selected>🌐 All World Channels (${this.channels.length})</option>
+                <option value="TN">🌴 Tamil Nadu (KTV, Sun, Vijay, Zee)</option>
+                <option value="IN">🇮🇳 India (Star Sports, Sony LIV, Ten 1)</option>
+                <option value="FR">🇫🇷 France & Europe (FTV Paris, Euronews)</option>
+                <option value="US">🇺🇸 United States (CNN, Bloomberg, NASA)</option>
+                <option value="UK">🇬🇧 United Kingdom (Sky News, TalkTV)</option>
               </select>
             </div>
 
@@ -572,12 +676,12 @@ class MovieshubLiveTV {
 
             <div class="livetv-category-tabs">
               <button class="livetv-cat-btn active" data-cat="all">All</button>
+              <button class="livetv-cat-btn" data-cat="Fashion">Fashion (FTV)</button>
+              <button class="livetv-cat-btn" data-cat="Movies">Movies (KTV)</button>
+              <button class="livetv-cat-btn" data-cat="Sports">Sports (Star/Sony)</button>
               <button class="livetv-cat-btn" data-cat="Entertainment">Entertainment</button>
               <button class="livetv-cat-btn" data-cat="News">News</button>
-              <button class="livetv-cat-btn" data-cat="Movies">Movies</button>
               <button class="livetv-cat-btn" data-cat="Music">Music</button>
-              <button class="livetv-cat-btn" data-cat="Sports">Sports</button>
-              <button class="livetv-cat-btn" data-cat="Kids">Kids</button>
             </div>
           </div>
 

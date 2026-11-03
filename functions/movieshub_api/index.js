@@ -190,6 +190,9 @@ const KNOWN_TMDB_MAP = {
   'dune: part two': 693134,
   'oppenheimer': 872585,
   'interstellar': 157336,
+  'game of thrones': 1399,
+  'got': 1399,
+  'house of the dragon': 94997,
   'severance': 95396,
   'stranger things': 66732,
   'the boys': 76479
