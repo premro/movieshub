@@ -915,9 +915,9 @@ module.exports = async (req, res) => {
     const title = u.searchParams.get("title") || "Baththa";
     const lang = u.searchParams.get("lang") || "Tamil";
     const year = u.searchParams.get("year") || "2026";
-    const prefix = getPrefix(pathname);
+    
 
-    const html = generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix);
+    const html = generateMoviesdaHtml(tmId, mtype, title, lang, year, apiPrefix);
     res.writeHead(200, {
       "Content-Type": "text/html; charset=utf-8",
       "Content-Security-Policy": "frame-ancestors *;",
