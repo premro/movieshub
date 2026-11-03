@@ -64,6 +64,8 @@ class MovieshubApp {
 
         const mergeMovie = (m) => {
           if (!m || !m.title) return;
+          // Filter out unreleased future titles (must be released with valid streams)
+          if (m.year && m.year > 2024) return;
           const exists = this.catalog.some(c => 
             (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) ||
             (c.id && m.id && c.id === m.id) ||
@@ -942,9 +944,9 @@ class MovieshubApp {
   }
 
   renderAllLanguagesHome(container) {
-    // Top 5 Latest IMDb Blockbusters for the Auto-Rotating Billboard (2026/2025 newest first)
+    // Top 5 Verified Released Blockbusters for the Auto-Rotating Billboard
     const sortedCatalog = [...this.catalog]
-      .filter(m => (m.backdrop || m.poster) && m.id !== "amaran-tamil")
+      .filter(m => (m.backdrop || m.poster) && (!m.year || m.year <= 2024))
       .sort((a, b) => {
         if ((b.year || 0) !== (a.year || 0)) return (b.year || 0) - (a.year || 0);
         return (b.rating || 0) - (a.rating || 0);
