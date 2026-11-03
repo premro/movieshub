@@ -28,7 +28,6 @@ const MOVIESDA_VERIFIED_MAP = {
   "varam": "102956",
   "418": "102870",
   "bigg boss": "103132",
-  "jailer 2": "102943"
 };
 
 function getVerifiedMoviesdaFileId(title) {
@@ -140,8 +139,8 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
 </html>`;
   } else {
     const streamUrl = mtype === "tv"
-      ? `https://vidsrc.pm/embed/tv/${tmId}/1/1`
-      : `https://vidsrc.pm/embed/movie/${tmId}`;
+      ? `https://vidsrc.su/embed/tv/${tmId}/1/1`
+      : `https://vidsrc.su/embed/movie/${tmId}`;
     const downloadUrl = `https://www.2embed.cc/embed/${tmId}`;
 
     return `<!DOCTYPE html>
@@ -887,8 +886,8 @@ class MovieshubPlayer {
           name: "Server 1",
           badge: "VidSrc Ultra HD",
           url: mtype === "tv"
-            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/1/1`
-            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
+            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s2",
@@ -1073,7 +1072,8 @@ class MovieshubPlayer {
             }
           };
 
-          if (srv.id === "s8") {
+          const isMoviesdaMovie = !!getVerifiedMoviesdaFileId(movie?.title) || movie?.platform === "Moviesda" || String(movie?.id || "").startsWith("moviesda-");
+          if (srv.id === "s8" || (srv.id === "s1" && isMoviesdaMovie)) {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
             hidePreloader();

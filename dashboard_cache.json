@@ -33,33 +33,33 @@
       "isTrending": true
     },
     {
-      "id": "tmdb-1234139",
-      "tmdbId": 1234139,
-      "title": "Jailer 2",
-      "nativeTitle": "\u0b9c\u0bc6\u0baf\u0bbf\u0bb2\u0bb0\u0bcd 2",
+      "id": "moviesda-immortal-2026",
+      "tmdbId": 102966,
+      "title": "Immortal",
+      "nativeTitle": "\u0b87\u0bae\u0bcd\u0bae\u0bbe\u0bb0\u0bcd\u0b9f\u0bb2\u0bcd",
       "language": "Tamil",
       "languageBadge": "Tamil",
       "year": 2026,
-      "rating": 8.8,
-      "match": "98%",
+      "rating": 8.9,
+      "match": "97%",
       "maturity": "U/A 16+",
-      "duration": "2h 45m",
+      "duration": "2h 18m",
       "genres": [
-        "Action",
-        "Crime",
+        "Fantasy",
+        "Horror",
         "Thriller"
       ],
       "qualities": [
         "4K",
         "1080p"
       ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
+      "platform": "Moviesda",
+      "platformBadge": "MOVIESDA",
       "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
+      "poster": "https://moviezda.me/uploads/shots/102966-moviesdamobi-immortal-2026-original-1080p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/102966-moviesdamobi-immortal-2026-original-1080p-hd.jpg",
       "mediaType": "movie",
-      "overview": "When a dangerous syndicate expands its reach, retired jailer Tiger Muthuvel Pandian goes undercover to protect his home.",
+      "overview": "A gripping Tamil fantasy thriller exploring power, mystery and eternal life starring G. V. Prakash Kumar.",
       "isTrending": true
     },
     {

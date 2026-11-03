@@ -683,7 +683,6 @@ const MOVIESDA_VERIFIED_MAP = {
   "varam": "102956",
   "418": "102870",
   "bigg boss": "103132",
-  "jailer 2": "102943"
 };
 
 function getVerifiedMoviesdaFileId(title) {

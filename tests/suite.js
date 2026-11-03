@@ -131,8 +131,11 @@ let playerTrailersOk = true;
 for (const m of global.MOVIE_CATALOG) {
   realPlayer.currentMovie = m;
   realPlayer.switchMode("movie");
-  const iframeSrc = getMockEl("player-stream-iframe").src;
-  if (!iframeSrc || (!iframeSrc.includes("autoembed.pro") && !iframeSrc.includes("vidsrc.su") && !iframeSrc.includes("autoembed.me") && !iframeSrc.includes("player.autoembed.cc") && !iframeSrc.includes("vidlink.pro") && !iframeSrc.includes("2embed.org") && !iframeSrc.includes("vidsrc.pm"))) {
+  const streamEl = getMockEl("player-stream-iframe");
+  const iframeSrc = streamEl.src || "";
+  const iframeSrcdoc = streamEl.srcdoc || "";
+  const validStream = (iframeSrc && (iframeSrc.includes("vidsrc.su") || iframeSrc.includes("vidsrc.pm") || iframeSrc.includes("vidlink.pro") || iframeSrc.includes("2embed") || iframeSrc.includes("autoembed"))) || (iframeSrcdoc && (iframeSrcdoc.includes("onestream.today") || iframeSrcdoc.includes("vidsrc")));
+  if (!validStream) {
     playerStreamsOk = false;
   }
 
