@@ -1252,7 +1252,7 @@ class MovieshubApp {
         <div class="card-media">
           <img class="card-img" src="${posterSrc}" alt="${cleanTitle}" loading="lazy" onerror="handlePosterError(this, '${cleanTitle}', '${movie.year || 2026}')" />
           <span class="card-lang-badge">${movie.language}</span>
-          <span class="card-quality-badge">${(movie.qualities && movie.qualities[0]) || "4K"}</span>
+          <span class="card-quality-badge ${((movie.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || movie.isTheatrePrint) ? "theatre" : ""}">${((movie.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || movie.isTheatrePrint) ? "THEATRE PRINT" : ((movie.qualities && movie.qualities[0]) || "4K")}</span>
           
           <div class="card-media-overlay">
             <div class="card-actions">

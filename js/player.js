@@ -637,6 +637,8 @@ class MovieshubPlayer {
 
       // Verified 100% accurate TMDB ID database for blockbusters
       const KNOWN_TMDB_MAP = {
+        "meesaya murukku": 424336,
+        "meesaya murukku 2": 1538457,
         "immortal": 1505305,
         "cold call": 126743,
         "anakapalli": 123090,
@@ -695,7 +697,11 @@ class MovieshubPlayer {
       // 1. Prioritize explicit numeric tmdbId from movie object
       let resolvedTmdbId = null;
       // If title is known, prioritize real TMDB ID over any 6-digit Moviesda upload ID
-      if (cleanTitle === "immortal" || cleanTitle.includes("immortal")) {
+      if (cleanTitle === "meesaya murukku 2" || cleanTitle.includes("meesaya murukku 2")) {
+        resolvedTmdbId = "1538457";
+      } else if (cleanTitle === "meesaya murukku" || cleanTitle === "meesaya murukku 1") {
+        resolvedTmdbId = "424336";
+      } else if (cleanTitle === "immortal" || cleanTitle.includes("immortal")) {
         resolvedTmdbId = "1505305";
       } else if (cleanTitle === "cold call") {
         resolvedTmdbId = "126743";
@@ -875,6 +881,17 @@ class MovieshubPlayer {
               <div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Free Stream • Ultra HD Playback</div>
             </div>
           </div>
+          ${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? `
+            <div class="theatre-print-notice" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:8px 14px;margin:8px 16px 0;color:#fef3c7;font-size:12px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="background:#f59e0b;color:#000;font-weight:800;font-size:10px;padding:2px 7px;border-radius:4px;letter-spacing:0.5px;">THEATRE PRINT</span>
+                <span>Currently streaming <strong>Theatrical Pre-HD Print</strong>. Official Digital OTT 4K/1080p HD premieres <strong>November 6, 2026 on SonyLIV</strong>.</span>
+              </div>
+              <button id="btnWatchMeesayaPart1" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;">
+                <span>▶ Watch Meesaya Murukku 1 (1080p HD)</span>
+              </button>
+            </div>
+          ` : ''}
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">
             <iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
@@ -913,7 +930,9 @@ class MovieshubPlayer {
               <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;">
                 <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
                 <span style="color:#888;">|</span>
-                <span style="color:#e50914;font-weight:700;font-size:11px;">1080p HD</span>
+                <span style="color:${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "#f59e0b" : "#e50914"};font-weight:700;font-size:11px;">
+                  ${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "Pre-HD (Theatre)" : "1080p HD"}
+                </span>
               </div>
             </div>
           </div>
@@ -1095,6 +1114,23 @@ class MovieshubPlayer {
         });
       }
       // Bottom bar back button
+      const watchPart1Btn = document.getElementById("btnWatchMeesayaPart1");
+      if (watchPart1Btn) {
+        watchPart1Btn.onclick = () => {
+          this.open({
+            id: "tmdb-424336",
+            tmdbId: 424336,
+            title: "Meesaya Murukku",
+            nativeTitle: "மீசைய முருக்கு",
+            year: 2017,
+            language: "Tamil",
+            mediaType: "movie",
+            qualities: ["1080p", "HD"],
+            overview: "A semi-autobiographical musical comedy following Adhi's early life and struggles as an engineering student striving to become an independent hip-hop artist."
+          }, "movie");
+        };
+      }
+
       const bottomBackBtn = document.getElementById("bottomPlayerBackBtn");
       if (bottomBackBtn) {
         bottomBackBtn.addEventListener("click", () => this.close());

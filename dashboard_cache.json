@@ -1,23 +1,23 @@
 {
-  "last_synced": 1793728204.7649589,
-  "last_synced_human": "2026-11-03 23:20:04",
+  "last_synced": 1793778220.387434,
+  "last_synced_human": "2026-11-04 13:13:40",
   "latest_six": [
     {
-      "id": "tmdb-1515692",
-      "tmdbId": 1515692,
-      "title": "Baththa",
-      "nativeTitle": "\u0baa\u0ba4\u0bcd\u0ba4\u0bbe",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
+      "id": "tmdb-791523",
+      "tmdbId": 791523,
+      "title": "Wildwood",
+      "nativeTitle": "Wildwood",
+      "language": "English",
+      "languageBadge": "English",
       "year": 2026,
-      "rating": 8.9,
+      "rating": 8.7,
       "match": "99%",
       "maturity": "U/A 16+",
       "duration": "2h 30m",
       "genres": [
-        "Drama",
-        "Action",
-        "Comedy"
+        "Animation",
+        "Adventure",
+        "Cinema"
       ],
       "qualities": [
         "4K",
@@ -26,147 +26,61 @@
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/7wHBYs8HHmTGe4nXLpMEAoDSK2o.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/5sBnZMT1aJ6cBvehKOzOOLdI6bz.jpg",
+      "poster": "https://image.tmdb.org/t/p/w500/8g7q6o54WfKWRmUQ0Ye8OskevUY.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/sl5NJ1vtyhP9Vr88bB4blULsJYp.jpg",
       "mediaType": "movie",
-      "overview": "In 1986 Madras, a timid eight-year-old boy accidentally traps a feared gangster inside a deserted school toilet.",
+      "overview": "After her baby brother is abducted by a murder of crows, headstrong teenager Prue McKeel launches a desperate rescue mission into the Impassable Wilderness, an enchanted forest hidden just beyond Portland, Oregon. Joined by her hapless but loyal classmate Curtis Mehlberg, Prue navigates a world of talking animals, bandits, and powerful figures driven by grief and ambition. As the pair is drawn into a conflict threatening the balance of the forest itself, Prue must discover the strength and belief she never knew she possessed.",
+      "cast": [],
+      "director": "Cinematic Director",
       "isTrending": true
     },
     {
-      "id": "moviesda-immortal-2026",
-      "tmdbId": 1505305,
-      "title": "Immortal",
-      "nativeTitle": "\u0b87\u0bae\u0bcd\u0bae\u0bbe\u0bb0\u0bcd\u0b9f\u0bb2\u0bcd",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
+      "id": "tmdb-1058424",
+      "tmdbId": 1058424,
+      "title": "Hope",
+      "nativeTitle": "\ud638\ud504",
+      "language": "Korean",
+      "languageBadge": "Korean",
       "year": 2026,
-      "rating": 8.9,
-      "match": "97%",
+      "rating": 6.8,
+      "match": "80%",
       "maturity": "U/A 16+",
-      "duration": "2h 18m",
+      "duration": "2h 30m",
       "genres": [
-        "Fantasy",
-        "Horror",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Moviesda",
-      "platformBadge": "MOVIESDA",
-      "platformColor": "#E50914",
-      "poster": "https://moviezda.me/uploads/shots/102966-moviesdamobi-immortal-2026-original-1080p-hd.jpg",
-      "backdrop": "https://moviezda.me/uploads/shots/102966-moviesdamobi-immortal-2026-original-1080p-hd.jpg",
-      "mediaType": "movie",
-      "overview": "A gripping Tamil fantasy thriller exploring power, mystery and eternal life starring G. V. Prakash Kumar.",
-      "isTrending": true,
-      "netId": "123957"
-    },
-    {
-      "id": "moviesda-cold-call-2026",
-      "tmdbId": 126743,
-      "title": "Cold Call",
-      "nativeTitle": "\u0b95\u0bcb\u0bb2\u0bcd\u0b9f\u0bcd \u0b95\u0bbe\u0bb2\u0bcd",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": 8.6,
-      "match": "96%",
-      "maturity": "U/A 16+",
-      "duration": "2h 15m",
-      "genres": [
-        "Comedy",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Moviesda",
-      "platformBadge": "MOVIESDA",
-      "platformColor": "#E50914",
-      "poster": "https://moviezda.me/uploads/shots/103140-moviesdamobi-cold-call-2026-original-720p-hd.jpg",
-      "backdrop": "https://moviezda.me/uploads/shots/103140-moviesdamobi-cold-call-2026-original-720p-hd.jpg",
-      "mediaType": "movie",
-      "overview": "A high stakes comedy thriller centering on an unexpected cold call that turns a normal day upside down.",
-      "isTrending": true,
-      "netId": "126743"
-    },
-    {
-      "id": "tmdb-1618200",
-      "tmdbId": 1618200,
-      "title": "The Dark Heaven",
-      "nativeTitle": "\u0ba4\u0bc0 \u0b9f\u0bbe\u0bb0\u0bcd\u0b95\u0bcd \u0bb9\u0bc6\u0bb5\u0ba9\u0bcd",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": 8.8,
-      "match": "95%",
-      "maturity": "U/A 16+",
-      "duration": "2h 20m",
-      "genres": [
-        "Crime",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/xFr0Q7j2JmOwBJnvImIgTAWBk4U.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/4ercU8wa7OAexszQG3SSNuyB8fy.jpg",
-      "mediaType": "movie",
-      "overview": "In the Hill Village of Mekkarai, where men die every seven years, a newly appointed inspector investigates mysterious murders.",
-      "isTrending": true
-    },
-    {
-      "id": "moviesda-anakapalli-2026",
-      "tmdbId": 123090,
-      "title": "Anakapalli",
-      "nativeTitle": "\u0b85\u0ba9\u0b95\u0bbe\u0baa\u0bb3\u0bcd\u0bb3\u0bbf",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": 8.5,
-      "match": "94%",
-      "maturity": "U/A 16+",
-      "duration": "2h 31m",
-      "genres": [
-        "Drama",
+        "Sci-Fi",
+        "Cinema",
         "Action"
       ],
       "qualities": [
         "4K",
         "1080p"
       ],
-      "platform": "Moviesda",
-      "platformBadge": "MOVIESDA",
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "https://moviezda.me/uploads/shots/103147-moviesdamobi-anakapalli-2026-original-720p-hd.jpg",
-      "backdrop": "https://moviezda.me/uploads/shots/103147-moviesdamobi-anakapalli-2026-original-720p-hd.jpg",
+      "poster": "https://image.tmdb.org/t/p/w500/6VY1ZKgpsc8CfGsQcCGiYEgHdH0.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/j96rurZqmBjyY37Fncl3IB0qJNe.jpg",
       "mediaType": "movie",
-      "overview": "Set in Anakapalli, a gripping drama following power struggles, loyalty and courage.",
-      "isTrending": true,
-      "netId": "123090"
+      "overview": "In the remote South Korean village of Hope Harbor, police chief Bum-seok and officer Sung-ae are called to investigate a mysterious creature wreaking havoc on the community. But all is not as it seems, and perceptions can be misleading. What begins as ignorance plants the seed of disaster, escalating through human conflict into a tragedy of cosmic proportions.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
     },
     {
-      "id": "tmdb-1578079",
-      "tmdbId": 1578079,
-      "title": "Dorothy",
-      "nativeTitle": "\u0b9f\u0bcb\u0bb0\u0ba4\u0bbf",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
+      "id": "tmdb-1596275",
+      "tmdbId": 1596275,
+      "title": "Drive - The Pretenders",
+      "nativeTitle": "Drive \u2013 The Pretenders",
+      "language": "DE",
+      "languageBadge": "DE",
       "year": 2026,
-      "rating": 9.0,
-      "match": "98%",
+      "rating": 7.6,
+      "match": "88%",
       "maturity": "U/A 16+",
-      "duration": "2h 25m",
+      "duration": "2h 30m",
       "genres": [
-        "Crime",
-        "Drama"
+        "Romance",
+        "Thriller"
       ],
       "qualities": [
         "4K",
@@ -175,10 +89,105 @@
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/o3r5DmWhOKdFmeIUoRJj4CvCqOP.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/fPByMSinDUlJ05pMVw2sbqYF6Ew.jpg",
+      "poster": "https://image.tmdb.org/t/p/w500/s9syckECnUYhKePQ1A0DC0mFVZ9.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/hbz4aeVsjnKb2HRoFbbr46Egh8y.jpg",
       "mediaType": "movie",
-      "overview": "In rural Tamil Nadu, two inseparable childhood friends navigate a complex world when a compassionate woman enters their lives.",
+      "overview": "A young race car mechanic fakes an engagement with racing's most scandalous star - officially for his reputation, secretly for her own shot behind the wheel. But soon the lie threatens to destroy everything - including what's already become so much more than just a deal.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1101412",
+      "tmdbId": 1101412,
+      "title": "Fall 2: Deadpoint",
+      "nativeTitle": "Fall 2: Deadpoint",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "rating": 7.3,
+      "match": "85%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/fgSm5ylwiXbIHn8UbUXDjk9RRu4.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/nGau0KBOaRILSK5MqFcuTfv7GMl.jpg",
+      "mediaType": "movie",
+      "overview": "On a perilous climb across Thailand's Mount Kwan, two climbers become trapped thousands of feet above the ground, where vertigo-inducing heights, sheer exposure, and impossible odds turn every moment into a fight for survival.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1283515",
+      "tmdbId": 1283515,
+      "title": "Verity",
+      "nativeTitle": "Verity",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "rating": 6.9,
+      "match": "81%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Cinema",
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/rmaNMA1seHqpjtnYKzyynFAr1g8.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/cKetrF2dAnQ0AMV5i4BMOs41I5P.jpg",
+      "mediaType": "movie",
+      "overview": "Lowen Ashleigh, hired to ghostwrite for best-selling author Verity Crawford, uncovers Verity's autobiographical notes, and becomes involved in what may prove to be a lethal conspiracy.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1507696",
+      "tmdbId": 1507696,
+      "title": "Apocalypse Z: New World",
+      "nativeTitle": "Apocalipsis Z: Nuevo mundo",
+      "language": "ES",
+      "languageBadge": "ES",
+      "year": 2026,
+      "rating": 6.0,
+      "match": "75%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Horror"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/wXln4DUrwcyjcFPwgQxFPYTlG1Z.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/o3XwuDUj0n8qnK91p6q8LKfr6rj.jpg",
+      "mediaType": "movie",
+      "overview": "The Canary Islands have become Europe\u2019s last refuge following the outbreak of the TSJ virus. When a special mission sets out for the mainland in search of vital supplies, Roberto joins the team with questionable intentions. The dangerous operation turns into a desperate race for survival, and Roberto and his companions find themselves caught between hordes of infected and divided loyalties.",
+      "cast": [],
+      "director": "Cinematic Director",
       "isTrending": true
     }
   ],
@@ -560,8 +569,7 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false,
-      "netId": "123957"
+      "isTrending": false
     }
   ],
   "tamil_2025": [
@@ -2391,8 +2399,7 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false,
-      "netId": "123957"
+      "isTrending": false
     },
     {
       "id": "tmdb-1398980",
@@ -4804,6 +4811,39 @@
   },
   "all": [
     {
+      "id": "tmdb-424336",
+      "tmdbId": 424336,
+      "title": "Meesaya Murukku",
+      "nativeTitle": "\u0bae\u0bc0\u0b9a\u0bc8\u0baf \u0bae\u0bc1\u0bb0\u0bc1\u0b95\u0bcd\u0b95\u0bc1",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2017,
+      "rating": 7.4,
+      "match": "91%",
+      "maturity": "U",
+      "duration": "2h 16m",
+      "genres": [
+        "Comedy",
+        "Romance",
+        "Music",
+        "Drama"
+      ],
+      "qualities": [
+        "1080p",
+        "HD"
+      ],
+      "isTheatrePrint": false,
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/tcyX5DP4CCqE8Qkg7p5M9z5V5P1.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/8iG6naruSFn4CuSWB01F0JuImCc.jpg",
+      "mediaType": "movie",
+      "overview": "A semi-autobiographical musical comedy following Adhi's early life and struggles as an engineering student striving to become an independent hip-hop artist in Tamil Nadu.",
+      "director": "Hiphop Tamizha Adhi",
+      "isTrending": false
+    },
+    {
       "id": "tmdb-791523",
       "tmdbId": 791523,
       "title": "Wildwood",
@@ -5368,8 +5408,7 @@
       "overview": "An unsuspecting man finds himself at the center of a series of mysterious deaths, forcing him to confront a truth that could cost him everything.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false,
-      "netId": "123957"
+      "isTrending": false
     },
     {
       "id": "tmdb-1398980",
@@ -6518,19 +6557,21 @@
         "Drama"
       ],
       "qualities": [
-        "4K",
-        "1080p"
+        "Pre-HD",
+        "Theatre Print"
       ],
       "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
+      "platformBadge": "THEATRE PRINT",
+      "platformColor": "#F59E0B",
       "poster": "https://image.tmdb.org/t/p/w500/qD1QwmInB9ezd2peVb5EbhaM4Mo.jpg",
       "backdrop": "https://image.tmdb.org/t/p/w1280/8iG6naruSFn4CuSWB01F0JuImCc.jpg",
       "mediaType": "movie",
-      "overview": "After facing rejection in love and getting into a fight, Jeeva learns about his father Siva's struggles and sacrifices. Inspired by his grandfather's legacy and father's dedication, Jeeva changes his outlook and works hard toward his musical dream. Through determination and perseverance, Jeeva earns recognition in the music industry and brings pride to his family.",
+      "overview": "After facing rejection in love and getting into a fight, Jeeva learns about his father Siva's struggles and sacrifices. Inspired by his grandfather's legacy and father's dedication, Jeeva changes his outlook and works hard toward his musical dream. (Note: Currently streaming Pre-HD Theatrical Print. Official Digital OTT 4K/1080p HD premieres November 6, 2026 on SonyLIV).",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "isTheatrePrint": true,
+      "ottReleaseDate": "November 6, 2026 (SonyLIV)"
     },
     {
       "id": "tmdb-969681",

@@ -258,7 +258,14 @@ assert(indexApiCode.includes("WATERMARK REMOVED"), "Watermark removal indicator 
 assert(indexApiCode.includes("download.moviespage.xyz"), "Direct Moviesda download route integrated");
 
 // 11. Testing UI Latest 6 Releases (2026 Verification & 2024 Removal)
-console.log("\n11. Testing UI Latest 6 Releases & Watermark Removal...");
+console.log("\n11. Testing Theatrical Releases & Meesaya Murukku Print Handling...");
+assert(playerCode.includes("theatre-print-notice"), "Theatre print notice banner integrated in player");
+assert(playerCode.includes("btnWatchMeesayaPart1"), "Quick switch to Part 1 (1080p HD) present in player");
+assert(playerCode.includes("424336"), "Meesaya Murukku Part 1 (TMDB 424336) mapped in player");
+assert(playerCode.includes("1538457"), "Meesaya Murukku Part 2 (TMDB 1538457) mapped in player");
+assert(appText.includes("THEATRE PRINT"), "THEATRE PRINT badge rendered on movie cards for theatrical pre-HD prints");
+
+console.log("\n12. Testing UI Latest 6 Releases & Watermark Removal...");
 const appCode = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
 assert(appCode.includes("this.dashboardData.latest_six.filter(m => (m.year || 2026) >= 2025)"), "App strictly filters out 2024 releases from Latest 6 Releases");
 
