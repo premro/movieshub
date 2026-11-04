@@ -1164,69 +1164,30 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: #000;
+  overflow: hidden;
 }
 
 .player-header {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
+  position: relative;
+  height: 56px;
+  min-height: 56px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 70%, transparent 100%);
-  z-index: 9999;
-  transition: opacity 0.3s;
+  padding: 0 20px;
+  background: rgba(12, 11, 18, 0.98);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 100;
 }
 
 .player-floating-back-btn {
-  position: absolute;
-  top: 14px;
-  left: 18px;
-  z-index: 100000;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(18, 18, 24, 0.9);
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 24px;
-  font-size: 13.5px;
-  font-weight: 700;
-  cursor: pointer;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
-  transition: all 0.2s ease;
-}
-
-.player-floating-back-btn:hover {
-  background: #e50914;
-  border-color: #e50914;
-  transform: scale(1.05);
+  display: none !important;
 }
 
 .bottom-back-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: rgba(229, 9, 20, 0.9);
-  color: #fff;
-  border: 1px solid rgba(229, 9, 20, 1);
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(229, 9, 20, 0.4);
-}
-
-.bottom-back-btn:hover {
-  background: #ff1f2d;
-  transform: scale(1.03);
+  display: none !important;
 }
 
 .player-header.fade-out, .player-controls.fade-out {
@@ -1315,11 +1276,69 @@ body {
 
 .player-stream-wrap {
   flex: 1;
-  position: relative;
+  min-height: 0;
   width: 100%;
   height: 100%;
   background: #000;
+  position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.player-stream-frame-container {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.player-stream-frame-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.player-server-bar {
+  min-height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 16px;
+  background: rgba(12, 11, 18, 0.98);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 50;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+
+.player-server-pills {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  flex: 1;
+  min-width: 0;
+}
+
+.player-server-pills::-webkit-scrollbar {
+  display: none;
+}
+
+.srv-pill-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .player-stream-wrap iframe {

@@ -131,11 +131,7 @@ class MovieshubPlayer {
 
     this.modal.innerHTML = `
       <div class="player-container" id="player-container">
-        <!-- Floating Back Button (Always visible on top of player) -->
-        <button class="player-floating-back-btn" id="player-floating-back-btn" title="Back to Movieshub">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-          <span>Back</span>
-        </button>
+
 
         <!-- Top bar -->
         <div class="player-header" id="player-header">
@@ -892,42 +888,39 @@ class MovieshubPlayer {
               </button>
             </div>
           ` : ''}
-          <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;position:relative;width:100%;height:100%;">
+          <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
             <iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
-          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:8px 16px;background:rgba(15,13,23,0.95);border-top:1px solid rgba(255,255,255,0.08);z-index:50;">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex:1;">
-              <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-                <span>Back</span>
-              </button>
-              <div class="player-server-pills" id="playerModalServerPills" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;padding:6px 16px;background:rgba(12,11,18,0.98);border-top:1px solid rgba(255,255,255,0.08);z-index:50;min-height:48px;">
+            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+              <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub" style="display:none;"></button>
+              <div class="player-server-pills" id="playerModalServerPills" style="display:flex;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
                 ${servers.map((s, idx) => `
-                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
+                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}" style="white-space:nowrap;flex-shrink:0;">
                     <span>${s.name}</span>
                     <span class="srv-pill-badge">${s.badge}</span>
                   </button>
                 `).join("")}
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-              <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio" style="background:#e50914;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
+              <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio" style="background:#e50914;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
                 <span>🔊 Tamil Dubbed</span>
               </button>
-              <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage">
+              <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage" style="white-space:nowrap;flex-shrink:0;">
                 <div class="atmos-pulse-dot"></div>
                 <span>Dolby Atmos</span>
               </button>
-              <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch">
+              <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch" style="white-space:nowrap;flex-shrink:0;">
                 <span>⏸ Auto-Switch: OFF</span>
               </button>
-              <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck">
+              <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck" style="white-space:nowrap;flex-shrink:0;">
                 <span>🔄 Reload</span>
               </button>
-              <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server">
+              <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server" style="white-space:nowrap;flex-shrink:0;">
                 <span>Next Server ⏭</span>
               </button>
-              <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;">
+              <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
                 <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
                 <span style="color:#888;">|</span>
                 <span style="color:${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "#f59e0b" : "#e50914"};font-weight:700;font-size:11px;">
@@ -1247,8 +1240,8 @@ class MovieshubPlayer {
 
     const badgeEl = document.getElementById("player-badge");
     if (badgeEl) {
-      badgeEl.textContent = movie.platformBadge || "MOVIESHUB";
-      badgeEl.style.backgroundColor = movie.platformColor || "#E50914";
+      badgeEl.textContent = (movie.platformBadge === "MOVIESDA" ? "MOVIESHUB" : (movie.platformBadge || "MOVIESHUB"));
+      badgeEl.style.backgroundColor = (movie.platformBadge === "MOVIESDA" ? "#E50914" : (movie.platformColor || "#E50914"));
     }
 
     const extraEl = document.getElementById("player-extra");

@@ -265,7 +265,16 @@ assert(playerCode.includes("424336"), "Meesaya Murukku Part 1 (TMDB 424336) mapp
 assert(playerCode.includes("1538457"), "Meesaya Murukku Part 2 (TMDB 1538457) mapped in player");
 assert(appText.includes("THEATRE PRINT"), "THEATRE PRINT badge rendered on movie cards for theatrical pre-HD prints");
 
-console.log("\n12. Testing UI Latest 6 Releases & Watermark Removal...");
+console.log("\n12. Testing Player UI Layout & Video Scaling...");
+const backendCode = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
+const stylesCode = fs.readFileSync(path.join(__dirname, "../css/styles.css"), "utf8");
+assert(backendCode.includes("art-video-title") && backendCode.includes("display: none !important"), "Netmirror proxy hides duplicate internal title overlay");
+assert(backendCode.includes("artplayer-app") && backendCode.includes("inset: 0 !important"), "Netmirror proxy forces player to fill viewport edge-to-edge");
+assert(stylesCode.includes(".player-header") && stylesCode.includes("min-height: 56px"), "Player header structured with clean fixed height");
+assert(stylesCode.includes(".player-server-pills") && stylesCode.includes("white-space: nowrap"), "Server pills prevent messy multi-line wrapping");
+assert(playerCode.includes("playerModalServerPills") && playerCode.includes("white-space:nowrap"), "Player server buttons stay on clean single toolbar");
+
+console.log("\n13. Testing UI Latest 6 Releases & Watermark Removal...");
 const appCode = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
 assert(appCode.includes("this.dashboardData.latest_six.filter(m => (m.year || 2026) >= 2025)"), "App strictly filters out 2024 releases from Latest 6 Releases");
 

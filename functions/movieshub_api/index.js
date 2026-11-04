@@ -1115,8 +1115,41 @@ module.exports = async (req, res) => {
       });
       let htmlStr = buffer.toString('utf8');
       const baseTag = '<base href="https://webvp.watch21.shop/play/">';
+      const customStyles = `
+        <style>
+          html, body {
+            width: 100% !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            background: #000 !important;
+          }
+          .artplayer-app {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            inset: 0 !important;
+          }
+          .art-video-player {
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100% !important;
+          }
+          .art-video-player video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+          }
+          .art-video-title {
+            display: none !important;
+          }
+        </style>
+      `;
       if (htmlStr.includes('<head>')) {
-        htmlStr = htmlStr.replace('<head>', `<head>${baseTag}`);
+        htmlStr = htmlStr.replace('<head>', `<head>${baseTag}${customStyles}`);
+      } else {
+        htmlStr = `<head>${baseTag}${customStyles}</head>` + htmlStr;
       }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(htmlStr);
