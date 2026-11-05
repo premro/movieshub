@@ -92,9 +92,9 @@ class DolbyAtmosEngine {
       this.audioCtx = new AudioContextClass({ latencyHint: "playback" });
       const ctx = this.audioCtx;
 
-      // Master output chain with Cinema DRC Compressor
+      // Master output chain with Cinema DRC Compressor & +3dB Gain Engine
       this.masterGain = ctx.createGain();
-      this.masterGain.gain.value = 1.0;
+      this.masterGain.gain.value = 1.25;
 
       this.compressor = ctx.createDynamicsCompressor();
       this.compressor.threshold.value = -12.0; // dB
@@ -263,7 +263,7 @@ class DolbyAtmosEngine {
         this.setBassBoost(4.5);
         this.setDialogueBoost(3.0);
         if (this.reverbGain) this.reverbGain.gain.value = 0.14;
-        this.masterGain.gain.value = 1.0;
+        this.masterGain.gain.value = 1.30;
         break;
 
       case "cinema":
@@ -273,7 +273,7 @@ class DolbyAtmosEngine {
         this.setBassBoost(6.0);
         this.setDialogueBoost(2.0);
         if (this.reverbGain) this.reverbGain.gain.value = 0.22;
-        this.masterGain.gain.value = 1.05;
+        this.masterGain.gain.value = 1.35;
         break;
 
       case "dialogue":
@@ -283,7 +283,7 @@ class DolbyAtmosEngine {
         this.setBassBoost(1.5);
         this.setDialogueBoost(6.5);
         if (this.reverbGain) this.reverbGain.gain.value = 0.04;
-        this.masterGain.gain.value = 1.0;
+        this.masterGain.gain.value = 1.40;
         break;
 
       case "night":
@@ -297,7 +297,7 @@ class DolbyAtmosEngine {
           this.compressor.ratio.value = 8.0;
         }
         if (this.reverbGain) this.reverbGain.gain.value = 0.05;
-        this.masterGain.gain.value = 0.85;
+        this.masterGain.gain.value = 1.10;
         break;
 
       case "bypass":
@@ -308,7 +308,7 @@ class DolbyAtmosEngine {
         this.setBassBoost(0.0);
         this.setDialogueBoost(0.0);
         if (this.reverbGain) this.reverbGain.gain.value = 0.0;
-        this.masterGain.gain.value = 1.0;
+        this.masterGain.gain.value = 1.20;
         break;
     }
 

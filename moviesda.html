@@ -79,7 +79,7 @@
       
       <!-- Mode 2: Shielded Clean Embed (Watermark Cropped) -->
       <div class="clipped-embed-wrap" id="embedWrap">
-        <iframe id="embedFrame" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+        <iframe id="embedFrame" src="about:blank" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
       </div>
     </div>
 
@@ -121,7 +121,29 @@
       "varam": "102956",
       "418": "102870",
       "bigg boss": "103132",
-        };
+      // Top Kollywood Blockbusters (Original Tamil HD Prints)
+      "master": "95553",
+      "amaran": "88497",
+      "goat": "86701",
+      "the greatest of all time": "86701",
+      "maharaja": "85289",
+      "leo": "82168",
+      "jailer": "81231",
+      "vikram": "74672",
+      "ps1": "79747",
+      "ponniyin selvan": "79747",
+      "doctor": "73806",
+      "kaithi": "62704",
+      "asuran": "62513",
+      "jai bhim": "70596",
+      "soorarai pottru": "65497",
+      "vettaiyan": "87369",
+      "raayan": "86088",
+      "demonte colony 2": "86639",
+      "lubber pandhu": "87208",
+      "meiyazhagan": "87066",
+      "pushpa 2": "88746",
+    };
 
     function resolveFileId(title, fallback) {
       if (!title) return fallback || null;

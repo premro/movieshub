@@ -28,23 +28,88 @@ const MOVIESDA_VERIFIED_MAP = {
   "varam": "102956",
   "418": "102870",
   "bigg boss": "103132",
+  // Top Kollywood Blockbusters (Original Tamil HD Prints)
+  "master": "95553",
+  "amaran": "88497",
+  "goat": "86701",
+  "the greatest of all time": "86701",
+  "the greatest of all time (g.o.a.t)": "86701",
+  "maharaja": "85289",
+  "leo": "82168",
+  "leo: bloody sweet": "82168",
+  "jailer": "81231",
+  "vikram": "74672",
+  "ps1": "79747",
+  "ponniyin selvan": "79747",
+  "ponniyin selvan: part i": "79747",
+  "ponniyin selvan: part i & ii": "79747",
+  "doctor": "73806",
+  "kaithi": "62704",
+  "asuran": "62513",
+  "jai bhim": "70596",
+  "soorarai pottru": "65497",
+  "vettaiyan": "87369",
+  "raayan": "86088",
+  "demonte colony 2": "86639",
+  "lubber pandhu": "87208",
+  "meiyazhagan": "87066",
+  "pushpa 2": "88746",
+  "pushpa 2: the rule": "88746",
 };
 
-function getVerifiedMoviesdaFileId(title) {
+const MOVIESDA_TMDB_MAP = {
+  626392: "95553",   // Master
+  927342: "88497",   // Amaran
+  1129608: "86701",  // GOAT
+  1118224: "85289",  // Maharaja
+  949229: "82168",   // Leo
+  1075794: "82168",  // Leo alt
+  937020: "81231",   // Jailer
+  998844: "81231",   // Jailer alt
+  743563: "74672",   // Vikram
+  725201: "74672",   // Vikram alt
+  660046: "79747",   // Ponniyin Selvan
+  673692: "73806",   // Doctor
+  587030: "62704",   // Kaithi
+  576928: "62513",   // Asuran
+  855400: "70596",   // Jai Bhim
+  595228: "65497",   // Soorarai Pottru
+  1093966: "87369",  // Vettaiyan
+  1136418: "86088",  // Raayan
+  1034587: "86088",  // Raayan alt
+  979250: "86639",   // Demonte Colony 2
+  1182047: "87208",  // Lubber Pandhu
+  1171178: "87066",  // Meiyazhagan
+  1011985: "88746",  // Pushpa 2
+  1618200: "103008", // The Dark Heaven
+  1515692: "103147", // Anakapalli
+  1528659: "103140", // Cold Call
+  1531720: "102943", // Baththa
+  1578079: "102743", // Dorothy
+  1505305: "102966", // Immortal
+};
+
+function getVerifiedMoviesdaFileId(title, tmdbId) {
+  if (tmdbId && MOVIESDA_TMDB_MAP[Number(tmdbId)]) {
+    return MOVIESDA_TMDB_MAP[Number(tmdbId)];
+  }
   if (!title) return null;
-  const clean = title.toLowerCase().trim();
+  const clean = title.toLowerCase().replace(/\[.*?\]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (clean && MOVIESDA_VERIFIED_MAP[clean]) {
+    return MOVIESDA_VERIFIED_MAP[clean];
+  }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean.includes(k) || k.includes(clean)) return v;
+    if (clean === k || clean.includes(k) || k.includes(clean)) return v;
   }
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "102943") {
-  return getVerifiedMoviesdaFileId(title) || fallback;
+function resolveMoviesdaFileId(title, fallback = "102943", tmdbId = null) {
+  return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
 function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
-  const fileId = getVerifiedMoviesdaFileId(title) || (String(tmId).length === 6 ? String(tmId) : null);
+  const fileId = getVerifiedMoviesdaFileId(title, tmId) || (String(tmId).length === 6 ? String(tmId) : null);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   
   if (fileId) {
@@ -68,16 +133,51 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
       border: none;
       display: block;
     }
+    .fs-corner-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      z-index: 100;
+      background: rgba(15,12,22,0.85);
+      border: 1px solid rgba(255,255,255,0.25);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s, transform 0.15s;
+    }
+    .fs-corner-btn:hover { background: #e50914; transform: scale(1.04); }
   </style>
 </head>
 <body>
-  <div class="m-frame-box">
+  <div class="m-frame-box" id="frameBox">
+    <button class="fs-corner-btn" id="srcdocFsBtn" onclick="toggleLocalFs()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+      <span>Fullscreen</span>
+    </button>
     <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
     <div class="clipped-embed-wrap" id="embedWrap">
-      <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+      <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
   <script>
+    function toggleLocalFs() {
+      var box = document.getElementById("frameBox") || document.documentElement;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (box.requestFullscreen) box.requestFullscreen();
+        else if (box.webkitRequestFullscreen) box.webkitRequestFullscreen();
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      }
+    }
+
     (function() {
       var apiPfx = window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "";
       fetch(apiPfx + "/api/moviesda_stream?file_id=${fileId}")
@@ -88,8 +188,34 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
             var ew = document.getElementById("embedWrap");
             if (nv && ew) {
               nv.src = d.streamUrl;
+              nv.volume = 1.0;
               nv.style.display = "block";
               ew.style.display = "none";
+              
+              // Audio Clarity & Volume Boost Engine (+3.5dB Dynamic Boost)
+              try {
+                var AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (AudioCtx && !window._boostNodeAttached) {
+                  window._boostNodeAttached = true;
+                  var actx = new AudioCtx();
+                  var srcNode = actx.createMediaElementSource(nv);
+                  var gainNode = actx.createGain();
+                  gainNode.gain.value = 1.35; // Clean +3.5dB boost
+                  var comp = actx.createDynamicsCompressor();
+                  comp.threshold.value = -18;
+                  comp.knee.value = 10;
+                  comp.ratio.value = 3.5;
+                  comp.attack.value = 0.003;
+                  comp.release.value = 0.25;
+                  srcNode.connect(gainNode);
+                  gainNode.connect(comp);
+                  comp.connect(actx.destination);
+                  nv.addEventListener("play", function() {
+                    if (actx.state === "suspended") actx.resume();
+                  });
+                }
+              } catch(e) {}
+
               nv.play().catch(function() {});
             }
           }
@@ -117,7 +243,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
   </style>
 </head>
 <body>
-  <iframe id="embedFrame" src="${streamUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+  <iframe id="embedFrame" src="${streamUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
 </body>
 </html>`;
   }
@@ -132,7 +258,7 @@ class MovieshubPlayer {
     this.streamIframe = null;
     this.isPlaying = false;
     this.isMuted = false;
-    this.currentVolume = 0.85;
+    this.currentVolume = 1.0;
     this.currentSpeed = 1.0;
     this.currentQuality = "4K UHD (2160p)";
     this.currentAudio = "Original (Dolby Atmos)";
@@ -817,16 +943,16 @@ class MovieshubPlayer {
           name: "Server 2",
           badge: "Primary HD (VidLink)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&quality=1080&autoplay=true`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&quality=1080&autoplay=true`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&quality=1080&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta&sub=ta" : ""}`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&quality=1080&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta&sub=ta" : ""}`
         },
         {
           id: "s3",
           name: "Server 3",
           badge: "Fast Forward (AutoEmbed)",
           url: mtype === "tv"
-            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}`
-            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}`
+            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}${safeLang.toLowerCase() === "tamil" ? "?audio=ta&lang=ta" : ""}`
+            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}${safeLang.toLowerCase() === "tamil" ? "?audio=ta&lang=ta" : ""}`
         },
         {
           id: "s4",
@@ -926,7 +1052,7 @@ class MovieshubPlayer {
             </div>
           ` : ''}
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
-            <iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
+            <iframe id="player-stream-iframe" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
           <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;padding:6px 16px;background:rgba(12,11,18,0.98);border-top:1px solid rgba(255,255,255,0.08);z-index:50;min-height:48px;">
             <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
@@ -956,6 +1082,10 @@ class MovieshubPlayer {
               </button>
               <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server" style="white-space:nowrap;flex-shrink:0;">
                 <span>Next Server ⏭</span>
+              </button>
+              <button id="streamFsBtn" class="stream-fs-btn" title="Toggle Fullscreen (F)" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.22);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+                <span>Fullscreen</span>
               </button>
               <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
                 <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
@@ -1005,7 +1135,7 @@ class MovieshubPlayer {
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = `<iframe id="player-stream-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+            container.innerHTML = `<iframe id="player-stream-iframe" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
           }
@@ -1108,12 +1238,44 @@ class MovieshubPlayer {
         });
       }
 
-      // Quick Tamil Dubbed Button
+      // Quick Tamil Dubbed / Original Audio Button
       const quickTamilBtn = document.getElementById("quickTamilAudioBtn");
       if (quickTamilBtn) {
         quickTamilBtn.addEventListener("click", () => {
+          const mFileId = getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId);
+          if (mFileId) {
+            const s9Idx = servers.findIndex(s => s.id === "s9");
+            if (s9Idx !== -1) {
+              loadServer(s9Idx, false);
+              if (window.showToast) window.showToast(`🔊 Playing ${movie?.title || "Movie"} in Original Tamil Audio (Moviesda HD)`);
+              return;
+            }
+          }
+          // For international or general titles with Tamil Dubbed:
           loadServer(1, false);
           if (window.showToast) window.showToast("Playing in Server 2 (Tamil Dubbed HD)");
+        });
+      }
+
+      // Dedicated Stream Fullscreen Button
+      const streamFsBtn = document.getElementById("streamFsBtn");
+      if (streamFsBtn) {
+        streamFsBtn.addEventListener("click", () => {
+          const container = document.getElementById("playerStreamFrameContainer") || this.modal;
+          if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            if (container.requestFullscreen) {
+              container.requestFullscreen().catch(() => {
+                if (this.modal && this.modal.requestFullscreen) this.modal.requestFullscreen().catch(() => {});
+              });
+            } else if (container.webkitRequestFullscreen) {
+              container.webkitRequestFullscreen();
+            } else if (this.modal && this.modal.requestFullscreen) {
+              this.modal.requestFullscreen().catch(() => {});
+            }
+          } else {
+            if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+            else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(() => {});
+          }
         });
       }
 

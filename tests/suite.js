@@ -302,6 +302,17 @@ assert(vercelJson.headers && vercelJson.headers.length > 0, "HTTP Security heade
 assert(playerCode.includes("e.origin && e.origin !== window.location.origin"), "Player validates postMessage origins against malicious third-party frames");
 assert(!fs.existsSync(path.join(__dirname, "../clean_code.zip")), "clean_code.zip removed from public web root");
 
+// 15. Testing Fullscreen, Audio Boost, and Master Movie Tamil Dubbed Engine
+console.log("\n15. Testing Fullscreen, Audio Boost, and Master Movie Tamil Dubbed Engine...");
+const dolbyCode = fs.readFileSync(path.join(__dirname, "../js/dolby-atmos.js"), "utf8");
+assert(playerCode.includes("streamFsBtn"), "Dedicated stream fullscreen button integrated in server toolbar");
+assert(playerCode.includes("webkitallowfullscreen") && playerCode.includes("mozallowfullscreen"), "Cross-browser webkitallowfullscreen and mozallowfullscreen permissions configured");
+assert(playerCode.includes("fullscreen *"), "Modern W3C wildcard fullscreen permission policy enabled");
+assert(playerCode.includes('"master": "95553"'), "Master movie mapped to verified Moviesda Tamil original print 95553");
+assert(playerCode.includes('626392: "95553"'), "Master TMDB 626392 mapped to verified Tamil stream");
+assert(dolbyCode.includes("this.masterGain.gain.value = 1.25"), "Dolby Atmos engine has +3dB master volume boost");
+assert(playerCode.includes("_boostNodeAttached"), "Moviesda HTML5 player has Web Audio vocal clarity & dynamic boost engine");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

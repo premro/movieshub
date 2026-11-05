@@ -711,25 +711,80 @@ const MOVIESDA_VERIFIED_MAP = {
   "varam": "102956",
   "418": "102870",
   "bigg boss": "103132",
+  // Top Kollywood Blockbusters (Original Tamil HD Prints)
+  "master": "95553",
+  "amaran": "88497",
+  "goat": "86701",
+  "the greatest of all time": "86701",
+  "the greatest of all time (g.o.a.t)": "86701",
+  "maharaja": "85289",
+  "leo": "82168",
+  "leo: bloody sweet": "82168",
+  "jailer": "81231",
+  "vikram": "74672",
+  "ps1": "79747",
+  "ponniyin selvan": "79747",
+  "doctor": "73806",
+  "kaithi": "62704",
+  "asuran": "62513",
+  "jai bhim": "70596",
+  "soorarai pottru": "65497",
+  "vettaiyan": "87369",
+  "raayan": "86088",
+  "demonte colony 2": "86639",
+  "lubber pandhu": "87208",
+  "meiyazhagan": "87066",
+  "pushpa 2": "88746",
 };
 
-function getVerifiedMoviesdaFileId(title) {
+const MOVIESDA_TMDB_MAP = {
+  626392: "95553",   // Master
+  927342: "88497",   // Amaran
+  1129608: "86701",  // GOAT
+  1118224: "85289",  // Maharaja
+  949229: "82168",   // Leo
+  1075794: "82168",  // Leo alt
+  937020: "81231",   // Jailer
+  743563: "74672",   // Vikram
+  660046: "79747",   // Ponniyin Selvan
+  673692: "73806",   // Doctor
+  587030: "62704",   // Kaithi
+  576928: "62513",   // Asuran
+  1093966: "87369",  // Vettaiyan
+  1136418: "86088",  // Raayan
+  1182047: "87208",  // Lubber Pandhu
+  1171178: "87066",  // Meiyazhagan
+  1011985: "88746",  // Pushpa 2
+  1618200: "103008", // The Dark Heaven
+  1515692: "103147", // Anakapalli
+  1528659: "103140", // Cold Call
+  1531720: "102943", // Baththa
+  1578079: "102743", // Dorothy
+};
+
+function getVerifiedMoviesdaFileId(title, tmdbId) {
+  if (tmdbId && MOVIESDA_TMDB_MAP[Number(tmdbId)]) {
+    return MOVIESDA_TMDB_MAP[Number(tmdbId)];
+  }
   if (!title) return null;
-  const clean = title.toLowerCase().trim();
+  const clean = title.toLowerCase().replace(/\[.*?\]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (clean && MOVIESDA_VERIFIED_MAP[clean]) {
+    return MOVIESDA_VERIFIED_MAP[clean];
+  }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean.includes(k) || k.includes(clean)) return v;
+    if (clean === k || clean.includes(k) || k.includes(clean)) return v;
   }
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "102943") {
-  return getVerifiedMoviesdaFileId(title) || fallback;
+function resolveMoviesdaFileId(title, fallback = "102943", tmdbId = null) {
+  return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
 function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const cleanTitle = (title || "Movie").replace(/\[.*?\]/g, "").replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
-  const fileId = resolveMoviesdaFileId(cleanTitle);
+  const fileId = resolveMoviesdaFileId(cleanTitle, "102943", tmId);
   const embedUrl = `${prefix}/stream/moviesda/embed?file_id=${fileId}&title=${encodeURIComponent(cleanTitle)}&year=${year}`;
   const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
   const isTv = mtype === "tv";
@@ -792,7 +847,7 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
     </div>
 
     <div class="m-frame-box">
-      <iframe id="mainFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
+      <iframe id="mainFrame" src="${embedUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
 
     <div class="m-sub-bar">
