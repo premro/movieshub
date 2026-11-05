@@ -770,7 +770,7 @@ class MovieshubPlayer {
 
       const pfx = (typeof window !== "undefined" && window.API_PREFIX)
         ? window.API_PREFIX
-        : "https://movieshub-60079640926.development.catalystserverless.in/server/movieshub_api";
+        : "/server/movieshub_api";
 
       const netId = movie?.netId || movie?.nid || "";
       const season = movie?.season || 1;

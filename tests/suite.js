@@ -232,6 +232,9 @@ assert(!playerCode.includes("multiLang=1"), "Player no longer uses broken multiL
 const vercelJson = JSON.parse(fs.readFileSync(path.join(__dirname, "../vercel.json"), "utf8"));
 const hasServerRewrite = vercelJson.rewrites.some(r => r.source.includes("/server/"));
 assert(hasServerRewrite, "Vercel rewrites /server/ to prevent 404 errors on external deployments");
+const indexHtmlContent = fs.readFileSync(path.join(__dirname, "../index.html"), "utf8");
+assert(indexHtmlContent.includes("window.IS_VERCEL") && indexHtmlContent.includes('window.API_PREFIX = "/server/movieshub_api"'), "Vercel uses same-origin relative API prefix without hitting external Catalyst");
+assert(!playerCode.includes('window.API_PREFIX ? window.API_PREFIX : "https://movieshub-60079640926.development.catalystserverless.in'), "Player defaults to local serverless route on Vercel deployments");
 
 // 10. Testing Multi-Server Network (Servers 1 to 9) & Server Integrity
 console.log("\n10. Testing Multi-Server Network (Servers 1 to 9) & Server Integrity...");

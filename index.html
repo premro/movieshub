@@ -10,19 +10,25 @@
   <meta name="description" content="Movieshub - Pure ad-free streaming with instant language filters for Tamil, English, Hindi, Telugu, and Malayalam. Created by Prem.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
-  <link rel="stylesheet" href="css/styles.css?v=20261104_10">
+  <link rel="stylesheet" href="css/styles.css?v=20261105_01">
   <script>
     window.IS_CATALYST = typeof window !== "undefined" && (
       window.location.hostname.includes("catalystserverless") ||
       window.location.hostname.includes("zohocatalyst") ||
       window.location.pathname.startsWith("/app")
     );
+    window.IS_VERCEL = typeof window !== "undefined" && (
+      window.location.hostname.includes("vercel.app") ||
+      window.location.hostname.includes("now.sh")
+    );
     window.IS_GITHUB_PAGES = typeof window !== "undefined" && window.location.hostname.endsWith("github.io");
 
-    if (window.IS_CATALYST) {
-      window.API_PREFIX = "/server/movieshub_api";
-    } else {
+    // On Vercel, Catalyst, or Localhost, use relative /server/movieshub_api to stay 100% same-origin with zero CORS errors
+    // Only static GitHub Pages requires the remote Zoho Catalyst fallback
+    if (window.IS_GITHUB_PAGES) {
       window.API_PREFIX = "https://movieshub-60079640926.development.catalystserverless.in/server/movieshub_api";
+    } else {
+      window.API_PREFIX = "/server/movieshub_api";
     }
 
     if (window.API_PREFIX) {
@@ -178,14 +184,14 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="js/hls.min.js?v=20261104_10"></script>
-  <script src="js/profile.js?v=20261104_10"></script>
-  <script src="js/catalog.js?v=20261104_10"></script>
-  <script src="js/search.js?v=20261104_10"></script>
-  <script src="js/livetv.js?v=20261104_10"></script>
-  <script src="js/sports.js?v=20261104_10"></script>
-  <script src="js/dolby-atmos.js?v=20261104_10"></script>
-  <script src="js/player.js?v=20261104_10"></script>
-  <script src="js/app.js?v=20261104_10"></script>
+  <script src="js/hls.min.js?v=20261105_01"></script>
+  <script src="js/profile.js?v=20261105_01"></script>
+  <script src="js/catalog.js?v=20261105_01"></script>
+  <script src="js/search.js?v=20261105_01"></script>
+  <script src="js/livetv.js?v=20261105_01"></script>
+  <script src="js/sports.js?v=20261105_01"></script>
+  <script src="js/dolby-atmos.js?v=20261105_01"></script>
+  <script src="js/player.js?v=20261105_01"></script>
+  <script src="js/app.js?v=20261105_01"></script>
 </body>
 </html>
