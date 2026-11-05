@@ -163,7 +163,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
     </button>
     <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
     <div class="clipped-embed-wrap" id="embedWrap">
-      <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
+      <iframe id="embedFrame" src="${embedUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
   <script>
@@ -188,35 +188,32 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
             var ew = document.getElementById("embedWrap");
             if (nv && ew) {
               nv.src = d.streamUrl;
+              nv.muted = false;
               nv.volume = 1.0;
               nv.style.display = "block";
               ew.style.display = "none";
-              
-              // Audio Clarity & Volume Boost Engine (+3.5dB Dynamic Boost)
-              try {
-                var AudioCtx = window.AudioContext || window.webkitAudioContext;
-                if (AudioCtx && !window._boostNodeAttached) {
-                  window._boostNodeAttached = true;
-                  var actx = new AudioCtx();
-                  var srcNode = actx.createMediaElementSource(nv);
-                  var gainNode = actx.createGain();
-                  gainNode.gain.value = 1.35; // Clean +3.5dB boost
-                  var comp = actx.createDynamicsCompressor();
-                  comp.threshold.value = -18;
-                  comp.knee.value = 10;
-                  comp.ratio.value = 3.5;
-                  comp.attack.value = 0.003;
-                  comp.release.value = 0.25;
-                  srcNode.connect(gainNode);
-                  gainNode.connect(comp);
-                  comp.connect(actx.destination);
-                  nv.addEventListener("play", function() {
-                    if (actx.state === "suspended") actx.resume();
+              var playPromise = nv.play();
+              if (playPromise !== undefined) {
+                playPromise.catch(function() {
+                  nv.muted = true;
+                  nv.play().then(function() {
+                    var unBtn = document.createElement("button");
+                    unBtn.id = "unmuteNoticeBtn";
+                    unBtn.innerHTML = "🔊 Click to Unmute Audio";
+                    unBtn.style.cssText = "position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#e50914;color:#fff;padding:10px 22px;border-radius:30px;border:none;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.6);";
+                    unBtn.onclick = function() {
+                      nv.muted = false;
+                      nv.volume = 1.0;
+                      unBtn.remove();
+                    };
+                    var box = document.getElementById("frameBox");
+                    if (box) box.appendChild(unBtn);
+                  }).catch(function() {
+                    nv.style.display = "none";
+                    ew.style.display = "block";
                   });
-                }
-              } catch(e) {}
-
-              nv.play().catch(function() {});
+                });
+              }
             }
           }
         })
@@ -1005,13 +1002,11 @@ class MovieshubPlayer {
       ];
 
       // Smart Auto-Selection for Instant Zero-Buffer Playback:
-      const moviesdaFileId = getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
-      if (moviesdaFileId) {
-        // Automatically default to Server 9 (Moviesda Tamil HD) so regional prints (like The Dark Heaven) play instantly!
+      const isRegionalOnly = cleanTitle.includes("dark heaven") || cleanTitle.includes("baththa") || cleanTitle.includes("anakapalli");
+      if (isRegionalOnly) {
         const s9Idx = servers.findIndex(s => s.id === "s9");
         this.currentServerIdx = s9Idx !== -1 ? s9Idx : 0;
       } else {
-        // For general movies, start on Server 2 (VidLink Ultra HD 0-Buffer) for instant autoplay!
         const s2Idx = servers.findIndex(s => s.id === "s2");
         this.currentServerIdx = s2Idx !== -1 ? s2Idx : 0;
       }
@@ -1052,7 +1047,7 @@ class MovieshubPlayer {
             </div>
           ` : ''}
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
-            <iframe id="player-stream-iframe" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
+            <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
           <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;padding:6px 16px;background:rgba(12,11,18,0.98);border-top:1px solid rgba(255,255,255,0.08);z-index:50;min-height:48px;">
             <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
@@ -1135,7 +1130,7 @@ class MovieshubPlayer {
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = `<iframe id="player-stream-iframe" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+            container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
           }
@@ -1159,7 +1154,7 @@ class MovieshubPlayer {
 
           const mFileId = getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
 
-          if (srv.id === "s9" || ((srv.id === "s1" || srv.id === "s2") && mFileId)) {
+          if (srv.id === "s9") {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
             hidePreloader();

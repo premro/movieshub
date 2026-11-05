@@ -847,7 +847,7 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
     </div>
 
     <div class="m-frame-box">
-      <iframe id="mainFrame" src="${embedUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
+      <iframe id="mainFrame" src="${embedUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
 
     <div class="m-sub-bar">
