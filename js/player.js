@@ -336,8 +336,11 @@ class MovieshubPlayer {
       });
     }
 
-    // Iframe postMessage listener for download actions
+    // Iframe postMessage listener for download actions (Secured with origin validation)
     window.addEventListener("message", (e) => {
+      if (e.origin && e.origin !== window.location.origin && e.origin !== "null") {
+        return;
+      }
       if (e.data && e.data.action === "open_download" && this.currentMovie && window.movieshubApp) {
         window.movieshubApp.openDownloadModal(this.currentMovie);
       }

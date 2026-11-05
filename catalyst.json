@@ -14,7 +14,11 @@
       "assets/videos/**",
       "assets/*.mp4",
       "assets/**/*.mp4",
-      "data/**"
+      "data/**",
+      "*.zip",
+      "*.tar",
+      "*.tar.gz",
+      "*.bak"
     ]
   },
   "functions": {

@@ -3,3 +3,10 @@ node_modules/
 server.log
 .catalystrc
 *.tmp
+
+*.zip
+*.tar
+*.tar.gz
+*.bak
+*.7z
+*.rar

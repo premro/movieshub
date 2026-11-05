@@ -7,8 +7,36 @@ const fs = require('fs');
 const path = require('path');
 const { URL, URLSearchParams } = require('url');
 
-const NETMIRROR_SECRET = 'net###@@sss';
-const TMDB_KEYS = ['c8dea14dc917687ac631a52620e4f7ad', '3cb41ecea3bf606c56552db3d17adefd'];
+const NETMIRROR_SECRET = process.env.NETMIRROR_SECRET || 'net###@@sss';
+const TMDB_KEYS = process.env.TMDB_KEYS 
+  ? process.env.TMDB_KEYS.split(',').map(k => k.trim()).filter(Boolean)
+  : ['c8dea14dc917687ac631a52620e4f7ad', '3cb41ecea3bf606c56552db3d17adefd'];
+
+// Strict SSRF Whitelist for Image Proxy
+const ALLOWED_IMAGE_HOSTS = [
+  'image.tmdb.org',
+  'img.youtube.com',
+  'i.ytimg.com',
+  'images.unsplash.com',
+  'wsrv.nl',
+  'm.media-amazon.com',
+  'assets.stickpng.com',
+  'play.onestream.today',
+  'movies.downloadpage.xyz'
+];
+
+function isSafeImageUrl(rawUrl) {
+  try {
+    const parsed = new URL(rawUrl);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') return false;
+    const host = parsed.hostname.toLowerCase();
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1' || host === '169.254.169.254') return false;
+    if (/^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\.|^192\.168\./.test(host)) return false;
+    return ALLOWED_IMAGE_HOSTS.some(allowed => host === allowed || host.endsWith('.' + allowed));
+  } catch (e) {
+    return false;
+  }
+}
 
 const LANG_NAME_MAP = {
   ta: 'Tamil', en: 'English', hi: 'Hindi', te: 'Telugu', ml: 'Malayalam',
@@ -893,12 +921,12 @@ module.exports = async (req, res) => {
     return res.end(svg);
   }
 
-  // 6. Image Proxy
+  // 6. Image Proxy (Hardened with strict SSRF defense)
   if (pathname === '/api/image_proxy') {
     const targetUrl = u.searchParams.get('url');
-    if (!targetUrl) {
-      res.writeHead(400);
-      return res.end('Missing url');
+    if (!targetUrl || !isSafeImageUrl(targetUrl)) {
+      res.writeHead(403, { 'Content-Type': 'application/json' });
+      return res.end(JSON.stringify({ error: 'Image proxy URL is invalid or domain not allowed' }));
     }
     try {
       const { buffer, headers, statusCode } = await fetchBuffer(targetUrl);
@@ -1083,28 +1111,27 @@ module.exports = async (req, res) => {
     return res.end(html);
   }
 
-  // 8. Stream netmirror embed proxy
+  // 8. Stream netmirror embed proxy (Hardened against SSRF and Reflected XSS)
   if (pathname === '/stream/netmirror/embed') {
-    let targetUrl = u.searchParams.get('url') || '';
-    if (!targetUrl) {
-      const tmId = u.searchParams.get('tm_id') || u.searchParams.get('id') || '';
-      const nid = u.searchParams.get('nid') || u.searchParams.get('net_id') || '';
-      const year = u.searchParams.get('year') || '2024';
-      if (tmId) {
-        const ts = String(Math.floor(Date.now() / 1000));
-        const sig = crypto.createHmac('sha256', NETMIRROR_SECRET).update(`${tmId}:${ts}`).digest('hex');
-        targetUrl = `https://webvp.watch21.shop/play/watchcinemo.php?tm_id=${tmId}&nid=${nid}&year=${year}&se=0&ep=0&ts=${ts}&sig=${sig}&hasExt=true`;
-      }
+    const tmId = u.searchParams.get('tm_id') || u.searchParams.get('id') || '';
+    const nid = u.searchParams.get('nid') || u.searchParams.get('net_id') || '';
+    const year = u.searchParams.get('year') || '2024';
+    const se = u.searchParams.get('se') || '0';
+    const ep = u.searchParams.get('ep') || '0';
+
+    if (!tmId || !/^[0-9a-zA-Z_-]+$/.test(tmId)) {
+      res.writeHead(400, { 'Content-Type': 'text/plain' });
+      return res.end('Invalid or missing Movie ID');
     }
-    if (!targetUrl) {
-      res.writeHead(400);
-      return res.end('Missing url or id');
-    }
-    if (targetUrl.includes('hasExt=') && !targetUrl.includes('hasExt=true')) {
-      targetUrl = targetUrl.replace('hasExt=', 'hasExt=true');
-    } else if (!targetUrl.includes('hasExt=true')) {
-      targetUrl += '&hasExt=true';
-    }
+
+    const safeYear = /^\d{4}$/.test(year) ? year : '2024';
+    const safeNid = /^[0-9a-zA-Z_-]*$/.test(nid) ? nid : '';
+    const safeSe = /^\d+$/.test(se) ? se : '0';
+    const safeEp = /^\d+$/.test(ep) ? ep : '0';
+
+    const ts = String(Math.floor(Date.now() / 1000));
+    const sig = crypto.createHmac('sha256', NETMIRROR_SECRET).update(`${tmId}:${ts}`).digest('hex');
+    const targetUrl = `https://webvp.watch21.shop/play/watchcinemo.php?tm_id=${encodeURIComponent(tmId)}&nid=${encodeURIComponent(safeNid)}&year=${safeYear}&se=${safeSe}&ep=${safeEp}&ts=${ts}&sig=${sig}&hasExt=true`;
 
     try {
       const { buffer } = await fetchBuffer(targetUrl, {
@@ -1159,19 +1186,20 @@ module.exports = async (req, res) => {
     }
   }
 
-  // 9. Download
+  // 9. Download (Hardened with strict redirect sanitization)
   if (pathname === "/api/download") {
-    const tmId = u.searchParams.get("id") || "";
+    const rawId = u.searchParams.get("id") || "";
     const title = u.searchParams.get("title") || "";
     const quality = u.searchParams.get("quality") || "";
+    const safeTmId = /^[0-9a-zA-Z_-]+$/.test(rawId) ? rawId : "1505305";
     
     if (quality === "moviesda" || (title && resolveMoviesdaFileId(title) !== "103147")) {
       const fileId = resolveMoviesdaFileId(title);
-      const moviesdaDl = `https://download.moviespage.xyz/download/file/${fileId}`;
+      const moviesdaDl = `https://download.moviespage.xyz/download/file/${encodeURIComponent(fileId)}`;
       res.writeHead(302, { "Location": moviesdaDl });
       return res.end();
     }
-    const fallbackUrl = `https://vidlink.pro/movie/${tmId}`;
+    const fallbackUrl = `https://vidlink.pro/movie/${encodeURIComponent(safeTmId)}`;
     res.writeHead(302, { "Location": fallbackUrl });
     return res.end();
   }

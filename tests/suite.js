@@ -292,6 +292,16 @@ assert(root2024Count === 0, "Root dashboard cache contains zero 2024 movies in l
 assert(backendCache.latest_six.every(m => m.year >= 2025), "All latest_six movies are 2026 or 2025 releases");
 assert(appCode.includes("Moviesda 2026 Master (Watermark Removed)"), "Download modal has direct Moviesda watermark-free download option");
 
+// 14. Testing Security Hardening & Vulnerability Defenses
+console.log("\n14. Testing Security Hardening & Vulnerability Defenses...");
+const apiIndexCode = fs.readFileSync(path.join(__dirname, "../api/index.js"), "utf8");
+assert(apiIndexCode.includes("isSafeImageUrl"), "SSRF whitelist defense is implemented in api/index.js");
+assert(!apiIndexCode.includes("let targetUrl = u.searchParams.get('url') || '';"), "Arbitrary url parameter removed from netmirror embed proxy");
+assert(apiIndexCode.includes("process.env.NETMIRROR_SECRET"), "Netmirror secret is configurable via environment variables");
+assert(vercelJson.headers && vercelJson.headers.length > 0, "HTTP Security headers configured in vercel.json");
+assert(playerCode.includes("e.origin && e.origin !== window.location.origin"), "Player validates postMessage origins against malicious third-party frames");
+assert(!fs.existsSync(path.join(__dirname, "../clean_code.zip")), "clean_code.zip removed from public web root");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
