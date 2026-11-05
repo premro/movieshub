@@ -59,6 +59,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
     .m-frame-box { width: 100%; height: 100%; position: relative; background: #000; overflow: hidden; }
+    #nativeVideo { width: 100%; height: 100%; object-fit: contain; background: #000; display: none; }
     .clipped-embed-wrap { width: 100%; height: 100%; position: absolute; inset: 0; overflow: hidden; }
     .clipped-embed-wrap iframe {
       width: 100%;
@@ -71,10 +72,31 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
 </head>
 <body>
   <div class="m-frame-box">
-    <div class="clipped-embed-wrap">
+    <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
+    <div class="clipped-embed-wrap" id="embedWrap">
       <iframe id="embedFrame" src="${embedUrl}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" allowfullscreen referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
+  <script>
+    (function() {
+      var apiPfx = window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "";
+      fetch(apiPfx + "/api/moviesda_stream?file_id=${fileId}")
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (d && d.streamUrl) {
+            var nv = document.getElementById("nativeVideo");
+            var ew = document.getElementById("embedWrap");
+            if (nv && ew) {
+              nv.src = d.streamUrl;
+              nv.style.display = "block";
+              ew.style.display = "none";
+              nv.play().catch(function() {});
+            }
+          }
+        })
+        .catch(function() {});
+    })();
+  </script>
 </body>
 </html>`;
   } else {
@@ -795,8 +817,8 @@ class MovieshubPlayer {
           name: "Server 2",
           badge: "Primary HD (VidLink)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidlink.pro/movie/${resolvedTmdbId}`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&quality=1080&autoplay=true`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&quality=1080&autoplay=true`
         },
         {
           id: "s3",
@@ -850,11 +872,23 @@ class MovieshubPlayer {
           id: "s9",
           name: "Server 9",
           badge: "Moviesda Tamil HD",
-          url: `https://moviezda.me/moviesda-tamil-movies-2026/`
+          url: (getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
+            ? `https://play.onestream.today/stream/page/${getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
+            : `https://moviezda.me/moviesda-tamil-movies-2026/`
         }
       ];
 
-      this.currentServerIdx = 0;
+      // Smart Auto-Selection for Instant Zero-Buffer Playback:
+      const moviesdaFileId = getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
+      if (moviesdaFileId) {
+        // Automatically default to Server 9 (Moviesda Tamil HD) so regional prints (like The Dark Heaven) play instantly!
+        const s9Idx = servers.findIndex(s => s.id === "s9");
+        this.currentServerIdx = s9Idx !== -1 ? s9Idx : 0;
+      } else {
+        // For general movies, start on Server 2 (VidLink Ultra HD 0-Buffer) for instant autoplay!
+        const s2Idx = servers.findIndex(s => s.id === "s2");
+        this.currentServerIdx = s2Idx !== -1 ? s2Idx : 0;
+      }
       this.isAutoSwitchingEnabled = false;
 
       // Prevent unauthorized external redirects
@@ -993,7 +1027,9 @@ class MovieshubPlayer {
             }
           };
 
-          if (srv.id === "s9") {
+          const mFileId = getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
+
+          if (srv.id === "s9" || ((srv.id === "s1" || srv.id === "s2") && mFileId)) {
             curIframe.removeAttribute("src");
             curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
             hidePreloader();
@@ -1002,12 +1038,20 @@ class MovieshubPlayer {
 
           if (srv.id === "s1") {
             curIframe.removeAttribute("srcdoc");
-            curIframe.src = mtype === "tv"
-              ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
-              : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`;
+            // Set instant working fallback so the player is never black or waiting
+            const instantStreamUrl = mtype === "tv"
+              ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true`
+              : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&autoplay=true`;
+            curIframe.src = instantStreamUrl;
+            hidePreloader();
+
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
-            fetch(srv.url)
+            const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+            const timeoutId = controller ? setTimeout(() => controller.abort(), 2500) : null;
+
+            fetch(srv.url, controller ? { signal: controller.signal } : {})
               .then(res => {
+                if (timeoutId) clearTimeout(timeoutId);
                 if (!res.ok) throw new Error("HTTP " + res.status);
                 return res.text();
               })
@@ -1015,18 +1059,10 @@ class MovieshubPlayer {
                 if (html && html.includes("<") && !html.includes("Stream Proxy error")) {
                   curIframe.removeAttribute("src");
                   curIframe.srcdoc = html;
-                  hidePreloader();
-                } else {
-                  throw new Error("Invalid stream HTML");
                 }
               })
               .catch(err => {
                 console.warn("[Movieshub] Server 1 fetch failed, falling back to clean upstream:", err);
-                curIframe.removeAttribute("srcdoc");
-                curIframe.src = mtype === "tv"
-                  ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/1/1`
-                  : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`;
-                hidePreloader();
               });
             return;
           }
@@ -1144,8 +1180,8 @@ class MovieshubPlayer {
         });
       }
 
-      // Load initial server (Server 1: VidLink Primary HD)
-      loadServer(0, false);
+      // Load initial server (Smart selected: Server 9 for Tamil prints, Server 2 for Instant HD)
+      loadServer(this.currentServerIdx, false);
 
       if (window.showToast) window.showToast("Streaming Full Movie • Ultra HD");
     } else {

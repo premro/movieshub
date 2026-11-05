@@ -1138,7 +1138,8 @@ module.exports = async (req, res) => {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
           'Referer': 'https://netmirror.plus/'
-        }
+        },
+        timeout: 3000
       });
       let htmlStr = buffer.toString('utf8');
       const baseTag = '<base href="https://webvp.watch21.shop/play/">';
@@ -1181,8 +1182,12 @@ module.exports = async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(htmlStr);
     } catch (err) {
-      res.writeHead(502);
-      return res.end('Stream Proxy error');
+      const isTv = safeSe !== '0' && safeEp !== '0';
+      const fallbackUrl = isTv 
+        ? `https://vidlink.pro/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}?primaryColor=e50914&autoplay=true`
+        : `https://vidlink.pro/movie/${encodeURIComponent(tmId)}?primaryColor=e50914&autoplay=true`;
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%;height:100%;margin:0;padding:0;border:0;background:#000;overflow:hidden;}</style></head><body><iframe src="${fallbackUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe></body></html>`);
     }
   }
 
