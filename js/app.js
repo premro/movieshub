@@ -169,6 +169,8 @@ class MovieshubApp {
               existing.rating = m.rating;
             }
             if (m.match) existing.match = m.match;
+            if (m.moviesdaFileId) existing.moviesdaFileId = m.moviesdaFileId;
+            if (m.isTheatrePrint) existing.isTheatrePrint = true;
           }
         };
 
@@ -210,14 +212,17 @@ class MovieshubApp {
         let added = 0;
         results.forEach(m => {
           if (!m || !m.title) return;
-          const exists = this.catalog.some(c =>
+          const existing = this.catalog.find(c =>
             (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) ||
             (c.id && m.id && c.id === m.id) ||
             (c.title && m.title && c.title.toLowerCase() === m.title.toLowerCase())
           );
-          if (!exists) {
+          if (!existing) {
             this.catalog.push(m);
             added++;
+          } else {
+            if (m.moviesdaFileId) existing.moviesdaFileId = m.moviesdaFileId;
+            if (m.isTheatrePrint) existing.isTheatrePrint = true;
           }
         });
 

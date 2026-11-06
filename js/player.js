@@ -7,27 +7,53 @@
 
 
 const MOVIESDA_VERIFIED_MAP = {
-  "anakapalli": "103147",
+  // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "kauriburir the cursed temple": "103307",
+  "ramayana": "103234",
+  "ramayana 2026": "103234",
+  "im game": "103243",
+  "the grandmaster": "103308",
+  "grandmaster": "103308",
+  "nooru kodi vaanavil": "103286",
+  "7 star boys": "103309",
+  "seven star boys": "103309",
+  "angelina": "103262",
+  "all pass": "103254",
+  "meesaya murukku 2": "103225",
+  "meesaya murukku": "103225",
+  "dilwali diwali": "103217",
+  "heart beat": "103204",
+  "tula pahta": "103193",
+  "lakshmikanthan kolai vazhakku": "103196",
+  "aazam": "103176",
+  "aakhri sawal": "103168",
+  "anakapalli": "103150",
   "cold call": "103140",
-  "baththa": "102943",
-  "dorothy": "102743",
-  "the dark heaven": "103008",
-  "dark heaven": "103008",
-  "immortal": "102966",
-  "sigma": "103031",
-  "si yugandhar": "103027",
-  "yugandhar": "103027",
-  "comrade kalyan": "103017",
-  "dont trouble the trouble": "102975",
-  "avarachan and sons": "102992",
-  "akka": "103040",
-  "love always": "103067",
+  "sampurna": "103124",
   "meethe mein kya hai": "103075",
-  "sampurna": "103118",
+  "love always": "103067",
+  "akka": "103047",
+  "the dark heaven": "103032",
+  "dark heaven": "103032",
+  "sigma": "103031",
+  "si yugandhar": "103029",
+  "yugandhar": "103029",
+  "comrade kalyan": "103017",
+  "avarachan and sons": "102997",
+  "dont trouble the trouble": "103020",
+  "immortal": "102966",
+  "dorothy": "102743",
+  "baththa": "102943",
+  "jigris": "102924",
   "madam inspector": "102906",
-  "varam": "102956",
+  "varam": "103209",
   "418": "102870",
-  "bigg boss": "103132",
+  "bigg boss": "103263",
+  "dhoomakethu": "102859",
+  "cocoons": "102849",
+  "chola kollai bommai": "102838",
+  "its a medical miracle": "102835",
+  "celebrity master chef": "103310",
   // Top Kollywood Blockbusters (Original Tamil HD Prints)
   "master": "95553",
   "amaran": "88497",
@@ -58,6 +84,20 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  656908: "103234",   // Ramayana
+  1538457: "103225",  // Meesaya Murukku 2
+  1250502: "103243",  // Im Game
+  1735058: "103308",  // The Grandmaster
+  926867: "103286",   // Nooru Kodi Vaanavil
+  1819399: "103309",  // 7 Star Boys
+  1338751: "103262",  // Angelina
+  1786905: "103254",  // All Pass
+  1618200: "103032",  // The Dark Heaven
+  1515692: "103150",  // Anakapalli
+  1528659: "103140",  // Cold Call
+  1531720: "102943",  // Baththa
+  1578079: "102743",  // Dorothy
+  1505305: "102966",  // Immortal
   626392: "95553",   // Master
   927342: "88497",   // Amaran
   1129608: "86701",  // GOAT
@@ -81,12 +121,6 @@ const MOVIESDA_TMDB_MAP = {
   1182047: "87208",  // Lubber Pandhu
   1171178: "87066",  // Meiyazhagan
   1011985: "88746",  // Pushpa 2
-  1618200: "103008", // The Dark Heaven
-  1515692: "103147", // Anakapalli
-  1528659: "103140", // Cold Call
-  1531720: "102943", // Baththa
-  1578079: "102743", // Dorothy
-  1505305: "102966", // Immortal
 };
 
 function getVerifiedMoviesdaFileId(title, tmdbId) {
@@ -94,27 +128,31 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
     return MOVIESDA_TMDB_MAP[Number(tmdbId)];
   }
   if (!title) return null;
-  const clean = title.toLowerCase().replace(/\[.*?\]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const raw = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const clean = raw.replace(/\b(2026|2025|2024|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
   if (clean && MOVIESDA_VERIFIED_MAP[clean]) {
     return MOVIESDA_VERIFIED_MAP[clean];
   }
+  if (raw && MOVIESDA_VERIFIED_MAP[raw]) {
+    return MOVIESDA_VERIFIED_MAP[raw];
+  }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || clean.includes(k) || k.includes(clean)) return v;
+    if (clean === k || (clean.length > 2 && (clean.includes(k) || k.includes(clean)))) return v;
+    if (raw === k || raw.includes(k) || k.includes(raw)) return v;
   }
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "102943", tmdbId = null) {
+function resolveMoviesdaFileId(title, fallback = "103234", tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
-function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
-  const fileId = getVerifiedMoviesdaFileId(title, tmId) || (String(tmId).length === 6 ? String(tmId) : null);
+function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFileId = null) {
+  const fileId = customFileId || getVerifiedMoviesdaFileId(title, tmId) || (String(tmId).length === 6 ? String(tmId) : null);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-  
-  if (fileId) {
-    const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
-    return `<!DOCTYPE html>
+  const embedUrl = fileId ? `https://play.onestream.today/stream/page/${fileId}` : "";
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -157,12 +195,17 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
 </head>
 <body>
   <div class="m-frame-box" id="frameBox">
+    <div id="mLoader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;">
+      <div style="width:42px;height:42px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+      <div id="mLoaderText" style="margin-top:14px;font-size:13px;color:#22c55e;font-weight:700;letter-spacing:0.3px;">Connecting to Moviesda 2026 HD Stream...</div>
+      <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+    </div>
     <button class="fs-corner-btn" id="srcdocFsBtn" onclick="toggleLocalFs()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
       <span>Fullscreen</span>
     </button>
     <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
-    <div class="clipped-embed-wrap" id="embedWrap">
+    <div class="clipped-embed-wrap" id="embedWrap" style="display:none;">
       <iframe id="embedFrame" src="${embedUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
@@ -178,72 +221,95 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year) {
       }
     }
 
+    function playDirect(streamUrl) {
+      var loader = document.getElementById("mLoader");
+      if (loader) loader.style.display = "none";
+      var nv = document.getElementById("nativeVideo");
+      var ew = document.getElementById("embedWrap");
+      if (nv && ew) {
+        nv.src = streamUrl;
+        nv.muted = false;
+        nv.volume = 1.0;
+        nv.style.display = "block";
+        ew.style.display = "none";
+        var playPromise = nv.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(function() {
+            nv.muted = true;
+            nv.play().then(function() {
+              var unBtn = document.createElement("button");
+              unBtn.id = "unmuteNoticeBtn";
+              unBtn.innerHTML = "🔊 Click to Unmute Audio";
+              unBtn.style.cssText = "position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#e50914;color:#fff;padding:10px 22px;border-radius:30px;border:none;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.6);";
+              unBtn.onclick = function() {
+                nv.muted = false;
+                nv.volume = 1.0;
+                unBtn.remove();
+              };
+              var box = document.getElementById("frameBox");
+              if (box) box.appendChild(unBtn);
+            }).catch(function() {
+              nv.style.display = "none";
+              ew.style.display = "block";
+            });
+          });
+        }
+      }
+    }
+
+    function playEmbed(fid) {
+      var loader = document.getElementById("mLoader");
+      if (loader) loader.style.display = "none";
+      var ef = document.getElementById("embedFrame");
+      var ew = document.getElementById("embedWrap");
+      if (ef && ew) {
+        ef.src = "https://play.onestream.today/stream/page/" + fid;
+        ew.style.display = "block";
+      }
+    }
+
     (function() {
       var apiPfx = window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "";
-      fetch(apiPfx + "/api/moviesda_stream?file_id=${fileId}")
-        .then(function(r) { return r.json(); })
-        .then(function(d) {
-          if (d && d.streamUrl) {
-            var nv = document.getElementById("nativeVideo");
-            var ew = document.getElementById("embedWrap");
-            if (nv && ew) {
-              nv.src = d.streamUrl;
-              nv.muted = false;
-              nv.volume = 1.0;
-              nv.style.display = "block";
-              ew.style.display = "none";
-              var playPromise = nv.play();
-              if (playPromise !== undefined) {
-                playPromise.catch(function() {
-                  nv.muted = true;
-                  nv.play().then(function() {
-                    var unBtn = document.createElement("button");
-                    unBtn.id = "unmuteNoticeBtn";
-                    unBtn.innerHTML = "🔊 Click to Unmute Audio";
-                    unBtn.style.cssText = "position:absolute;bottom:80px;left:50%;transform:translateX(-50%);z-index:999;background:#e50914;color:#fff;padding:10px 22px;border-radius:30px;border:none;font-weight:700;font-size:14px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.6);";
-                    unBtn.onclick = function() {
-                      nv.muted = false;
-                      nv.volume = 1.0;
-                      unBtn.remove();
-                    };
-                    var box = document.getElementById("frameBox");
-                    if (box) box.appendChild(unBtn);
-                  }).catch(function() {
-                    nv.style.display = "none";
-                    ew.style.display = "block";
-                  });
-                });
-              }
+      var initialFileId = "${fileId || ""}";
+
+      function handleFileId(fid) {
+        fetch(apiPfx + "/api/moviesda_stream?file_id=" + fid)
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            var stream = (d && (d.streamUrl || d.stream_url)) || "";
+            if (stream) {
+              playDirect(stream);
+            } else {
+              playEmbed(fid);
             }
-          }
-        })
-        .catch(function() {});
+          })
+          .catch(function() {
+            playEmbed(fid);
+          });
+      }
+
+      if (initialFileId) {
+        handleFileId(initialFileId);
+      } else {
+        var lt = document.getElementById("mLoaderText");
+        if (lt) lt.textContent = "Resolving latest 2026 Tamil release...";
+        fetch(apiPfx + "/api/moviesda_resolve?title=" + encodeURIComponent("${safeTitle}") + "&tmdb_id=${tmId}")
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d && (d.fileId || d.file_id)) {
+              handleFileId(d.fileId || d.file_id);
+            } else {
+              playEmbed("103234");
+            }
+          })
+          .catch(function() {
+            playEmbed("103234");
+          });
+      }
     })();
   </script>
 </body>
 </html>`;
-  } else {
-    const streamUrl = mtype === "tv"
-      ? `https://vidsrc.su/embed/tv/${tmId}/1/1`
-      : `https://vidsrc.su/embed/movie/${tmId}`;
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>${safeTitle} - Tamil Ultra HD</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
-    iframe { width: 100%; height: 100%; border: none; display: block; }
-  </style>
-</head>
-<body>
-  <iframe id="embedFrame" src="${streamUrl}" allow="accelerometer; autoplay *; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen *" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
-</body>
-</html>`;
-  }
 }
 
 class MovieshubPlayer {
@@ -995,15 +1061,23 @@ class MovieshubPlayer {
           id: "s9",
           name: "Server 9",
           badge: "Moviesda Tamil HD",
-          url: (getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
-            ? `https://play.onestream.today/stream/page/${getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
-            : `https://moviezda.me/moviesda-tamil-movies-2026/`
+          url: (movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
+            ? `https://play.onestream.today/stream/page/${movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
+            : `https://moviezda.me/tamil-2026-movies/`
         }
       ];
 
       // Smart Auto-Selection for Instant Zero-Buffer Playback:
-      const isRegionalOnly = cleanTitle.includes("dark heaven") || cleanTitle.includes("baththa") || cleanTitle.includes("anakapalli");
-      if (isRegionalOnly) {
+      const cleanLower = cleanTitle.toLowerCase();
+      const hasMoviesda = Boolean(
+        movie?.moviesdaFileId ||
+        getVerifiedMoviesdaFileId(movie?.title) ||
+        getVerifiedMoviesdaFileId(cleanTitle) ||
+        (movie?.year && Number(movie.year) >= 2025 && safeLang.toLowerCase() === "tamil") ||
+        (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd") || q.toLowerCase().includes("moviesda")))
+      );
+
+      if (hasMoviesda) {
         const s9Idx = servers.findIndex(s => s.id === "s9");
         this.currentServerIdx = s9Idx !== -1 ? s9Idx : 0;
       } else {
@@ -1152,11 +1226,11 @@ class MovieshubPlayer {
             }
           };
 
-          const mFileId = getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
+          const mFileId = movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
 
           if (srv.id === "s9") {
             curIframe.removeAttribute("src");
-            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026);
+            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026, mFileId);
             hidePreloader();
             return;
           }

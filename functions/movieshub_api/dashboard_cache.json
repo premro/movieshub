@@ -185,6 +185,78 @@
   ],
   "tamil_2026": [
     {
+      "id": "mz-103234",
+      "tmdbId": 656908,
+      "title": "Ramayana",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103234",
+      "isTheatrePrint": true,
+      "poster": "https://moviezda.me/uploads/shots/103235-ramayana-2026-hq-predvd-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103235-ramayana-2026-hq-predvd-720p-hd.jpg",
+      "overview": "Ramayana (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
+      ]
+    },
+    {
+      "id": "mz-103243",
+      "tmdbId": 1250502,
+      "title": "Im Game",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103243",
+      "isTheatrePrint": true,
+      "poster": "https://moviezda.me/uploads/shots/103243-im-game-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103243-im-game-2026-original-720p-hd.jpg",
+      "overview": "Im Game (2026) - Gripping survival thriller in Tamil HD.",
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
+      ]
+    },
+    {
+      "id": "mz-103308",
+      "tmdbId": 1735058,
+      "title": "The Grandmaster",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103308",
+      "poster": "https://moviezda.me/uploads/shots/103308-the-grandmaster-2026-tamil-dubbed-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103308-the-grandmaster-2026-tamil-dubbed-original-720p-hd.jpg",
+      "overview": "The Grandmaster (2026) - Tamil dubbed martial arts spectacle.",
+      "qualities": [
+        "1080p HD",
+        "720p HD"
+      ]
+    },
+    {
+      "id": "mz-103286",
+      "tmdbId": 926867,
+      "title": "Nooru Kodi Vaanavil",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103286",
+      "poster": "https://moviezda.me/uploads/shots/103286-nooru-kodi-vaanavil-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103286-nooru-kodi-vaanavil-2026-original-720p-hd.jpg",
+      "overview": "Nooru Kodi Vaanavil (2026) - Romantic drama in Tamil.",
+      "qualities": [
+        "1080p HD",
+        "720p HD"
+      ]
+    },
+    {
       "id": "tmdb-1515692",
       "tmdbId": 1515692,
       "title": "Baththa",
@@ -575,7 +647,7 @@
       "isTrending": false
     },
     {
-      "id": "tmdb-1538457",
+      "id": "mz-103225",
       "tmdbId": 1538457,
       "title": "Meesaya Murukku 2",
       "nativeTitle": "மீசைய முருக்கு 2",
@@ -590,19 +662,22 @@
         "Cinema"
       ],
       "qualities": [
-        "4K",
-        "1080p"
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
       ],
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
       "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/qD1QwmInB9ezd2peVb5EbhaM4Mo.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/8iG6naruSFn4CuSWB01F0JuImCc.jpg",
+      "poster": "https://moviezda.me/uploads/shots/103225-meesaya-murukku-2-2026-hq-predvd-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103225-meesaya-murukku-2-2026-hq-predvd-720p-hd.jpg",
       "mediaType": "movie",
-      "overview": "After facing rejection in love and getting into a fight, Jeeva learns about his father Siva's struggles and sacrifices. Inspired by his grandfather's legacy and father's dedication, Jeeva changes his outlook and works hard toward his musical dream. Through determination and perseverance, Jeeva earns recognition in the music industry and brings pride to his family.",
+      "overview": "Meesaya Murukku 2 (2026) - High-energy musical comedy sequel.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "moviesdaFileId": "103225",
+      "isTheatrePrint": true
     },
     {
       "id": "tmdb-1367220",

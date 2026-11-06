@@ -280,8 +280,50 @@ async function syncDashboardCatalog(force = false) {
     (t26Data.results || []).map(normalizeMovie).forEach(m => {
       m.language = 'Tamil';
       m.languageBadge = 'Tamil';
+      const fid = getVerifiedMoviesdaFileId(m.title, m.tmdbId);
+      if (fid) m.moviesdaFileId = fid;
       addMovie(m, updated.tamil_2026);
     });
+
+    // 2b. Enrich & Merge with Verified Moviesda 2026 Releases (https://moviezda.me/tamil-2026-movies/)
+    try {
+      const mzRes = await fetchBuffer("https://moviezda.me/tamil-2026-movies/", {
+        headers: { "User-Agent": "Mozilla/5.0" }
+      });
+      const mzHtml = mzRes.buffer.toString("utf8");
+      const mzRegex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
+      let mm;
+      while ((mm = mzRegex.exec(mzHtml)) !== null) {
+        const rawTitle = mm[2].trim();
+        const cleanTitle = rawTitle.replace(/\s*\(\d{4}\).*$/, "").trim();
+        const fid = getVerifiedMoviesdaFileId(cleanTitle);
+        let existing = updated.tamil_2026.find(m => m.title && (m.title.toLowerCase().includes(cleanTitle.toLowerCase()) || cleanTitle.toLowerCase().includes(m.title.toLowerCase())));
+        if (existing) {
+          if (fid) existing.moviesdaFileId = fid;
+          existing.isTheatrePrint = true;
+        } else if (fid) {
+          const tId = Number(Object.keys(MOVIESDA_TMDB_MAP).find(k => MOVIESDA_TMDB_MAP[k] === fid)) || Number(fid);
+          const mItem = {
+            id: `mz-${fid}`,
+            tmdbId: tId,
+            title: cleanTitle,
+            language: "Tamil",
+            languageBadge: "Tamil",
+            year: 2026,
+            rating: "NEW",
+            moviesdaFileId: fid,
+            isTheatrePrint: true,
+            poster: `https://moviezda.me/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
+            backdrop: `https://moviezda.me/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
+            overview: `${cleanTitle} (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.`,
+            qualities: ["1080p HD", "720p HD", "Theatre Print"]
+          };
+          addMovie(mItem, updated.tamil_2026);
+        }
+      }
+    } catch (err) {
+      // Non-fatal, keep going
+    }
 
     // 3. Fetch Tamil 2025 Releases
     const t25Data = await fetchTmdbApi('/discover/movie', {
@@ -809,27 +851,53 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 }
 
 const MOVIESDA_VERIFIED_MAP = {
-  "anakapalli": "103147",
+  // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "kauriburir the cursed temple": "103307",
+  "ramayana": "103234",
+  "ramayana 2026": "103234",
+  "im game": "103243",
+  "the grandmaster": "103308",
+  "grandmaster": "103308",
+  "nooru kodi vaanavil": "103286",
+  "7 star boys": "103309",
+  "seven star boys": "103309",
+  "angelina": "103262",
+  "all pass": "103254",
+  "meesaya murukku 2": "103225",
+  "meesaya murukku": "103225",
+  "dilwali diwali": "103217",
+  "heart beat": "103204",
+  "tula pahta": "103193",
+  "lakshmikanthan kolai vazhakku": "103196",
+  "aazam": "103176",
+  "aakhri sawal": "103168",
+  "anakapalli": "103150",
   "cold call": "103140",
-  "baththa": "102943",
-  "dorothy": "102743",
-  "the dark heaven": "103008",
-  "dark heaven": "103008",
-  "immortal": "102966",
-  "sigma": "103031",
-  "si yugandhar": "103027",
-  "yugandhar": "103027",
-  "comrade kalyan": "103017",
-  "dont trouble the trouble": "102975",
-  "avarachan and sons": "102992",
-  "akka": "103040",
-  "love always": "103067",
+  "sampurna": "103124",
   "meethe mein kya hai": "103075",
-  "sampurna": "103118",
+  "love always": "103067",
+  "akka": "103047",
+  "the dark heaven": "103032",
+  "dark heaven": "103032",
+  "sigma": "103031",
+  "si yugandhar": "103029",
+  "yugandhar": "103029",
+  "comrade kalyan": "103017",
+  "avarachan and sons": "102997",
+  "dont trouble the trouble": "103020",
+  "immortal": "102966",
+  "dorothy": "102743",
+  "baththa": "102943",
+  "jigris": "102924",
   "madam inspector": "102906",
-  "varam": "102956",
+  "varam": "103209",
   "418": "102870",
-  "bigg boss": "103132",
+  "bigg boss": "103263",
+  "dhoomakethu": "102859",
+  "cocoons": "102849",
+  "chola kollai bommai": "102838",
+  "its a medical miracle": "102835",
+  "celebrity master chef": "103310",
   // Top Kollywood Blockbusters (Original Tamil HD Prints)
   "master": "95553",
   "amaran": "88497",
@@ -857,6 +925,20 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  656908: "103234",   // Ramayana
+  1538457: "103225",  // Meesaya Murukku 2
+  1250502: "103243",  // Im Game
+  1735058: "103308",  // The Grandmaster
+  926867: "103286",   // Nooru Kodi Vaanavil
+  1819399: "103309",  // 7 Star Boys
+  1338751: "103262",  // Angelina
+  1786905: "103254",  // All Pass
+  1618200: "103032",  // The Dark Heaven
+  1515692: "103150",  // Anakapalli
+  1528659: "103140",  // Cold Call
+  1531720: "102943",  // Baththa
+  1578079: "102743",  // Dorothy
+  1505305: "102966",  // Immortal
   626392: "95553",   // Master
   927342: "88497",   // Amaran
   1129608: "86701",  // GOAT
@@ -874,29 +956,88 @@ const MOVIESDA_TMDB_MAP = {
   1182047: "87208",  // Lubber Pandhu
   1171178: "87066",  // Meiyazhagan
   1011985: "88746",  // Pushpa 2
-  1618200: "103008", // The Dark Heaven
-  1515692: "103147", // Anakapalli
-  1528659: "103140", // Cold Call
-  1531720: "102943", // Baththa
-  1578079: "102743", // Dorothy
 };
+
+const moviesdaLiveCache = new Map();
+
+async function resolveMoviesdaLive(title) {
+  if (!title) return null;
+  const raw = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const clean = raw.replace(/\b(2026|2025|2024|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
+  if (!clean) return null;
+  
+  if (moviesdaLiveCache.has(clean)) return moviesdaLiveCache.get(clean);
+
+  try {
+    const { buffer } = await fetchBuffer("https://moviezda.me/tamil-2026-movies/", {
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" }
+    });
+    const html = buffer.toString("utf8");
+    const regex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
+    let m;
+    let targetUrl = null;
+    const firstWord = clean.split(" ")[0];
+    while ((m = regex.exec(html)) !== null) {
+      const itemTitle = m[2].toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+      if (itemTitle.includes(clean) || clean.includes(itemTitle.replace(/ 2026| 2025/g, "")) || (firstWord.length > 3 && itemTitle.includes(firstWord))) {
+        targetUrl = "https://moviezda.me" + m[1];
+        break;
+      }
+    }
+
+    if (!targetUrl) return null;
+
+    const subRes = await fetchBuffer(targetUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
+    const subHtml = subRes.buffer.toString("utf8");
+    let subMatch = subHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
+    let pageHtml = subHtml;
+    if (subMatch) {
+      const pRes = await fetchBuffer("https://moviezda.me" + subMatch[1], { headers: { "User-Agent": "Mozilla/5.0" } });
+      pageHtml = pRes.buffer.toString("utf8");
+      let subMatch2 = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
+      if (subMatch2) {
+        const pRes2 = await fetchBuffer("https://moviezda.me" + subMatch2[1], { headers: { "User-Agent": "Mozilla/5.0" } });
+        pageHtml = pRes2.buffer.toString("utf8");
+      }
+    }
+
+    let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/);
+    if (dlPageMatch) {
+      const dlRes = await fetchBuffer("https://moviezda.me" + dlPageMatch[1], { headers: { "User-Agent": "Mozilla/5.0" } });
+      const dlHtml = dlRes.buffer.toString("utf8");
+      let fid = dlHtml.match(/\/file\/(\d+)/);
+      if (fid) {
+        moviesdaLiveCache.set(clean, fid[1]);
+        return fid[1];
+      }
+    }
+  } catch (e) {
+    return null;
+  }
+  return null;
+}
 
 function getVerifiedMoviesdaFileId(title, tmdbId) {
   if (tmdbId && MOVIESDA_TMDB_MAP[Number(tmdbId)]) {
     return MOVIESDA_TMDB_MAP[Number(tmdbId)];
   }
   if (!title) return null;
-  const clean = title.toLowerCase().replace(/\[.*?\]/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const raw = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  const clean = raw.replace(/\b(2026|2025|2024|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
   if (clean && MOVIESDA_VERIFIED_MAP[clean]) {
     return MOVIESDA_VERIFIED_MAP[clean];
   }
+  if (raw && MOVIESDA_VERIFIED_MAP[raw]) {
+    return MOVIESDA_VERIFIED_MAP[raw];
+  }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || clean.includes(k) || k.includes(clean)) return v;
+    if (clean === k || (clean.length > 2 && (clean.includes(k) || k.includes(clean)))) return v;
+    if (raw === k || raw.includes(k) || k.includes(raw)) return v;
   }
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "102943", tmdbId = null) {
+function resolveMoviesdaFileId(title, fallback = "103234", tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
@@ -955,7 +1096,7 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>⬇ Download 720p / 1080p MP4</span>
         </a>
-        <a href="https://moviezda.me/moviesda-tamil-movies-2026/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+        <a href="https://moviezda.me/tamil-2026-movies/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
           <span>Moviesda 2026 Hub</span>
         </a>
@@ -1139,7 +1280,7 @@ module.exports = async (req, res) => {
   // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
   // 6b. Moviesda Stream Extractor API
   if (pathname === "/api/moviesda_stream") {
-    const fileId = u.searchParams.get("file_id") || "103147";
+    const fileId = u.searchParams.get("file_id") || "103234";
     try {
       const targetUrl = `https://play.onestream.today/stream/page/${fileId}`;
       const { buffer } = await fetchBuffer(targetUrl, {
@@ -1157,8 +1298,12 @@ module.exports = async (req, res) => {
       });
       return res.end(JSON.stringify({
         success: !!rawStream,
+        status: rawStream ? "ok" : "fail",
         fileId,
+        file_id: fileId,
         streamUrl: rawStream,
+        stream_url: rawStream,
+        embed_url: targetUrl,
         downloadUrl: `https://download.moviespage.xyz/download/file/${fileId}`
       }));
     } catch (e) {
@@ -1168,11 +1313,36 @@ module.exports = async (req, res) => {
       });
       return res.end(JSON.stringify({
         success: false,
+        status: "fail",
         fileId,
+        file_id: fileId,
         streamUrl: "",
+        stream_url: "",
         downloadUrl: `https://download.moviespage.xyz/download/file/${fileId}`
       }));
     }
+  }
+
+  // 6c. Moviesda Dynamic Live File Resolver
+  if (pathname === "/api/moviesda_resolve") {
+    const title = u.searchParams.get("title") || "";
+    const tmId = u.searchParams.get("tmdb_id") || null;
+    let fileId = getVerifiedMoviesdaFileId(title, tmId);
+    if (!fileId && title) {
+      fileId = await resolveMoviesdaLive(title);
+    }
+    res.writeHead(200, {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    });
+    return res.end(JSON.stringify({
+      status: fileId ? "ok" : "not_found",
+      title,
+      fileId: fileId || null,
+      file_id: fileId || null,
+      streamUrl: fileId ? `https://play.onestream.today/stream/page/${fileId}` : null,
+      stream_url: fileId ? `https://play.onestream.today/stream/page/${fileId}` : null
+    }));
   }
 
     // 7b. Moviesda 2026 Engine Route (Tamil HD - Watermark Removed & Direct Download)

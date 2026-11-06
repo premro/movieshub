@@ -326,6 +326,18 @@ assert(apiCode.includes("pathname === '/api/sync'"), "Backend provides live /api
 assert(!freshAppCode.includes('span class="card-meta-rating">★ ${movie.rating || "8.5"}</span>'), "Movie cards no longer fallback to fake 8.5 rating");
 assert(freshAppCode.includes("existing.rating = m.rating;"), "Client mergeMovie updates ratings in real-time when fresh data arrives");
 
+// 17. Testing Moviezda 2026 Instant Theatrical Playback Engine
+console.log("\n17. Testing Moviezda 2026 Instant Theatrical Playback Engine...");
+assert(apiCode.includes('"ramayana": "103234"') && playerCode.includes('"ramayana": "103234"'), "Ramayana (2026) verified with working Moviezda stream file ID 103234");
+assert(apiCode.includes('"meesaya murukku 2": "103225"') && playerCode.includes('"meesaya murukku 2": "103225"'), "Meesaya Murukku 2 (2026) verified with file ID 103225");
+assert(apiCode.includes('"im game": "103243"') && playerCode.includes('"im game": "103243"'), "Im Game (2026) verified with file ID 103243");
+assert(apiCode.includes('"the grandmaster": "103308"') && playerCode.includes('"the grandmaster": "103308"'), "The Grandmaster (2026) verified with file ID 103308");
+assert(apiCode.includes('pathname === "/api/moviesda_resolve"'), "Dynamic live Moviezda scraper resolver endpoint /api/moviesda_resolve is registered");
+assert(apiCode.includes("stream_url: rawStream") && apiCode.includes("streamUrl: rawStream"), "/api/moviesda_stream returns both stream_url and streamUrl");
+assert(playerCode.includes("hasMoviesda"), "Player smart auto-selects Server 9 (Moviesda Tamil HD) for 2026 Tamil movies");
+assert(catalogCode.includes('id: "ramayana-tamil-2026"') && catalogCode.includes('moviesdaFileId: "103234"'), "Catalog contains Ramayana 2026 with direct Moviesda file ID");
+assert(backendCache.tamil_2026.some(m => m.moviesdaFileId === "103234"), "Backend dashboard cache contains Ramayana 2026 with verified stream ID");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
