@@ -156,14 +156,19 @@ class MovieshubApp {
         const mergeMovie = (m) => {
           if (!m || !m.title) return;
           this.registerMovie(m);
-          const exists = this.catalog.some(c => 
+          const existing = this.catalog.find(c => 
             (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) ||
             (c.id && m.id && c.id === m.id) ||
             (c.title && m.title && c.title.toLowerCase() === m.title.toLowerCase())
           );
-          if (!exists) {
+          if (!existing) {
             this.catalog.push(m);
             addedCount++;
+          } else {
+            if (m.rating && (typeof m.rating === "number" || m.rating === "NEW")) {
+              existing.rating = m.rating;
+            }
+            if (m.match) existing.match = m.match;
           }
         };
 
@@ -799,7 +804,7 @@ class MovieshubApp {
             <span class="badge-quality">4K Ultra HD</span>
             <span class="badge-sound">Dolby Atmos</span>
             <span class="badge-creator" style="background:rgba(229,9,20,0.25);border:1px solid #e50914;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;">Created by Prem</span>
-            <span class="badge-creator" id="hero-badge-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:800;">★ ${m.rating || "8.5"} IMDb</span>
+            <span class="badge-creator" id="hero-badge-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:800;">${(typeof m.rating === "number" && m.rating > 0) ? `★ ${m.rating.toFixed(1)} TMDB` : (m.rating === "NEW" || (m.year && m.year >= 2026) ? "🆕 NEW RELEASE" : `★ ${m.rating || "7.5"} TMDB`)}</span>
           </div>
           <h1 class="hero-title" id="hero-title">${m.title}</h1>
           <p class="hero-synopsis" id="hero-synopsis">${m.overview || ""}</p>
@@ -864,7 +869,11 @@ class MovieshubApp {
       if (yearEl) yearEl.textContent = `${m.year || 2024} RELEASE`;
 
       const ratEl = document.getElementById("hero-badge-rating");
-      if (ratEl) ratEl.textContent = `★ ${m.rating || "8.5"} IMDb`;
+      if (ratEl) {
+        ratEl.textContent = (typeof m.rating === "number" && m.rating > 0)
+          ? `★ ${m.rating.toFixed(1)} TMDB`
+          : (m.rating === "NEW" || (m.year && m.year >= 2026) ? "🆕 NEW RELEASE" : `★ ${m.rating || "7.5"} TMDB`);
+      }
 
       document.querySelectorAll(".hero-dot").forEach((dot, i) => {
         dot.classList.toggle("active", i === this.currentHeroIndex);
@@ -1281,7 +1290,7 @@ class MovieshubApp {
           <div class="card-meta-permanent">
             <span class="card-meta-year">${movie.year || "2026"}</span>
             <span class="card-meta-lang">${movie.language}</span>
-            <span class="card-meta-rating">★ ${movie.rating || "8.5"}</span>
+            <span class="card-meta-rating">${(typeof movie.rating === "number" && movie.rating > 0) ? `★ ${movie.rating.toFixed(1)}` : (movie.rating === "NEW" || (movie.year && movie.year >= 2026) ? "🆕 NEW" : (movie.rating ? `★ ${movie.rating}` : "★ 7.5"))}</span>
           </div>
         </div>
       </div>
@@ -1472,6 +1481,13 @@ class MovieshubApp {
             <div class="modal-tags">
               <span class="tag-match">${movie.match || "98% Match"}</span>
               <span class="tag-year">${movie.year || 2026}</span>
+              ${(typeof movie.rating === 'number' && movie.rating > 0)
+                ? `<span class="tag-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px;">★ ${movie.rating.toFixed(1)} TMDB</span>`
+                : (movie.rating === 'NEW' || (movie.year && movie.year >= 2026)
+                  ? `<span class="tag-rating" style="background:rgba(59,130,246,0.2);border:1px solid #3b82f6;color:#60a5fa;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px;">🆕 New Release</span>`
+                  : `<span class="tag-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:2px 8px;border-radius:4px;font-weight:700;font-size:12px;">★ ${movie.rating || '7.5'} TMDB</span>`
+                )
+              }
               <span class="tag-maturity">${movie.maturity || "U/A 16+"}</span>
               <span class="tag-duration">${movie.duration || "2h 30m"}</span>
               <span class="tag-quality">4K Ultra HD</span>

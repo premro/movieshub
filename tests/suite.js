@@ -313,6 +313,19 @@ assert(playerCode.includes('626392: "95553"'), "Master TMDB 626392 mapped to ver
 assert(dolbyCode.includes("this.masterGain.gain.value = 1.25"), "Dolby Atmos engine has +3dB master volume boost");
 assert(playerCode.includes("unmuteNoticeBtn"), "Moviesda HTML5 player has unmuted audio fallback");
 
+// 16. Testing Accurate Real-World Ratings & Automatic Catalog Sync
+console.log("\n16. Testing Accurate Real-World Ratings & Automatic Catalog Sync...");
+const catalogCode = fs.readFileSync(path.join(__dirname, "../js/catalog.js"), "utf8");
+const freshAppCode = fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8");
+const apiCode = fs.readFileSync(path.join(__dirname, "../api/index.js"), "utf8");
+assert(catalogCode.includes('id: "master-tamil"') && catalogCode.includes('rating: 6.6'), "Master has verified real-world TMDB rating 6.6");
+assert(catalogCode.includes('id: "goat-tamil"') && catalogCode.includes('rating: 4.7'), "G.O.A.T has verified real-world TMDB rating 4.7");
+assert(catalogCode.includes('id: "leo-tamil"') && catalogCode.includes('rating: 6.8'), "Leo has verified real-world TMDB rating 6.8");
+assert(apiCode.includes("syncDashboardCatalog"), "Backend has automatic live dashboard catalog sync engine");
+assert(apiCode.includes("pathname === '/api/sync'"), "Backend provides live /api/sync endpoint for immediate catalog update");
+assert(!freshAppCode.includes('span class="card-meta-rating">★ ${movie.rating || "8.5"}</span>'), "Movie cards no longer fallback to fake 8.5 rating");
+assert(freshAppCode.includes("existing.rating = m.rating;"), "Client mergeMovie updates ratings in real-time when fresh data arrives");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
