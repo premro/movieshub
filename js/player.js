@@ -224,14 +224,16 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
     function playDirect(streamUrl) {
       var loader = document.getElementById("mLoader");
       if (loader) loader.style.display = "none";
-      var nv = document.getElementById("nativeVideo");
+      var ef = document.getElementById("embedFrame");
+      if (ef) ef.src = "about:blank";
       var ew = document.getElementById("embedWrap");
-      if (nv && ew) {
+      if (ew) ew.style.display = "none";
+      var nv = document.getElementById("nativeVideo");
+      if (nv) {
         nv.src = streamUrl;
         nv.muted = false;
         nv.volume = 1.0;
         nv.style.display = "block";
-        ew.style.display = "none";
         var playPromise = nv.play();
         if (playPromise !== undefined) {
           playPromise.catch(function() {
@@ -249,8 +251,9 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
               var box = document.getElementById("frameBox");
               if (box) box.appendChild(unBtn);
             }).catch(function() {
+              try { nv.pause(); nv.removeAttribute("src"); nv.load(); } catch (e) {}
               nv.style.display = "none";
-              ew.style.display = "block";
+              if (ew) ew.style.display = "block";
             });
           });
         }
@@ -260,6 +263,11 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
     function playEmbed(fid) {
       var loader = document.getElementById("mLoader");
       if (loader) loader.style.display = "none";
+      var nv = document.getElementById("nativeVideo");
+      if (nv) {
+        try { nv.pause(); nv.removeAttribute("src"); nv.load(); } catch (e) {}
+        nv.style.display = "none";
+      }
       var ef = document.getElementById("embedFrame");
       var ew = document.getElementById("embedWrap");
       if (ef && ew) {
@@ -267,6 +275,43 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         ew.style.display = "block";
       }
     }
+
+    // Forward 10s skip and keyboard shortcuts inside iframe
+    window.addEventListener("message", function(e) {
+      var d = e.data;
+      if (!d) return;
+      var nv = document.getElementById("nativeVideo");
+      if (d.action === "forward" || d.type === "seek" || d.action === "skipForward") {
+        var secs = d.seconds || d.value || 10;
+        if (nv && !nv.paused) {
+          nv.currentTime = Math.min((nv.duration || Infinity), nv.currentTime + secs);
+        }
+      } else if (d.action === "pause" || d === "stop") {
+        if (nv) {
+          try { nv.pause(); } catch (e) {}
+        }
+      }
+    });
+
+    window.addEventListener("keydown", function(e) {
+      var nv = document.getElementById("nativeVideo");
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (nv) {
+          nv.currentTime = Math.min((nv.duration || Infinity), nv.currentTime + 10);
+        }
+        try { window.parent.postMessage({ type: "player:toast", message: "⏩ +10s" }, "*"); } catch (err) {}
+      } else if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        e.stopPropagation();
+        try { window.parent.postMessage({ type: "player:fullscreen_toggle" }, "*"); } catch (err) {}
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        try { window.parent.postMessage({ type: "player:escape" }, "*"); } catch (err) {}
+      }
+    });
 
     (function() {
       var apiPfx = window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "";
@@ -762,45 +807,137 @@ class MovieshubPlayer {
       });
     });
 
-    // Fullscreen
-    fullscreenBtn.addEventListener("click", () => {
-      if (!document.fullscreenElement) {
-        this.modal.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
+    // 10s Forward Skip across all servers & modes
+    const skipForward10 = () => {
+      // 1. Trailer or direct native video
+      if (video && !video.paused) {
+        video.currentTime = Math.min((video.duration || Infinity), video.currentTime + 10);
       }
-    });
+      // 2. Server iframes (Servers 1 to 9: VidLink, AutoEmbed, 2Embed, VidSrc, Moviesda, etc.)
+      const curIframe = document.getElementById("player-stream-iframe");
+      if (curIframe && curIframe.contentWindow) {
+        try {
+          if (curIframe.contentDocument) {
+            const innerVid = curIframe.contentDocument.querySelector("video");
+            if (innerVid) {
+              innerVid.currentTime = Math.min((innerVid.duration || Infinity), innerVid.currentTime + 10);
+            }
+          }
+        } catch (e) {}
 
-    // Keyboard controls in Player
+        try {
+          curIframe.contentWindow.postMessage({ type: "seek", value: 10, relative: true }, "*");
+          curIframe.contentWindow.postMessage({ action: "forward", seconds: 10 }, "*");
+          curIframe.contentWindow.postMessage({ action: "skipForward", seconds: 10 }, "*");
+          curIframe.contentWindow.postMessage({ event: "command", func: "fastForward", args: [10] }, "*");
+          curIframe.contentWindow.postMessage({ type: "player:forward", seconds: 10 }, "*");
+        } catch (e) {}
+      }
+      this.showToastIndicator("⏩ +10s");
+    };
+
+    // Fullscreen toggle across all servers
+    const toggleFullscreen = () => {
+      const container = document.getElementById("playerStreamFrameContainer") || this.modal;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        if (container.requestFullscreen) {
+          container.requestFullscreen().catch(() => {
+            if (this.modal && this.modal.requestFullscreen) this.modal.requestFullscreen().catch(() => {});
+          });
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (this.modal && this.modal.requestFullscreen) {
+          this.modal.requestFullscreen().catch(() => {});
+        }
+      } else {
+        if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(() => {});
+      }
+    };
+
+    // Fullscreen button
+    fullscreenBtn.addEventListener("click", () => toggleFullscreen());
+
+    if (forwardBtn) {
+      forwardBtn.addEventListener("click", () => skipForward10());
+    }
+
+    // Keyboard controls in Player (Active across ALL servers)
     window.addEventListener("keydown", (e) => {
       if (this.modal.classList.contains("hidden")) return;
 
+      // 1. Esc: exit fullscreen if currently in fullscreen, otherwise off-screen (close player)
       if (e.key === "Escape") {
-        this.close();
-      } else if (this.currentMode === "trailer") {
+        e.preventDefault();
+        e.stopPropagation();
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(() => {});
+        } else {
+          this.close();
+        }
+        return;
+      }
+
+      // 2. F / f: Toggle Fullscreen
+      if (e.key === "f" || e.key === "F") {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleFullscreen();
+        return;
+      }
+
+      // 3. Forward key (ArrowRight): skip 10 seconds in ALL servers
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        e.stopPropagation();
+        skipForward10();
+        return;
+      }
+
+      // Mode-specific additional shortcuts (Trailer preview mode)
+      if (this.currentMode === "trailer") {
         if (e.key === " " || e.key === "k") {
           e.preventDefault();
           togglePlay();
         } else if (e.key === "ArrowLeft") {
           e.preventDefault();
-          video.currentTime = Math.max(0, video.currentTime - 10);
-        } else if (e.key === "ArrowRight") {
-          e.preventDefault();
-          video.currentTime = Math.min(video.duration || 0, video.currentTime + 10);
+          if (video) video.currentTime = Math.max(0, video.currentTime - 10);
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
-          video.volume = Math.min(1, video.volume + 0.1);
-          this.updateVolumeUI();
+          if (video) {
+            video.volume = Math.min(1, video.volume + 0.1);
+            this.updateVolumeUI();
+          }
         } else if (e.key === "ArrowDown") {
           e.preventDefault();
-          video.volume = Math.max(0, video.volume - 0.1);
-          this.updateVolumeUI();
+          if (video) {
+            video.volume = Math.max(0, video.volume - 0.1);
+            this.updateVolumeUI();
+          }
         } else if (e.key === "m") {
-          video.muted = !video.muted;
-          this.updateVolumeUI();
-        } else if (e.key === "f") {
-          fullscreenBtn.click();
+          if (video) {
+            video.muted = !video.muted;
+            this.updateVolumeUI();
+          }
         }
+      }
+    });
+
+    // Listen for remote events from iframes (e.g. Server 9)
+    window.addEventListener("message", (e) => {
+      if (!e.data || typeof e.data !== "object") return;
+      if (e.data.type === "player:fullscreen_toggle") {
+        toggleFullscreen();
+      } else if (e.data.type === "player:escape") {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+          else if (document.webkitExitFullscreen) document.webkitExitFullscreen().catch(() => {});
+        } else {
+          this.close();
+        }
+      } else if (e.data.type === "player:toast") {
+        this.showToastIndicator(e.data.message || "⏩ +10s");
       }
     });
   }
@@ -1109,17 +1246,6 @@ class MovieshubPlayer {
               <div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Free Stream • Ultra HD Playback</div>
             </div>
           </div>
-          ${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? `
-            <div class="theatre-print-notice" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:rgba(245,158,11,0.15);border:1px solid rgba(245,158,11,0.4);border-radius:8px;padding:8px 14px;margin:8px 16px 0;color:#fef3c7;font-size:12px;">
-              <div style="display:flex;align-items:center;gap:8px;">
-                <span style="background:#f59e0b;color:#000;font-weight:800;font-size:10px;padding:2px 7px;border-radius:4px;letter-spacing:0.5px;">THEATRE PRINT</span>
-                <span>Currently streaming <strong>Theatrical Pre-HD Print</strong>. Official Digital OTT 4K/1080p HD premieres <strong>November 6, 2026 on SonyLIV</strong>.</span>
-              </div>
-              <button id="btnWatchMeesayaPart1" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px;transition:all 0.2s;">
-                <span>▶ Watch Meesaya Murukku 1 (1080p HD)</span>
-              </button>
-            </div>
-          ` : ''}
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
             <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
@@ -1207,6 +1333,15 @@ class MovieshubPlayer {
             container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
+          } else {
+            // Cleanly pause and stop any ongoing audio/video from previous server before loading new one
+            try {
+              curIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+              curIframe.contentWindow.postMessage('{"action":"pause"}', '*');
+              curIframe.contentWindow.postMessage("stop", "*");
+            } catch (e) {}
+            curIframe.removeAttribute("srcdoc");
+            curIframe.src = "about:blank";
           }
 
           curIframe.onload = () => {
@@ -1237,16 +1372,11 @@ class MovieshubPlayer {
 
           if (srv.id === "s1") {
             curIframe.removeAttribute("srcdoc");
-            // Set instant working fallback so the player is never black or waiting
-            const instantStreamUrl = mtype === "tv"
-              ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true`
-              : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&autoplay=true`;
-            curIframe.src = instantStreamUrl;
-            hidePreloader();
+            curIframe.src = "about:blank";
 
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
             const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-            const timeoutId = controller ? setTimeout(() => controller.abort(), 2500) : null;
+            const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
 
             fetch(srv.url, controller ? { signal: controller.signal } : {})
               .then(res => {
@@ -1258,10 +1388,19 @@ class MovieshubPlayer {
                 if (html && html.includes("<") && !html.includes("Stream Proxy error")) {
                   curIframe.removeAttribute("src");
                   curIframe.srcdoc = html;
+                  hidePreloader();
+                } else {
+                  throw new Error("Invalid stream proxy response");
                 }
               })
               .catch(err => {
                 console.warn("[Movieshub] Server 1 fetch failed, falling back to clean upstream:", err);
+                const instantStreamUrl = mtype === "tv"
+                  ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true`
+                  : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&autoplay=true`;
+                curIframe.removeAttribute("srcdoc");
+                curIframe.src = instantStreamUrl;
+                hidePreloader();
               });
             return;
           }
@@ -1496,13 +1635,35 @@ class MovieshubPlayer {
     if (!movie) return;
     this.currentMovie = movie;
 
+    // Prevent duplicate audio streams: Stop any active Live TV, Sports, or previous player session
+    if (window.movieshubApp) {
+      if (window.movieshubApp.liveTv) {
+        try { window.movieshubApp.liveTv.destroy(); } catch (e) {}
+      }
+      if (window.movieshubApp.sports) {
+        try { window.movieshubApp.sports.destroy(); } catch (e) {}
+      }
+    }
+    if (this.streamIframe) {
+      try {
+        this.streamIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        this.streamIframe.contentWindow.postMessage('{"action":"pause"}', '*');
+        this.streamIframe.contentWindow.postMessage("stop", "*");
+      } catch (e) {}
+      this.streamIframe.removeAttribute("srcdoc");
+      this.streamIframe.src = "about:blank";
+    }
+
     // Save to Continue Watching in localStorage on device
     if (window.movieshubApp && typeof window.movieshubApp.addToContinueWatching === "function") {
       window.movieshubApp.addToContinueWatching(movie);
     }
 
     if (this.video) {
-      this.video.currentTime = 0;
+      try {
+        this.video.pause();
+        this.video.currentTime = 0;
+      } catch (e) {}
     }
 
     const titleEl = document.getElementById("player-title");
@@ -1539,8 +1700,11 @@ class MovieshubPlayer {
     // 100% Silence and Destroy Stream Iframe DOM to prevent ANY ghost audio leaks
     if (this.streamIframe) {
       try {
+        this.streamIframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+        this.streamIframe.contentWindow.postMessage('{"action":"pause"}', '*');
         this.streamIframe.contentWindow.postMessage("stop", "*");
       } catch (e) {}
+      this.streamIframe.removeAttribute("srcdoc");
       this.streamIframe.src = "about:blank";
     }
     const streamWrap = document.getElementById("player-stream-wrap");
@@ -1643,6 +1807,25 @@ class MovieshubPlayer {
     } catch (e) {
       return 0;
     }
+  }
+
+  showToastIndicator(text) {
+    let toast = document.getElementById("player-hud-toast");
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = "player-hud-toast";
+      toast.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%, -50%) scale(1);background:rgba(15,15,20,0.88);color:#fff;padding:12px 24px;border-radius:30px;font-size:18px;font-weight:800;letter-spacing:1px;z-index:99999;pointer-events:none;transition:opacity 0.25s, transform 0.25s;border:1px solid rgba(255,255,255,0.25);box-shadow:0 10px 30px rgba(0,0,0,0.8);display:flex;align-items:center;gap:8px;";
+      const container = document.getElementById("playerStreamFrameContainer") || document.getElementById("player-container") || this.modal;
+      if (container) container.appendChild(toast);
+    }
+    toast.textContent = text;
+    toast.style.opacity = "1";
+    toast.style.transform = "translate(-50%, -50%) scale(1)";
+    clearTimeout(this._hudToastTimer);
+    this._hudToastTimer = setTimeout(() => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translate(-50%, -50%) scale(0.85)";
+    }, 800);
   }
 }
 

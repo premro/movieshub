@@ -47,11 +47,11 @@ class MovieshubApp {
       this.switchView(hash);
     }
 
-    // Dynamically load 2-hour synced dashboard data from Netmirror
+    // Dynamically load fresh synced catalog from all servers
     this.loadDashboardData();
 
-    // Auto-check for fresh dashboard updates every 15 minutes
-    setInterval(() => this.loadDashboardData(true), 15 * 60 * 1000);
+    // Auto-sync movies from all servers every 1 hour (60 minutes)
+    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
   }
 
   /* ================= MOVIE REGISTRY & LOOKUP ================= */

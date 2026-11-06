@@ -234,10 +234,13 @@ const KNOWN_TMDB_MAP = {
 let lastDashboardSyncTime = 0;
 let isSyncingDashboard = false;
 
+// 1-Hour Automatic Sync Timer across all server providers (TMDB, Moviezda, Netmirror)
+const ONE_HOUR_MS = 60 * 60 * 1000;
+
 async function syncDashboardCatalog(force = false) {
   if (isSyncingDashboard) return cachedDashboard;
   const now = Date.now();
-  if (!force && (now - lastDashboardSyncTime < 30 * 60 * 1000) && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
+  if (!force && (now - lastDashboardSyncTime < ONE_HOUR_MS) && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
     return cachedDashboard;
   }
 
@@ -1188,9 +1191,9 @@ module.exports = async (req, res) => {
     }));
   }
 
-  // 2. Dashboard (Auto-updating live releases & accurate ratings)
+  // 2. Dashboard (Auto-updating live releases & accurate ratings every 1 hour)
   if (pathname === '/api/dashboard') {
-    const isStale = !cachedDashboard || (Date.now() - lastDashboardSyncTime > 30 * 60 * 1000);
+    const isStale = !cachedDashboard || (Date.now() - lastDashboardSyncTime > ONE_HOUR_MS);
     const forceRefresh = u.searchParams.get('refresh') === '1';
     if (forceRefresh || isStale) {
       if (forceRefresh || !cachedDashboard) {
@@ -1578,3 +1581,11 @@ module.exports = async (req, res) => {
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Endpoint not found', path: pathname }));
 };
+// Automatic 1-Hour Sync from all server providers (TMDB, Moviezda, Netmirror)
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    console.log('[Movieshub Auto-Sync] Hourly sync triggered across all server providers...');
+    syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] Hourly sync error:', e.message));
+  }, ONE_HOUR_MS);
+}
+

@@ -260,10 +260,9 @@ assert(indexApiCode.includes("resolveMoviesdaFileId"), "Moviesda file ID resolve
 assert(indexApiCode.includes("WATERMARK REMOVED"), "Watermark removal indicator present in Moviesda player");
 assert(indexApiCode.includes("download.moviespage.xyz"), "Direct Moviesda download route integrated");
 
-// 11. Testing UI Latest 6 Releases (2026 Verification & 2024 Removal)
-console.log("\n11. Testing Theatrical Releases & Meesaya Murukku Print Handling...");
-assert(playerCode.includes("theatre-print-notice"), "Theatre print notice banner integrated in player");
-assert(playerCode.includes("btnWatchMeesayaPart1"), "Quick switch to Part 1 (1080p HD) present in player");
+// 11. Testing Theatrical Releases & Clean UI Alerts
+console.log("\n11. Testing Theatrical Releases & Clean UI Alerts...");
+assert(!playerCode.includes('<div class="theatre-print-notice"'), "Theatrical Pre-HD alert banner removed per user directive");
 assert(playerCode.includes("424336"), "Meesaya Murukku Part 1 (TMDB 424336) mapped in player");
 assert(playerCode.includes("1538457"), "Meesaya Murukku Part 2 (TMDB 1538457) mapped in player");
 assert(appText.includes("THEATRE PRINT"), "THEATRE PRINT badge rendered on movie cards for theatrical pre-HD prints");
@@ -337,6 +336,17 @@ assert(apiCode.includes("stream_url: rawStream") && apiCode.includes("streamUrl:
 assert(playerCode.includes("hasMoviesda"), "Player smart auto-selects Server 9 (Moviesda Tamil HD) for 2026 Tamil movies");
 assert(catalogCode.includes('id: "ramayana-tamil-2026"') && catalogCode.includes('moviesdaFileId: "103234"'), "Catalog contains Ramayana 2026 with direct Moviesda file ID");
 assert(backendCache.tamil_2026.some(m => m.moviesdaFileId === "103234"), "Backend dashboard cache contains Ramayana 2026 with verified stream ID");
+
+// 18. Testing Audio De-duplication, Universal Keyboard Shortcuts (+10s, F, Esc), and 1-Hour Auto-Sync
+console.log("\n18. Testing Audio De-duplication, Universal Keyboard Shortcuts (+10s, F, Esc), and 1-Hour Auto-Sync...");
+assert(playerCode.includes("skipForward10"), "skipForward10 implemented across all servers");
+assert(playerCode.includes('e.key === "ArrowRight"'), "Forward key skips 10s on all servers");
+assert(playerCode.includes('e.key === "f" || e.key === "F"'), "F key toggles fullscreen across all servers");
+assert(playerCode.includes('e.key === "Escape"'), "Escape key exits fullscreen or dismisses player off screen");
+assert(playerCode.includes('ef.src = "about:blank"') && playerCode.includes("nv.pause()"), "Moviesda player enforces strict single-audio exclusivity");
+assert(playerCode.includes("pauseVideo"), "Server switching and modal close immediately pause and terminate background iframe audio");
+assert(apiCode.includes("ONE_HOUR_MS") && apiCode.includes("setInterval"), "Backend automatically syncs from all servers every 1 hour (3600s)");
+assert(freshAppCode.includes("setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000)"), "Client checks for fresh catalog updates every 1 hour");
 
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
