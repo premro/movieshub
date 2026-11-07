@@ -8,6 +8,9 @@
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "scene": "1402181",
+  "scene 2026": "1402181",
+  "scene tamil": "1402181",
   "kauriburir the cursed temple": "103307",
   "ramayana": "103234",
   "ramayana 2026": "103234",
@@ -84,6 +87,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1402181: "1402181",  // Scene (2026)
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
   1250502: "103243",  // Im Game
@@ -143,7 +147,7 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "103234", tmdbId = null) {
+function resolveMoviesdaFileId(title, fallback = null, tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
@@ -271,7 +275,11 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       var ef = document.getElementById("embedFrame");
       var ew = document.getElementById("embedWrap");
       if (ef && ew) {
-        ef.src = "https://play.onestream.today/stream/page/" + fid;
+        if (!fid || (fid === "103234" && "${tmId}" !== "656908") || fid === "1402181" || String(fid).length >= 7) {
+          ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+        } else {
+          ef.src = "https://play.onestream.today/stream/page/" + fid;
+        }
         ew.style.display = "block";
       }
     }
@@ -344,11 +352,21 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
             if (d && (d.fileId || d.file_id)) {
               handleFileId(d.fileId || d.file_id);
             } else {
-              playEmbed("103234");
+              var ef = document.getElementById("embedFrame");
+              var ew = document.getElementById("embedWrap");
+              if (ef && ew) {
+                ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+                ew.style.display = "block";
+              }
             }
           })
           .catch(function() {
-            playEmbed("103234");
+            var ef = document.getElementById("embedFrame");
+            var ew = document.getElementById("embedWrap");
+            if (ef && ew) {
+              ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+              ew.style.display = "block";
+            }
           });
       }
     })();
@@ -1206,12 +1224,10 @@ class MovieshubPlayer {
 
       // Smart Auto-Selection for Instant Zero-Buffer Playback:
       const cleanLower = cleanTitle.toLowerCase();
+      const verifiedFid = movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId);
       const hasMoviesda = Boolean(
-        movie?.moviesdaFileId ||
-        getVerifiedMoviesdaFileId(movie?.title) ||
-        getVerifiedMoviesdaFileId(cleanTitle) ||
-        (movie?.year && Number(movie.year) >= 2025 && safeLang.toLowerCase() === "tamil") ||
-        (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd") || q.toLowerCase().includes("moviesda")))
+        (verifiedFid && (verifiedFid !== "103234" || resolvedTmdbId === 656908)) ||
+        (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("moviesda")))
       );
 
       if (hasMoviesda) {
@@ -1574,6 +1590,9 @@ class MovieshubPlayer {
       // Play official high-definition trailer without buffering
       if (this.currentMovie) {
         const TRAILER_MAP = {
+          "scene-tamil-2026": "jW8Z3s-z6n8",
+          "scene": "jW8Z3s-z6n8",
+          "ramayana-tamil-2026": "r_3xOQO83L8",
           "leo-tamil": "FZYhL_bVQUQ",
           "jailer-tamil": "xenOE1Tma0A",
           "vikram-tamil": "jJf35tEkW9E",

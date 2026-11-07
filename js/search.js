@@ -16,9 +16,9 @@ class MovieshubSearchEngine {
   loadHistory() {
     try {
       const stored = localStorage.getItem(this.historyKey);
-      return stored ? JSON.parse(stored) : ["Amaran", "Leo", "GOAT", "Dune", "Tamil", "Action", "4K"];
+      return stored ? JSON.parse(stored) : ["Scene", "Amaran", "Leo", "GOAT", "Dune", "Tamil", "Action", "4K"];
     } catch (e) {
-      return ["Amaran", "Leo", "Dune"];
+      return ["Scene", "Amaran", "Leo", "Dune"];
     }
   }
 

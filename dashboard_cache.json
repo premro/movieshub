@@ -1,7 +1,49 @@
 {
-  "last_synced": 1793947293,
-  "last_synced_human": "2026-11-06 06:41:33",
+  "last_synced": 1794027974,
+  "last_synced_human": "2026-11-07 05:06:14",
   "latest_six": [
+    {
+      "id": "scene-tamil-2026",
+      "tmdbId": 1402181,
+      "title": "Scene",
+      "nativeTitle": "சீன்",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.8,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 29m",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Thriller"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
+      "mediaType": "movie",
+      "overview": "DSP Inbaraj (Suriya), an eccentric investigator with progressive vision loss, reopens an unresolved serial case alongside Maya (Nazriya) and a chaotic squad to hunt down the elusive contract killer Easwaran (Naslen).",
+      "cast": [
+        "Suriya",
+        "Nazriya Nazim",
+        "Naslen",
+        "Lal",
+        "Anandraj"
+      ],
+      "director": "Jithu Madhavan",
+      "music": "Sushin Shyam",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "1402181"
+    },
     {
       "id": "tmdb-791523",
       "tmdbId": 791523,
@@ -151,39 +193,51 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true
-    },
-    {
-      "id": "tmdb-1813355",
-      "tmdbId": 1813355,
-      "title": "A Story of Derry",
-      "nativeTitle": "A Story of Derry",
-      "language": "English",
-      "languageBadge": "English",
-      "year": 2026,
-      "rating": 6.9,
-      "match": "79%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Cinema"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/4PtzGcegF5Po1NmDAW9IklyvAUh.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/8vky6e0D4dSZMlxHWXBIRRFP1Pb.jpg",
-      "mediaType": "movie",
-      "overview": "Hundreds of years before Pennywise, three youngsters venture into the Western Wood...where they encounter a terrifying ancient spirit.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": true
     }
   ],
   "tamil_2026": [
+    {
+      "id": "scene-tamil-2026",
+      "tmdbId": 1402181,
+      "title": "Scene",
+      "nativeTitle": "சீன்",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.8,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 29m",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Thriller"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
+      "mediaType": "movie",
+      "overview": "DSP Inbaraj (Suriya), an eccentric investigator with progressive vision loss, reopens an unresolved serial case alongside Maya (Nazriya) and a chaotic squad to hunt down the elusive contract killer Easwaran (Naslen).",
+      "cast": [
+        "Suriya",
+        "Nazriya Nazim",
+        "Naslen",
+        "Lal",
+        "Anandraj"
+      ],
+      "director": "Jithu Madhavan",
+      "music": "Sushin Shyam",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "1402181"
+    },
     {
       "id": "mz-103234",
       "tmdbId": 656908,
@@ -522,36 +576,6 @@
       "backdrop": "https://image.tmdb.org/t/p/w1280/xsoKAonKy1zk5XoQoUG1dUXDCKH.jpg",
       "mediaType": "movie",
       "overview": "A seemingly ordinary family must unleash their hidden martial arts skills when they clash with a ruthless criminal gang tied to corruption and violence.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false
-    },
-    {
-      "id": "tmdb-1402181",
-      "tmdbId": 1402181,
-      "title": "Scene",
-      "nativeTitle": "சீன்",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": "NEW",
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Cinema"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
-      "mediaType": "movie",
-      "overview": "Inbaraj, a police officer, is forced to reopen a case he left unfinished years ago. This time, he must solve it with a chaotic and troublesome team. As they struggle to work together and deal with the twists and turns of the case, the investigation takes them on a chaotic and unpredictable ride.",
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
@@ -5258,6 +5282,48 @@
   },
   "all": [
     {
+      "id": "scene-tamil-2026",
+      "tmdbId": 1402181,
+      "title": "Scene",
+      "nativeTitle": "சீன்",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.8,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 29m",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Thriller"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
+      "mediaType": "movie",
+      "overview": "DSP Inbaraj (Suriya), an eccentric investigator with progressive vision loss, reopens an unresolved serial case alongside Maya (Nazriya) and a chaotic squad to hunt down the elusive contract killer Easwaran (Naslen).",
+      "cast": [
+        "Suriya",
+        "Nazriya Nazim",
+        "Naslen",
+        "Lal",
+        "Anandraj"
+      ],
+      "director": "Jithu Madhavan",
+      "music": "Sushin Shyam",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "1402181"
+    },
+    {
       "id": "tmdb-791523",
       "tmdbId": 791523,
       "title": "Wildwood",
@@ -5703,36 +5769,6 @@
       "backdrop": "https://image.tmdb.org/t/p/w1280/xsoKAonKy1zk5XoQoUG1dUXDCKH.jpg",
       "mediaType": "movie",
       "overview": "A seemingly ordinary family must unleash their hidden martial arts skills when they clash with a ruthless criminal gang tied to corruption and violence.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false
-    },
-    {
-      "id": "tmdb-1402181",
-      "tmdbId": 1402181,
-      "title": "Scene",
-      "nativeTitle": "சீன்",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": "NEW",
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Cinema"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
-      "mediaType": "movie",
-      "overview": "Inbaraj, a police officer, is forced to reopen a case he left unfinished years ago. This time, he must solve it with a chaotic and troublesome team. As they struggle to work together and deal with the twists and turns of the case, the investigation takes them on a chaotic and unpredictable ride.",
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false

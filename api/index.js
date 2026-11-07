@@ -198,6 +198,8 @@ function normalizeMovie(item) {
 }
 
 const KNOWN_TMDB_MAP = {
+  'scene': 1402181,
+  'scene 2026': 1402181,
   'leo': 949229,
   'leo: bloody sweet': 949229,
   'jailer': 937020,
@@ -378,6 +380,41 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
+    // Always guarantee Scene (2026, TMDB 1402181) is prioritized at #1 in latest_six and tamil_2026
+    const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
+      id: "scene-tamil-2026",
+      tmdbId: 1402181,
+      title: "Scene",
+      nativeTitle: "சீன்",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.8,
+      match: "99%",
+      maturity: "U/A 16+",
+      duration: "2h 29m",
+      genres: ["Action", "Comedy", "Thriller"],
+      qualities: ["1080p HD", "720p HD", "Dolby Atmos"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
+      mediaType: "movie",
+      overview: "DSP Inbaraj (Suriya), an eccentric investigator with progressive vision loss, reopens an unresolved serial case alongside Maya (Nazriya) and a chaotic squad to hunt down the elusive contract killer Easwaran (Naslen).",
+      cast: ["Suriya", "Nazriya Nazim", "Naslen", "Lal", "Anandraj"],
+      director: "Jithu Madhavan",
+      music: "Sushin Shyam",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "1402181"
+    };
+    if (!updated.all.some(m => m.tmdbId === 1402181)) {
+      updated.all.unshift(sceneMovieObj);
+    }
+    updated.tamil_2026 = [sceneMovieObj, ...updated.tamil_2026.filter(m => m.tmdbId !== 1402181)];
+    updated.latest_six = [sceneMovieObj, ...updated.latest_six.filter(m => m.tmdbId !== 1402181)].slice(0, 6);
+
     updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 24);
 
     cachedDashboard = updated;
@@ -393,6 +430,42 @@ async function syncDashboardCatalog(force = false) {
 async function searchMovies(query, lang = null) {
   const results = [];
   const seenIds = new Set();
+
+  const cleanQ = (query || '').toLowerCase().trim();
+  if (cleanQ === 'scene' || cleanQ.includes('scene')) {
+    const sceneItem = {
+      id: "scene-tamil-2026",
+      tmdbId: 1402181,
+      title: "Scene",
+      nativeTitle: "சீன்",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.8,
+      match: "99%",
+      maturity: "U/A 16+",
+      duration: "2h 29m",
+      genres: ["Action", "Comedy", "Thriller"],
+      qualities: ["1080p HD", "720p HD", "Dolby Atmos"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
+      mediaType: "movie",
+      overview: "DSP Inbaraj (Suriya), an eccentric investigator with progressive vision loss, reopens an unresolved serial case alongside Maya (Nazriya) and a chaotic squad to hunt down the elusive contract killer Easwaran (Naslen).",
+      cast: ["Suriya", "Nazriya Nazim", "Naslen", "Lal", "Anandraj"],
+      director: "Jithu Madhavan",
+      music: "Sushin Shyam",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "1402181"
+    };
+    seenIds.add(sceneItem.id);
+    seenIds.add("tmdb-1402181");
+    seenIds.add(1402181);
+    results.unshift(sceneItem);
+  }
 
   try {
     const url = `https://api2.imdb4.shop/api/search2/${encodeURIComponent(query)}?page=0`;
@@ -855,6 +928,9 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "scene": "1402181",
+  "scene 2026": "1402181",
+  "scene tamil": "1402181",
   "kauriburir the cursed temple": "103307",
   "ramayana": "103234",
   "ramayana 2026": "103234",
@@ -928,6 +1004,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1402181: "1402181",  // Scene (2026)
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
   1250502: "103243",  // Im Game
@@ -1040,7 +1117,7 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
   return null;
 }
 
-function resolveMoviesdaFileId(title, fallback = "103234", tmdbId = null) {
+function resolveMoviesdaFileId(title, fallback = null, tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
@@ -1283,7 +1360,24 @@ module.exports = async (req, res) => {
   // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
   // 6b. Moviesda Stream Extractor API
   if (pathname === "/api/moviesda_stream") {
-    const fileId = u.searchParams.get("file_id") || "103234";
+    const fileId = u.searchParams.get("file_id") || "";
+    if (fileId === "1402181" || String(fileId).length >= 7) {
+      const vidlinkStream = `https://vidlink.pro/movie/${fileId}?multiLang=true`;
+      res.writeHead(200, {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      });
+      return res.end(JSON.stringify({
+        success: true,
+        status: "ok",
+        fileId,
+        file_id: fileId,
+        streamUrl: vidlinkStream,
+        stream_url: vidlinkStream,
+        embed_url: vidlinkStream,
+        downloadUrl: `https://vidlink.pro/movie/${fileId}`
+      }));
+    }
     try {
       const targetUrl = `https://play.onestream.today/stream/page/${fileId}`;
       const { buffer } = await fetchBuffer(targetUrl, {
@@ -1334,17 +1428,26 @@ module.exports = async (req, res) => {
     if (!fileId && title) {
       fileId = await resolveMoviesdaLive(title);
     }
+    const resolvedId = fileId || tmId || null;
+    let streamTarget = null;
+    if (resolvedId) {
+      if (resolvedId === "1402181" || String(resolvedId).length >= 7) {
+        streamTarget = `https://vidlink.pro/movie/${resolvedId}?multiLang=true`;
+      } else {
+        streamTarget = `https://play.onestream.today/stream/page/${resolvedId}`;
+      }
+    }
     res.writeHead(200, {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*"
     });
     return res.end(JSON.stringify({
-      status: fileId ? "ok" : "not_found",
+      status: resolvedId ? "ok" : "not_found",
       title,
-      fileId: fileId || null,
-      file_id: fileId || null,
-      streamUrl: fileId ? `https://play.onestream.today/stream/page/${fileId}` : null,
-      stream_url: fileId ? `https://play.onestream.today/stream/page/${fileId}` : null
+      fileId: resolvedId,
+      file_id: resolvedId,
+      streamUrl: streamTarget,
+      stream_url: streamTarget
     }));
   }
 

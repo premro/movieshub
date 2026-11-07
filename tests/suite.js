@@ -348,6 +348,27 @@ assert(playerCode.includes("pauseVideo"), "Server switching and modal close imme
 assert(apiCode.includes("ONE_HOUR_MS") && apiCode.includes("setInterval"), "Backend automatically syncs from all servers every 1 hour (3600s)");
 assert(freshAppCode.includes("setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000)"), "Client checks for fresh catalog updates every 1 hour");
 
+// 19. Testing 2026 Theatrical Release 'Scene' (TMDB 1402181) & Anti-Ramayana Fallback Protection
+console.log("\n19. Testing 2026 Theatrical Release 'Scene' (TMDB 1402181) & Anti-Ramayana Fallback Protection...");
+const updatedCatalog = fs.readFileSync(path.join(__dirname, "../js/catalog.js"), "utf8");
+const updatedPlayer = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
+const updatedApi = fs.readFileSync(path.join(__dirname, "../api/index.js"), "utf8");
+const updatedDashCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../dashboard_cache.json"), "utf8"));
+const updatedFnCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/dashboard_cache.json"), "utf8"));
+
+assert(updatedCatalog.includes('id: "scene-tamil-2026"') && updatedCatalog.includes('tmdbId: 1402181'), "Scene (2026) exists in local MOVIE_CATALOG with TMDB ID 1402181");
+assert(updatedDashCache.latest_six && updatedDashCache.latest_six[0].tmdbId === 1402181, "Scene (TMDB 1402181) is #1 in latest_six dashboard cache");
+assert(updatedDashCache.tamil_2026 && updatedDashCache.tamil_2026[0].tmdbId === 1402181, "Scene (TMDB 1402181) is #1 in tamil_2026 dashboard cache");
+assert(updatedFnCache.latest_six && updatedFnCache.latest_six[0].tmdbId === 1402181, "Scene is synced in serverless functions dashboard cache");
+assert(updatedPlayer.includes('1402181: "1402181"'), "Scene TMDB 1402181 mapped in player MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('1402181: "1402181"'), "Scene TMDB 1402181 mapped in api MOVIESDA_TMDB_MAP");
+assert(!updatedPlayer.includes('playEmbed("103234")'), "Hardcoded Ramayana fallback playEmbed(103234) removed from player");
+assert(!updatedPlayer.includes('fallback = "103234"'), "Player resolveMoviesdaFileId has null fallback instead of Ramayana");
+assert(!updatedApi.includes('fallback = "103234"'), "API resolveMoviesdaFileId has null fallback instead of Ramayana");
+assert(!updatedApi.includes('u.searchParams.get("file_id") || "103234"'), "API moviesda_stream does not default missing file_id to Ramayana 103234");
+assert(updatedApi.includes('fileId === "1402181" || String(fileId).length >= 7'), "API moviesda_stream routes TMDB IDs directly to multi-lang stream");
+assert(updatedApi.includes("cleanQ === 'scene' || cleanQ.includes('scene')"), "API searchMovies prioritizes Scene for instant search playback");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
