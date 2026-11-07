@@ -360,13 +360,18 @@ assert(updatedCatalog.includes('id: "scene-tamil-2026"') && updatedCatalog.inclu
 assert(updatedDashCache.latest_six && updatedDashCache.latest_six[0].tmdbId === 1402181, "Scene (TMDB 1402181) is #1 in latest_six dashboard cache");
 assert(updatedDashCache.tamil_2026 && updatedDashCache.tamil_2026[0].tmdbId === 1402181, "Scene (TMDB 1402181) is #1 in tamil_2026 dashboard cache");
 assert(updatedFnCache.latest_six && updatedFnCache.latest_six[0].tmdbId === 1402181, "Scene is synced in serverless functions dashboard cache");
-assert(updatedPlayer.includes('1402181: "1402181"'), "Scene TMDB 1402181 mapped in player MOVIESDA_TMDB_MAP");
-assert(updatedApi.includes('1402181: "1402181"'), "Scene TMDB 1402181 mapped in api MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('1402181: \"103361\"'), "Scene TMDB 1402181 mapped to Moviesda 1080p print 103361 in player MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('1402181: \"103361\"'), "Scene TMDB 1402181 mapped to Moviesda 1080p print 103361 in api MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('"scene": "103361"'), "Scene verified in player MOVIESDA_VERIFIED_MAP with 103361");
+assert(updatedApi.includes('"scene": "103361"'), "Scene verified in api MOVIESDA_VERIFIED_MAP with 103361");
+assert(updatedApi.includes("MOVIESDA_DOMAINS"), "API includes resilient domain mirror list for Moviesda domain changes");
+assert(updatedApi.includes("res.statusCode >= 300 && res.statusCode < 400"), "fetchBuffer automatically follows HTTP redirects for domain changes");
+assert(updatedApi.includes("resolveMoviesdaLive(urlParam)"), "API moviesda_resolve supports direct URL parameter for moviezda links");
 assert(!updatedPlayer.includes('playEmbed("103234")'), "Hardcoded Ramayana fallback playEmbed(103234) removed from player");
 assert(!updatedPlayer.includes('fallback = "103234"'), "Player resolveMoviesdaFileId has null fallback instead of Ramayana");
 assert(!updatedApi.includes('fallback = "103234"'), "API resolveMoviesdaFileId has null fallback instead of Ramayana");
 assert(!updatedApi.includes('u.searchParams.get("file_id") || "103234"'), "API moviesda_stream does not default missing file_id to Ramayana 103234");
-assert(updatedApi.includes('fileId === "1402181" || String(fileId).length >= 7'), "API moviesda_stream routes TMDB IDs directly to multi-lang stream");
+assert(updatedApi.includes("String(fileId).length >= 7"), "API moviesda_stream routes TMDB IDs directly to multi-lang stream");
 assert(updatedApi.includes("cleanQ === 'scene' || cleanQ.includes('scene')"), "API searchMovies prioritizes Scene for instant search playback");
 
 console.log(`\n========================================`);

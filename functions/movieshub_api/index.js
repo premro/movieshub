@@ -94,22 +94,32 @@ function fetchJson(url, options = {}) {
   });
 }
 
-function fetchBuffer(url, options = {}) {
+function fetchBuffer(url, options = {}, redirectCount = 0) {
   return new Promise((resolve, reject) => {
+    if (redirectCount > 6) {
+      return reject(new Error('Too many redirects'));
+    }
     const u = new URL(url);
     const client = u.protocol === 'http:' ? http : https;
     const req = client.request(u, {
       method: options.method || 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-        'Referer': 'https://netmirror.plus/',
+        'Referer': options.headers?.Referer || 'https://moviezda.me/',
         ...(options.headers || {})
       },
       timeout: options.timeout || 8000
     }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        let redirectUrl = res.headers.location;
+        if (!redirectUrl.startsWith('http')) {
+          redirectUrl = new URL(redirectUrl, url).toString();
+        }
+        return resolve(fetchBuffer(redirectUrl, options, redirectCount + 1));
+      }
       const chunks = [];
       res.on('data', chunk => chunks.push(chunk));
-      res.on('end', () => resolve({ buffer: Buffer.concat(chunks), headers: res.headers, statusCode: res.statusCode }));
+      res.on('end', () => resolve({ buffer: Buffer.concat(chunks), headers: res.headers, statusCode: res.statusCode, finalUrl: url }));
     });
     req.on('error', reject);
     req.on('timeout', () => {
@@ -407,8 +417,9 @@ async function syncDashboardCatalog(force = false) {
       music: "Sushin Shyam",
       isTrending: true,
       isTheatrePrint: true,
-      moviesdaFileId: "1402181"
+      moviesdaFileId: "103361"
     };
+    sceneMovieObj.moviesdaFileId = "103361";
     if (!updated.all.some(m => m.tmdbId === 1402181)) {
       updated.all.unshift(sceneMovieObj);
     }
@@ -928,9 +939,9 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
-  "scene": "1402181",
-  "scene 2026": "1402181",
-  "scene tamil": "1402181",
+  "scene": "103361",
+  "scene 2026": "103361",
+  "scene tamil": "103361",
   "kauriburir the cursed temple": "103307",
   "ramayana": "103234",
   "ramayana 2026": "103234",
@@ -1004,7 +1015,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
-  1402181: "1402181",  // Scene (2026)
+  1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
   1250502: "103243",  // Im Game
@@ -1038,61 +1049,104 @@ const MOVIESDA_TMDB_MAP = {
   1011985: "88746",  // Pushpa 2
 };
 
+const MOVIESDA_DOMAINS = [
+  "https://moviezda.me",
+  "https://moviesda.io",
+  "https://moviesda.mobi",
+  "https://moviesda.net"
+];
+
 const moviesdaLiveCache = new Map();
 
-async function resolveMoviesdaLive(title) {
-  if (!title) return null;
-  const raw = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+async function resolveMoviesdaLive(titleOrUrl) {
+  if (!titleOrUrl) return null;
+  const inputStr = String(titleOrUrl).trim();
+
+  // 1. If direct URL is provided (e.g. https://moviezda.me/scene-2026-tamil-movie/)
+  if (inputStr.startsWith("http://") || inputStr.startsWith("https://")) {
+    try {
+      const { buffer, finalUrl } = await fetchBuffer(inputStr);
+      const origin = new URL(finalUrl || inputStr).origin;
+      let pageHtml = buffer.toString("utf8");
+
+      let subMatch = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
+      if (subMatch) {
+        const pRes = await fetchBuffer(new URL(subMatch[1], origin).toString());
+        pageHtml = pRes.buffer.toString("utf8");
+        let subMatch2 = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
+        if (subMatch2) {
+          const pRes2 = await fetchBuffer(new URL(subMatch2[1], origin).toString());
+          pageHtml = pRes2.buffer.toString("utf8");
+        }
+      }
+      let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/);
+      if (dlPageMatch) {
+        const dlRes = await fetchBuffer(new URL(dlPageMatch[1], origin).toString());
+        const dlHtml = dlRes.buffer.toString("utf8");
+        let fid = dlHtml.match(/\/file\/(\d+)/);
+        if (fid) {
+          moviesdaLiveCache.set(inputStr, fid[1]);
+          return fid[1];
+        }
+      }
+    } catch (e) {
+      // Continue to title based search
+    }
+  }
+
+  const raw = inputStr.toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
   const clean = raw.replace(/\b(2026|2025|2024|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
   if (!clean) return null;
   
   if (moviesdaLiveCache.has(clean)) return moviesdaLiveCache.get(clean);
 
-  try {
-    const { buffer } = await fetchBuffer("https://moviezda.me/tamil-2026-movies/", {
-      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" }
-    });
-    const html = buffer.toString("utf8");
-    const regex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
-    let m;
-    let targetUrl = null;
-    const firstWord = clean.split(" ")[0];
-    while ((m = regex.exec(html)) !== null) {
-      const itemTitle = m[2].toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
-      if (itemTitle.includes(clean) || clean.includes(itemTitle.replace(/ 2026| 2025/g, "")) || (firstWord.length > 3 && itemTitle.includes(firstWord))) {
-        targetUrl = "https://moviezda.me" + m[1];
-        break;
+  // Try domain mirrors with automatic redirect handling
+  for (const baseDomain of MOVIESDA_DOMAINS) {
+    try {
+      // Direct slug guess first (e.g. /scene-2026-tamil-movie/ or /scene-tamil-movie/)
+      const slugGuesses = [
+        `${baseDomain}/${clean.replace(/\s+/g, "-")}-2026-tamil-movie/`,
+        `${baseDomain}/${clean.replace(/\s+/g, "-")}-tamil-movie/`
+      ];
+      for (const slugUrl of slugGuesses) {
+        try {
+          const directRes = await fetchBuffer(slugUrl);
+          if (directRes && directRes.statusCode === 200) {
+            const fid = await resolveMoviesdaLive(directRes.finalUrl || slugUrl);
+            if (fid) {
+              moviesdaLiveCache.set(clean, fid);
+              return fid;
+            }
+          }
+        } catch (e) {}
       }
-    }
 
-    if (!targetUrl) return null;
-
-    const subRes = await fetchBuffer(targetUrl, { headers: { "User-Agent": "Mozilla/5.0" } });
-    const subHtml = subRes.buffer.toString("utf8");
-    let subMatch = subHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
-    let pageHtml = subHtml;
-    if (subMatch) {
-      const pRes = await fetchBuffer("https://moviezda.me" + subMatch[1], { headers: { "User-Agent": "Mozilla/5.0" } });
-      pageHtml = pRes.buffer.toString("utf8");
-      let subMatch2 = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
-      if (subMatch2) {
-        const pRes2 = await fetchBuffer("https://moviezda.me" + subMatch2[1], { headers: { "User-Agent": "Mozilla/5.0" } });
-        pageHtml = pRes2.buffer.toString("utf8");
+      // Catalog page crawl
+      const { buffer, finalUrl } = await fetchBuffer(`${baseDomain}/tamil-2026-movies/`);
+      const origin = new URL(finalUrl || baseDomain).origin;
+      const html = buffer.toString("utf8");
+      const regex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
+      let m;
+      let targetUrl = null;
+      const firstWord = clean.split(" ")[0];
+      while ((m = regex.exec(html)) !== null) {
+        const itemTitle = m[2].toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
+        if (itemTitle.includes(clean) || clean.includes(itemTitle.replace(/ 2026| 2025/g, "")) || (firstWord.length > 3 && itemTitle.includes(firstWord))) {
+          targetUrl = new URL(m[1], origin).toString();
+          break;
+        }
       }
-    }
 
-    let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/);
-    if (dlPageMatch) {
-      const dlRes = await fetchBuffer("https://moviezda.me" + dlPageMatch[1], { headers: { "User-Agent": "Mozilla/5.0" } });
-      const dlHtml = dlRes.buffer.toString("utf8");
-      let fid = dlHtml.match(/\/file\/(\d+)/);
-      if (fid) {
-        moviesdaLiveCache.set(clean, fid[1]);
-        return fid[1];
+      if (targetUrl) {
+        const fid = await resolveMoviesdaLive(targetUrl);
+        if (fid) {
+          moviesdaLiveCache.set(clean, fid);
+          return fid;
+        }
       }
+    } catch (e) {
+      continue;
     }
-  } catch (e) {
-    return null;
   }
   return null;
 }
@@ -1360,8 +1414,9 @@ module.exports = async (req, res) => {
   // 7b. 1TamilMV Stream & Multi-Audio Dynamic Portal
   // 6b. Moviesda Stream Extractor API
   if (pathname === "/api/moviesda_stream") {
-    const fileId = u.searchParams.get("file_id") || "";
-    if (fileId === "1402181" || String(fileId).length >= 7) {
+    let fileId = u.searchParams.get("file_id") || "";
+    if (fileId === "1402181") fileId = "103361";
+    if (String(fileId).length >= 7) {
       const vidlinkStream = `https://vidlink.pro/movie/${fileId}?multiLang=true`;
       res.writeHead(200, {
         "Content-Type": "application/json",
@@ -1424,14 +1479,21 @@ module.exports = async (req, res) => {
   if (pathname === "/api/moviesda_resolve") {
     const title = u.searchParams.get("title") || "";
     const tmId = u.searchParams.get("tmdb_id") || null;
-    let fileId = getVerifiedMoviesdaFileId(title, tmId);
+    const urlParam = u.searchParams.get("url") || "";
+    let fileId = null;
+    if (urlParam) {
+      fileId = await resolveMoviesdaLive(urlParam);
+    }
+    if (!fileId) {
+      fileId = getVerifiedMoviesdaFileId(title, tmId);
+    }
     if (!fileId && title) {
       fileId = await resolveMoviesdaLive(title);
     }
     const resolvedId = fileId || tmId || null;
     let streamTarget = null;
     if (resolvedId) {
-      if (resolvedId === "1402181" || String(resolvedId).length >= 7) {
+      if (String(resolvedId).length >= 7) {
         streamTarget = `https://vidlink.pro/movie/${resolvedId}?multiLang=true`;
       } else {
         streamTarget = `https://play.onestream.today/stream/page/${resolvedId}`;

@@ -8,9 +8,9 @@
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
-  "scene": "1402181",
-  "scene 2026": "1402181",
-  "scene tamil": "1402181",
+  "scene": "103361",
+  "scene 2026": "103361",
+  "scene tamil": "103361",
   "kauriburir the cursed temple": "103307",
   "ramayana": "103234",
   "ramayana 2026": "103234",
@@ -87,7 +87,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
-  1402181: "1402181",  // Scene (2026)
+  1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
   1250502: "103243",  // Im Game
@@ -225,7 +225,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       }
     }
 
-    function playDirect(streamUrl) {
+    function playDirect(streamUrl, fid) {
       var loader = document.getElementById("mLoader");
       if (loader) loader.style.display = "none";
       var ef = document.getElementById("embedFrame");
@@ -234,6 +234,11 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       if (ew) ew.style.display = "none";
       var nv = document.getElementById("nativeVideo");
       if (nv) {
+        nv.onerror = function() {
+          try { nv.pause(); nv.removeAttribute("src"); nv.load(); } catch (e) {}
+          nv.style.display = "none";
+          playEmbed(fid);
+        };
         nv.src = streamUrl;
         nv.muted = false;
         nv.volume = 1.0;
@@ -257,7 +262,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
             }).catch(function() {
               try { nv.pause(); nv.removeAttribute("src"); nv.load(); } catch (e) {}
               nv.style.display = "none";
-              if (ew) ew.style.display = "block";
+              playEmbed(fid);
             });
           });
         }
@@ -331,7 +336,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
           .then(function(d) {
             var stream = (d && (d.streamUrl || d.stream_url)) || "";
             if (stream) {
-              playDirect(stream);
+              playDirect(stream, fid);
             } else {
               playEmbed(fid);
             }
