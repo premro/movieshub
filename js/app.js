@@ -204,6 +204,16 @@ class MovieshubApp {
           });
         }
 
+        const hasAllLanguages = data.languages &&
+          Array.isArray(data.languages.english) && data.languages.english.length > 0 &&
+          Array.isArray(data.languages.hindi) && data.languages.hindi.length > 0 &&
+          Array.isArray(data.languages.telugu) && data.languages.telugu.length > 0 &&
+          Array.isArray(data.languages.malayalam) && data.languages.malayalam.length > 0;
+
+        if (!hasAllLanguages) {
+          await this.syncClientSideLiveReleases(mergeMovie);
+        }
+
         if (this.searchEngine) {
           this.searchEngine.catalog = this.catalog;
         }
@@ -215,6 +225,69 @@ class MovieshubApp {
       }
     } catch (e) {
       // Quiet failover
+    }
+  }
+
+  async syncClientSideLiveReleases(mergeMovie) {
+    try {
+      const tmdbKey = "3cb41ecea3bf606c56552db3d17adefd";
+      const endpoints = [
+        "https://tmdb.imdb3.shop/3/movie/now_playing?api_key=" + tmdbKey + "&page=1",
+        "https://tmdb.imdb3.shop/3/discover/movie?api_key=" + tmdbKey + "&with_original_language=ta&primary_release_year=2026&sort_by=popularity.desc",
+        "https://tmdb.imdb3.shop/3/discover/movie?api_key=" + tmdbKey + "&with_original_language=te&primary_release_year=2026&sort_by=popularity.desc",
+        "https://tmdb.imdb3.shop/3/discover/movie?api_key=" + tmdbKey + "&with_original_language=ml&primary_release_year=2026&sort_by=popularity.desc",
+        "https://tmdb.imdb3.shop/3/discover/movie?api_key=" + tmdbKey + "&with_original_language=hi&primary_release_year=2026&sort_by=popularity.desc",
+        "https://tmdb.imdb3.shop/3/discover/movie?api_key=" + tmdbKey + "&with_original_language=en&primary_release_year=2026&sort_by=popularity.desc"
+      ];
+      const langMap = { ta: "Tamil", te: "Telugu", ml: "Malayalam", hi: "Hindi", en: "English" };
+
+      const responses = await Promise.allSettled(endpoints.map(url => fetch(url).then(r => r.json())));
+      responses.forEach(res => {
+        if (res.status === "fulfilled" && res.value && Array.isArray(res.value.results)) {
+          const items = res.value.results;
+          items.forEach(item => {
+            if (!item || !item.id) return;
+            const origLang = item.original_language || "en";
+            const langName = langMap[origLang] || "English";
+            const title = item.title || item.name || "Movie";
+            const relDate = item.release_date || item.first_air_date || "2026";
+            const year = parseInt(relDate.slice(0, 4), 10) || 2026;
+            const vote = (item.vote_count >= 5 && item.vote_average > 0)
+              ? Math.round(item.vote_average * 10) / 10
+              : "NEW";
+            const poster = item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : "";
+            const backdrop = item.backdrop_path ? `https://image.tmdb.org/t/p/w1280${item.backdrop_path}` : poster;
+
+            const movieObj = {
+              id: `tmdb-${item.id}`,
+              tmdbId: item.id,
+              title: title,
+              nativeTitle: item.original_title || title,
+              language: langName,
+              languageBadge: langName,
+              year: year,
+              rating: vote,
+              match: "98%",
+              maturity: "U/A 16+",
+              duration: "2h 30m",
+              genres: ["Action", "Drama"],
+              qualities: ["4K", "1080p"],
+              platform: "Direct",
+              platformBadge: "MOVIESHUB",
+              platformColor: "#E50914",
+              poster: poster,
+              backdrop: backdrop,
+              mediaType: "movie",
+              overview: item.overview || `${title} (${year}) - Latest high definition release.`
+            };
+            if (typeof mergeMovie === "function") {
+              mergeMovie(movieObj);
+            }
+          });
+        }
+      });
+    } catch (e) {
+      // Non-fatal client fallback
     }
   }
 
