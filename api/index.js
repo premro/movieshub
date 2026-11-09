@@ -52,11 +52,31 @@ const LANG_COLORS = {
   indonesian: '#06b6d4', english: '#3b82f6', cinema: '#e50914'
 };
 
+let lastDashboardSyncTime = 0;
+let isSyncingDashboard = false;
 let cachedDashboard = null;
+function getCacheFilePath() {
+  const candidatePaths = [
+    '/tmp/dashboard_cache.json',
+    path.join(__dirname, 'dashboard_cache.json'),
+    path.join(__dirname, '..', 'dashboard_cache.json'),
+    path.join(process.cwd(), 'dashboard_cache.json'),
+    path.join(process.cwd(), 'api', 'dashboard_cache.json'),
+    path.join(process.cwd(), 'Movieshub', 'dashboard_cache.json')
+  ];
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+  return null;
+}
+
 try {
-  const cachePath = path.join(__dirname, 'dashboard_cache.json');
-  if (fs.existsSync(cachePath)) {
+  const cachePath = getCacheFilePath();
+  if (cachePath) {
     cachedDashboard = JSON.parse(fs.readFileSync(cachePath, 'utf8'));
+    if (cachedDashboard && cachedDashboard.last_synced) {
+      lastDashboardSyncTime = cachedDashboard.last_synced * 1000;
+    }
   }
 } catch (e) {
   console.error('[Cache Init Error]', e);
@@ -243,8 +263,7 @@ const KNOWN_TMDB_MAP = {
   'the boys': 76479
 };
 
-let lastDashboardSyncTime = 0;
-let isSyncingDashboard = false;
+// Sync states declared above
 
 // 1-Hour Automatic Sync Timer across all server providers (TMDB, Moviezda, Netmirror)
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -267,40 +286,91 @@ async function syncDashboardCatalog(force = false) {
       tamil_2024: (cachedDashboard && cachedDashboard.tamil_2024) || [],
       trending: [],
       latest: [],
-      languages: (cachedDashboard && cachedDashboard.languages) || {},
+      languages: {
+        tamil: [],
+        english: [],
+        hindi: [],
+        telugu: [],
+        malayalam: []
+      },
       all: []
     };
 
     const seenIds = new Set();
-    const addMovie = (m, arr) => {
+    const addMovie = (m, arr = null) => {
       if (!m || !m.title) return;
-      arr.push(m);
+      if (arr && Array.isArray(arr)) arr.push(m);
       if (!seenIds.has(m.tmdbId)) {
         seenIds.add(m.tmdbId);
         updated.all.push(m);
       }
     };
 
-    // 1. Fetch Now Playing (Latest 6 Releases strictly 2025/2026)
-    const npData = await fetchTmdbApi('/movie/now_playing', { page: 1 });
-    const npList = (npData.results || []).map(normalizeMovie).filter(m => (m.year || 2026) >= 2025);
-    npList.slice(0, 6).forEach(m => addMovie(m, updated.latest_six));
+    // Parallel multi-language discovery: fetches 2026 & 2025 for all major languages + Now Playing + Trending
+    const [
+      npRes,
+      trRes,
+      ta26Res,
+      ta25Res,
+      en26Res,
+      en25Res,
+      hi26Res,
+      hi25Res,
+      te26Res,
+      te25Res,
+      ml26Res,
+      ml25Res
+    ] = await Promise.allSettled([
+      fetchTmdbApi('/movie/now_playing', { page: 1 }),
+      fetchTmdbApi('/trending/movie/week', { page: 1 }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'ta', primary_release_year: 2026, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'ta', primary_release_year: 2025, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'en', primary_release_year: 2026, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'en', primary_release_year: 2025, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'hi', primary_release_year: 2026, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'hi', primary_release_year: 2025, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'te', primary_release_year: 2026, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'te', primary_release_year: 2025, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2026, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2025, sort_by: 'popularity.desc' })
+    ]);
 
-    // 2. Fetch Tamil 2026 Releases
-    const t26Data = await fetchTmdbApi('/discover/movie', {
-      with_original_language: 'ta',
-      primary_release_year: 2026,
-      sort_by: 'popularity.desc'
-    });
-    (t26Data.results || []).map(normalizeMovie).forEach(m => {
-      m.language = 'Tamil';
-      m.languageBadge = 'Tamil';
-      const fid = getVerifiedMoviesdaFileId(m.title, m.tmdbId);
-      if (fid) m.moviesdaFileId = fid;
-      addMovie(m, updated.tamil_2026);
-    });
+    // Process Now Playing
+    if (npRes.status === 'fulfilled' && npRes.value && npRes.value.results) {
+      const npList = npRes.value.results.map(normalizeMovie).filter(m => (m.year || 2026) >= 2025);
+      npList.slice(0, 8).forEach(m => addMovie(m, null));
+    }
 
-    // 2b. Enrich & Merge with Verified Moviesda 2026 Releases (https://moviezda.me/tamil-2026-movies/)
+    // Process Trending
+    if (trRes.status === 'fulfilled' && trRes.value && trRes.value.results) {
+      trRes.value.results.slice(0, 18).map(normalizeMovie).forEach(m => {
+        addMovie(m, updated.trending);
+      });
+    }
+
+    // Process Tamil 2026
+    if (ta26Res.status === 'fulfilled' && ta26Res.value && ta26Res.value.results) {
+      ta26Res.value.results.map(normalizeMovie).forEach(m => {
+        m.language = 'Tamil';
+        m.languageBadge = 'Tamil';
+        const fid = getVerifiedMoviesdaFileId(m.title, m.tmdbId);
+        if (fid) m.moviesdaFileId = fid;
+        addMovie(m, updated.tamil_2026);
+        addMovie(m, updated.languages.tamil);
+      });
+    }
+
+    // Process Tamil 2025
+    if (ta25Res.status === 'fulfilled' && ta25Res.value && ta25Res.value.results) {
+      ta25Res.value.results.map(normalizeMovie).forEach(m => {
+        m.language = 'Tamil';
+        m.languageBadge = 'Tamil';
+        addMovie(m, updated.tamil_2025);
+        addMovie(m, updated.languages.tamil);
+      });
+    }
+
+    // Enrich & Merge with Verified Moviesda 2026 Theatrical Prints
     try {
       const mzRes = await fetchBuffer("https://moviezda.me/tamil-2026-movies/", {
         headers: { "User-Agent": "Mozilla/5.0" }
@@ -334,31 +404,58 @@ async function syncDashboardCatalog(force = false) {
             qualities: ["1080p HD", "720p HD", "Theatre Print"]
           };
           addMovie(mItem, updated.tamil_2026);
+          addMovie(mItem, updated.languages.tamil);
         }
       }
     } catch (err) {
-      // Non-fatal, keep going
+      // Non-fatal
     }
 
-    // 3. Fetch Tamil 2025 Releases
-    const t25Data = await fetchTmdbApi('/discover/movie', {
-      with_original_language: 'ta',
-      primary_release_year: 2025,
-      sort_by: 'popularity.desc'
-    });
-    (t25Data.results || []).map(normalizeMovie).forEach(m => {
-      m.language = 'Tamil';
-      m.languageBadge = 'Tamil';
-      addMovie(m, updated.tamil_2025);
-    });
-
-    // 4. Fetch Trending Movies This Week
-    const trData = await fetchTmdbApi('/trending/movie/week', { page: 1 });
-    (trData.results || []).slice(0, 16).map(normalizeMovie).forEach(m => {
-      addMovie(m, updated.trending);
+    // Process English 2026 & 2025
+    [en26Res, en25Res].forEach(res => {
+      if (res.status === 'fulfilled' && res.value && res.value.results) {
+        res.value.results.map(normalizeMovie).forEach(m => {
+          m.language = 'English';
+          m.languageBadge = 'English';
+          addMovie(m, updated.languages.english);
+        });
+      }
     });
 
-    // 5. Retain catalog movies and test items from existing cachedDashboard
+    // Process Hindi 2026 & 2025
+    [hi26Res, hi25Res].forEach(res => {
+      if (res.status === 'fulfilled' && res.value && res.value.results) {
+        res.value.results.map(normalizeMovie).forEach(m => {
+          m.language = 'Hindi';
+          m.languageBadge = 'Hindi';
+          addMovie(m, updated.languages.hindi);
+        });
+      }
+    });
+
+    // Process Telugu 2026 & 2025
+    [te26Res, te25Res].forEach(res => {
+      if (res.status === 'fulfilled' && res.value && res.value.results) {
+        res.value.results.map(normalizeMovie).forEach(m => {
+          m.language = 'Telugu';
+          m.languageBadge = 'Telugu';
+          addMovie(m, updated.languages.telugu);
+        });
+      }
+    });
+
+    // Process Malayalam 2026 & 2025
+    [ml26Res, ml25Res].forEach(res => {
+      if (res.status === 'fulfilled' && res.value && res.value.results) {
+        res.value.results.map(normalizeMovie).forEach(m => {
+          m.language = 'Malayalam';
+          m.languageBadge = 'Malayalam';
+          addMovie(m, updated.languages.malayalam);
+        });
+      }
+    });
+
+    // Retain catalog movies from previous cachedDashboard so nothing is lost
     if (cachedDashboard && Array.isArray(cachedDashboard.all)) {
       cachedDashboard.all.forEach(m => {
         if (!seenIds.has(m.tmdbId)) {
@@ -380,17 +477,24 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
-    // Ensure latest_six has 6 items and all >= 2025
-    if (updated.latest_six.length < 6) {
-      for (const c of updated.tamil_2026) {
-        if (!updated.latest_six.some(m => m.tmdbId === c.tmdbId)) {
-          updated.latest_six.push(c);
-          if (updated.latest_six.length >= 6) break;
-        }
+    // Assemble latest_six (strictly 2026/2025 releases across all languages)
+    const latestCandidates = [
+      ...updated.tamil_2026,
+      ...updated.languages.english.filter(m => (m.year || 0) >= 2026),
+      ...updated.languages.hindi.filter(m => (m.year || 0) >= 2026),
+      ...updated.languages.telugu.filter(m => (m.year || 0) >= 2026),
+      ...updated.languages.malayalam.filter(m => (m.year || 0) >= 2026),
+      ...updated.all.filter(m => (m.year || 0) >= 2026)
+    ];
+
+    for (const cand of latestCandidates) {
+      if (!updated.latest_six.some(m => m.tmdbId === cand.tmdbId)) {
+        updated.latest_six.push(cand);
+        if (updated.latest_six.length >= 6) break;
       }
     }
 
-    // Always guarantee Scene (2026, TMDB 1402181) is prioritized at #1 in latest_six and tamil_2026
+    // Guarantee Scene (2026, TMDB 1402181) is prioritized at #1 in latest_six and tamil_2026
     const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
       id: "scene-tamil-2026",
       tmdbId: 1402181,
@@ -426,10 +530,18 @@ async function syncDashboardCatalog(force = false) {
     updated.tamil_2026 = [sceneMovieObj, ...updated.tamil_2026.filter(m => m.tmdbId !== 1402181)];
     updated.latest_six = [sceneMovieObj, ...updated.latest_six.filter(m => m.tmdbId !== 1402181)].slice(0, 6);
 
-    updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 24);
+    updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 30);
 
     cachedDashboard = updated;
     lastDashboardSyncTime = now;
+
+    // Persist cache to /tmp and local directory for subsequent warm lambdas
+    try {
+      fs.writeFileSync('/tmp/dashboard_cache.json', JSON.stringify(updated));
+    } catch (e) {}
+    try {
+      fs.writeFileSync(path.join(__dirname, 'dashboard_cache.json'), JSON.stringify(updated));
+    } catch (e) {}
   } catch (e) {
     console.error('[Dashboard Auto-Sync Error]', e);
   } finally {
@@ -1327,17 +1439,14 @@ module.exports = async (req, res) => {
     const isStale = !cachedDashboard || (Date.now() - lastDashboardSyncTime > ONE_HOUR_MS);
     const forceRefresh = u.searchParams.get('refresh') === '1';
     if (forceRefresh || isStale) {
-      if (forceRefresh || !cachedDashboard) {
-        await syncDashboardCatalog(forceRefresh);
-      } else {
-        syncDashboardCatalog(false).catch(err => console.error('[BG Sync]', err));
-      }
+      await syncDashboardCatalog(forceRefresh);
     }
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=300'
+      'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+      'Access-Control-Allow-Origin': '*'
     });
-    return res.end(JSON.stringify(cachedDashboard || { all: [], latest_six: [], trending: [] }));
+    return res.end(JSON.stringify(cachedDashboard || { all: [], latest_six: [], trending: [], languages: {} }));
   }
 
   // 2b. Force Catalog Sync Endpoint

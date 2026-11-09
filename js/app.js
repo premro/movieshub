@@ -50,8 +50,22 @@ class MovieshubApp {
     // Dynamically load fresh synced catalog from all servers
     this.loadDashboardData();
 
-    // Auto-sync movies from all servers every 1 hour (60 minutes)
-    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
+    // Auto-sync movies from all servers every 30 minutes
+    setInterval(() => this.loadDashboardData(true), 30 * 60 * 1000);
+
+    // Auto-refresh when tab becomes active / focused if 10 minutes have passed
+    let lastTabFocusSync = Date.now();
+    const checkTabFocusSync = () => {
+      const now = Date.now();
+      if (now - lastTabFocusSync > 10 * 60 * 1000) {
+        lastTabFocusSync = now;
+        this.loadDashboardData(true);
+      }
+    };
+    window.addEventListener("focus", checkTabFocusSync);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") checkTabFocusSync();
+    });
   }
 
   /* ================= MOVIE REGISTRY & LOOKUP ================= */
@@ -162,15 +176,18 @@ class MovieshubApp {
             (c.title && m.title && c.title.toLowerCase() === m.title.toLowerCase())
           );
           if (!existing) {
-            this.catalog.push(m);
+            this.catalog.unshift(m);
             addedCount++;
           } else {
             if (m.rating && (typeof m.rating === "number" || m.rating === "NEW")) {
               existing.rating = m.rating;
             }
+            if (m.year && m.year > (existing.year || 0)) existing.year = m.year;
             if (m.match) existing.match = m.match;
             if (m.moviesdaFileId) existing.moviesdaFileId = m.moviesdaFileId;
             if (m.isTheatrePrint) existing.isTheatrePrint = true;
+            if (m.backdrop && !existing.backdrop) existing.backdrop = m.backdrop;
+            if (m.poster && (!existing.poster || existing.poster.includes("/api/poster"))) existing.poster = m.poster;
           }
         };
 
@@ -1061,19 +1078,24 @@ class MovieshubApp {
   }
 
   renderAllLanguagesHome(container) {
+    // Helper: calculate sort weight prioritizing 2026/2025 releases with valid numeric rating
+    const getSortScore = (m) => {
+      const y = m.year || 2024;
+      const r = (typeof m.rating === "number" && !isNaN(m.rating))
+        ? m.rating
+        : (m.rating === "NEW" ? 8.5 : parseFloat(m.rating) || 7.0);
+      return y * 100 + r;
+    };
+    const sortByLatest = (arr) => [...arr].sort((a, b) => getSortScore(b) - getSortScore(a));
+
     // Top 5 Verified Released Blockbusters for the Auto-Rotating Billboard (Prioritizing 2026/2025 releases)
     const sortedCatalog = [...this.catalog]
       .filter(m => (m.backdrop || m.poster))
-      .sort((a, b) => {
-        const yearA = a.year || 2024;
-        const yearB = b.year || 2024;
-        if (yearB !== yearA) return yearB - yearA;
-        return (b.rating || 0) - (a.rating || 0);
-      });
+      .sort((a, b) => getSortScore(b) - getSortScore(a));
     const top5Imdb = sortedCatalog.slice(0, 5);
     const featuredMovie = top5Imdb[0] || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
     
-    // Top 6 Latest Releases from IMDb / TMDB (Strictly 2026/2025 releases - remove 2024)
+    // Top 6 Latest Releases from IMDb / TMDB (Strictly 2026/2025 releases across all languages)
     let latestSix = (this.dashboardData && this.dashboardData.latest_six && this.dashboardData.latest_six.length > 0)
       ? this.dashboardData.latest_six.filter(m => (m.year || 2026) >= 2025)
       : [];
@@ -1085,7 +1107,7 @@ class MovieshubApp {
         ...this.catalog.filter(m => (m.year || 0) >= 2025)
       ];
       for (const c of candidates) {
-        if (!latestSix.some(m => m.id === c.id || m.title === c.title)) {
+        if (!latestSix.some(m => (m.tmdbId && c.tmdbId && m.tmdbId === c.tmdbId) || m.id === c.id || m.title === c.title)) {
           latestSix.push(c);
           if (latestSix.length >= 6) break;
         }
@@ -1094,22 +1116,22 @@ class MovieshubApp {
 
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
       ? this.dashboardData.tamil_2026
-      : this.catalog.filter(m => m.language === "Tamil" && m.year === 2026);
+      : sortByLatest(this.catalog.filter(m => m.language === "Tamil" && m.year === 2026));
 
     const tamil2025 = (this.dashboardData && this.dashboardData.tamil_2025 && this.dashboardData.tamil_2025.length > 0)
       ? this.dashboardData.tamil_2025
-      : this.catalog.filter(m => m.language === "Tamil" && m.year === 2025);
+      : sortByLatest(this.catalog.filter(m => m.language === "Tamil" && m.year === 2025));
 
     const tamil2024 = (this.dashboardData && this.dashboardData.tamil_2024 && this.dashboardData.tamil_2024.length > 0)
       ? this.dashboardData.tamil_2024
-      : this.catalog.filter(m => m.language === "Tamil" && m.year === 2024);
+      : sortByLatest(this.catalog.filter(m => m.language === "Tamil" && m.year === 2024));
 
     const top10 = [...this.catalog].filter(m => m.trendingRank || m.rating >= 8.0).slice(0, 10);
-    const tamilMovies = this.catalog.filter(m => m.language === "Tamil");
-    const englishMovies = this.catalog.filter(m => m.language === "English");
-    const hindiMovies = this.catalog.filter(m => m.language === "Hindi");
-    const teluguMovies = this.catalog.filter(m => m.language === "Telugu");
-    const malayalamMovies = this.catalog.filter(m => m.language === "Malayalam");
+    const tamilMovies = sortByLatest(this.catalog.filter(m => m.language === "Tamil"));
+    const englishMovies = sortByLatest(this.catalog.filter(m => m.language === "English"));
+    const hindiMovies = sortByLatest(this.catalog.filter(m => m.language === "Hindi"));
+    const teluguMovies = sortByLatest(this.catalog.filter(m => m.language === "Telugu"));
+    const malayalamMovies = sortByLatest(this.catalog.filter(m => m.language === "Malayalam"));
 
     container.innerHTML = `
       <!-- Hero Billboard Carousel (Netflix & Hotstar Auto-Rotating) -->
