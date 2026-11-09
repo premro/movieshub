@@ -1,6 +1,6 @@
 {
-  "last_synced": 1794210442,
-  "last_synced_human": "2026-11-09 07:47:22",
+  "last_synced": 1794211404,
+  "last_synced_human": "2026-11-09 08:03:24",
   "latest_six": [
     {
       "id": "tmdb-1402181",
@@ -37,6 +37,40 @@
       "isTheatrePrint": true
     },
     {
+      "id": "tmdb-1234139",
+      "tmdbId": 1234139,
+      "title": "Jailer 2",
+      "nativeTitle": "ஜெயிலர் 2",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.2,
+      "match": "92%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Drama"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
+      "mediaType": "movie",
+      "overview": "When a dangerous syndicate expands its reach to threaten his family's peace, retired jailer Tiger Muthuvel Pandian goes undercover as a driver. Operating from the shadows, he takes on ruthless new enemies to protect his home.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": false,
+      "moviesdaFileId": "103358",
+      "isTheatrePrint": true
+    },
+    {
       "id": "tmdb-1327835",
       "tmdbId": 1327835,
       "title": "Mookuthi Amman 2",
@@ -67,7 +101,27 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true,
+      "moviesdaFileId": "103371",
       "isTheatrePrint": true
+    },
+    {
+      "id": "mz-103376",
+      "tmdbId": 954445,
+      "title": "Yezhu Kadal Yezhu Malai",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103376",
+      "isTheatrePrint": true,
+      "poster": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "overview": "Yezhu Kadal Yezhu Malai (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
+      ]
     },
     {
       "id": "tmdb-1515692",
@@ -103,40 +157,6 @@
       "moviesdaFileId": "103150"
     },
     {
-      "id": "tmdb-1234139",
-      "tmdbId": 1234139,
-      "title": "Jailer 2",
-      "nativeTitle": "ஜெயிலர் 2",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": 8.2,
-      "match": "92%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Action",
-        "Comedy",
-        "Drama"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
-      "mediaType": "movie",
-      "overview": "When a dangerous syndicate expands its reach to threaten his family's peace, retired jailer Tiger Muthuvel Pandian goes undercover as a driver. Operating from the shadows, he takes on ruthless new enemies to protect his home.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false,
-      "moviesdaFileId": "81231",
-      "isTheatrePrint": true
-    },
-    {
       "id": "tmdb-1408162",
       "tmdbId": 1408162,
       "title": "Vishwanath & Sons",
@@ -167,38 +187,6 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
-    },
-    {
-      "id": "tmdb-1618200",
-      "tmdbId": 1618200,
-      "title": "The Dark Heaven",
-      "nativeTitle": "தீ டார்க் ஹெவன்",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": "NEW",
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Crime",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/xFr0Q7j2JmOwBJnvImIgTAWBk4U.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/4ercU8wa7OAexszQG3SSNuyB8fy.jpg",
-      "mediaType": "movie",
-      "overview": "In the Hill Village of Mekkarai, Where It is Customary for Men to Die Every Seven Years During the Month of June, a Newly Appointed Police Inspector Arrives to Investigate a Series of Mysterious Murders. As He Digs Deeper Into the Village's Dark Secrets and Long-standing Beliefs, He Finds Himself Trapped in a Web of Crime, Fear, and Hidden Truths.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false,
-      "moviesdaFileId": "103032"
     }
   ],
   "tamil_2026": [
@@ -237,6 +225,40 @@
       "isTheatrePrint": true
     },
     {
+      "id": "tmdb-1234139",
+      "tmdbId": 1234139,
+      "title": "Jailer 2",
+      "nativeTitle": "ஜெயிலர் 2",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": 8.2,
+      "match": "92%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Drama"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
+      "mediaType": "movie",
+      "overview": "When a dangerous syndicate expands its reach to threaten his family's peace, retired jailer Tiger Muthuvel Pandian goes undercover as a driver. Operating from the shadows, he takes on ruthless new enemies to protect his home.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": false,
+      "moviesdaFileId": "103358",
+      "isTheatrePrint": true
+    },
+    {
       "id": "tmdb-1327835",
       "tmdbId": 1327835,
       "title": "Mookuthi Amman 2",
@@ -267,7 +289,27 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true,
+      "moviesdaFileId": "103371",
       "isTheatrePrint": true
+    },
+    {
+      "id": "mz-103376",
+      "tmdbId": 954445,
+      "title": "Yezhu Kadal Yezhu Malai",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103376",
+      "isTheatrePrint": true,
+      "poster": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "overview": "Yezhu Kadal Yezhu Malai (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
+      ]
     },
     {
       "id": "tmdb-1515692",
@@ -301,40 +343,6 @@
       "director": "Cinematic Director",
       "isTrending": false,
       "moviesdaFileId": "103150"
-    },
-    {
-      "id": "tmdb-1234139",
-      "tmdbId": 1234139,
-      "title": "Jailer 2",
-      "nativeTitle": "ஜெயிலர் 2",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "rating": 8.2,
-      "match": "92%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Action",
-        "Comedy",
-        "Drama"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
-      "mediaType": "movie",
-      "overview": "When a dangerous syndicate expands its reach to threaten his family's peace, retired jailer Tiger Muthuvel Pandian goes undercover as a driver. Operating from the shadows, he takes on ruthless new enemies to protect his home.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false,
-      "moviesdaFileId": "81231",
-      "isTheatrePrint": true
     },
     {
       "id": "tmdb-1408162",
@@ -1280,7 +1288,7 @@
       "id": "tmdb-1257957",
       "tmdbId": 1257957,
       "title": "Bison Kaalamaadan",
-      "nativeTitle": "பைசன் காளமாடன்",
+      "nativeTitle": "பைசன�� காளமாடன்",
       "language": "Tamil",
       "languageBadge": "Tamil",
       "year": 2025,
@@ -3392,6 +3400,7 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true,
+      "moviesdaFileId": "103371",
       "isTheatrePrint": true
     },
     {
@@ -3492,7 +3501,7 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false,
-      "moviesdaFileId": "81231",
+      "moviesdaFileId": "103358",
       "isTheatrePrint": true
     },
     {
@@ -3687,6 +3696,7 @@
         "cast": [],
         "director": "Cinematic Director",
         "isTrending": true,
+        "moviesdaFileId": "103371",
         "isTheatrePrint": true
       },
       {
@@ -3787,7 +3797,7 @@
         "cast": [],
         "director": "Cinematic Director",
         "isTrending": false,
-        "moviesdaFileId": "81231",
+        "moviesdaFileId": "103358",
         "isTheatrePrint": true
       },
       {
@@ -4466,7 +4476,7 @@
         "id": "tmdb-1257957",
         "tmdbId": 1257957,
         "title": "Bison Kaalamaadan",
-        "nativeTitle": "பைசன் காளமாடன்",
+        "nativeTitle": "பைசன�� காளமாடன்",
         "language": "Tamil",
         "languageBadge": "Tamil",
         "year": 2025,
@@ -4934,6 +4944,25 @@
         "cast": [],
         "director": "Cinematic Director",
         "isTrending": false
+      },
+      {
+        "id": "mz-103376",
+        "tmdbId": 954445,
+        "title": "Yezhu Kadal Yezhu Malai",
+        "language": "Tamil",
+        "languageBadge": "Tamil",
+        "year": 2026,
+        "rating": "NEW",
+        "moviesdaFileId": "103376",
+        "isTheatrePrint": true,
+        "poster": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+        "backdrop": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+        "overview": "Yezhu Kadal Yezhu Malai (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+        "qualities": [
+          "1080p HD",
+          "720p HD",
+          "Theatre Print"
+        ]
       },
       {
         "id": "mz-103307",
@@ -9202,7 +9231,7 @@
         "id": "tmdb-1248251",
         "tmdbId": 1248251,
         "title": "Mollywood Times",
-        "nativeTitle": "മോള��വുഡ് ടൈംസ്",
+        "nativeTitle": "മോളിവുഡ് ടൈംസ്",
         "language": "Malayalam",
         "languageBadge": "Malayalam",
         "year": 2026,
@@ -10929,6 +10958,7 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true,
+      "moviesdaFileId": "103371",
       "isTheatrePrint": true
     },
     {
@@ -11029,7 +11059,7 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false,
-      "moviesdaFileId": "81231",
+      "moviesdaFileId": "103358",
       "isTheatrePrint": true
     },
     {
@@ -11708,7 +11738,7 @@
       "id": "tmdb-1257957",
       "tmdbId": 1257957,
       "title": "Bison Kaalamaadan",
-      "nativeTitle": "பைசன் காளமாடன்",
+      "nativeTitle": "பைசன�� காளமாடன்",
       "language": "Tamil",
       "languageBadge": "Tamil",
       "year": 2025,
@@ -12176,6 +12206,25 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
+    },
+    {
+      "id": "mz-103376",
+      "tmdbId": 954445,
+      "title": "Yezhu Kadal Yezhu Malai",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "rating": "NEW",
+      "moviesdaFileId": "103376",
+      "isTheatrePrint": true,
+      "poster": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "backdrop": "https://moviezda.me/uploads/shots/103376-yezhu-kadal-yezhu-malai-2026-original-720p-hd.jpg",
+      "overview": "Yezhu Kadal Yezhu Malai (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Theatre Print"
+      ]
     },
     {
       "id": "mz-103307",
@@ -16069,7 +16118,7 @@
       "id": "tmdb-1248251",
       "tmdbId": 1248251,
       "title": "Mollywood Times",
-      "nativeTitle": "മോള��വുഡ് ടൈംസ്",
+      "nativeTitle": "മോളിവുഡ് ടൈംസ്",
       "language": "Malayalam",
       "languageBadge": "Malayalam",
       "year": 2026,

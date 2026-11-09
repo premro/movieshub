@@ -374,6 +374,28 @@ assert(!updatedApi.includes('u.searchParams.get("file_id") || "103234"'), "API m
 assert(updatedApi.includes("String(fileId).length >= 7"), "API moviesda_stream routes TMDB IDs directly to multi-lang stream");
 assert(updatedApi.includes("cleanQ === 'scene' || cleanQ.includes('scene')"), "API searchMovies prioritizes Scene for instant search playback");
 
+// 20. Testing Jailer 2, Mookuthi Amman 2, and Yezhu Kadal Yezhu Malai 2026 Theatrical Prints
+console.log("\n20. Testing Jailer 2, Mookuthi Amman 2, and Yezhu Kadal Yezhu Malai 2026 Theatrical Prints...");
+assert(updatedCatalog.includes('id: "jailer-2-tamil-2026"') && updatedCatalog.includes('tmdbId: 1234139'), "Jailer 2 (2026) exists in local MOVIE_CATALOG with TMDB ID 1234139");
+assert(updatedCatalog.includes('id: "mookuthi-amman-2-tamil-2026"') && updatedCatalog.includes('tmdbId: 1327835'), "Mookuthi Amman 2 (2026) exists in local MOVIE_CATALOG with TMDB ID 1327835");
+assert(updatedCatalog.includes('id: "yezhu-kadal-yezhu-malai-tamil-2026"') && updatedCatalog.includes('tmdbId: 954445'), "Yezhu Kadal Yezhu Malai (2026) exists in local MOVIE_CATALOG with TMDB ID 954445");
+
+assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 1234139 && m.moviesdaFileId === "103358"), "Jailer 2 (103358) verified in dashboard cache tamil_2026");
+assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 1327835 && m.moviesdaFileId === "103371"), "Mookuthi Amman 2 (103371) verified in dashboard cache tamil_2026");
+assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 954445 && m.moviesdaFileId === "103376"), "Yezhu Kadal Yezhu Malai (103376) verified in dashboard cache tamil_2026");
+
+assert(updatedPlayer.includes('1234139: "103358"'), "Jailer 2 mapped to 103358 in player MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('1327835: "103371"'), "Mookuthi Amman 2 mapped to 103371 in player MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('954445: "103376"'), "Yezhu Kadal Yezhu Malai mapped to 103376 in player MOVIESDA_TMDB_MAP");
+
+assert(updatedApi.includes('1234139: "103358"'), "Jailer 2 mapped to 103358 in api MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('1327835: "103371"'), "Mookuthi Amman 2 mapped to 103371 in api MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('954445: "103376"'), "Yezhu Kadal Yezhu Malai mapped to 103376 in api MOVIESDA_TMDB_MAP");
+
+assert(updatedPlayer.includes('"jailer 2": "103358"'), "Jailer 2 verified in player MOVIESDA_VERIFIED_MAP");
+assert(updatedPlayer.includes('"mookuthi amman 2": "103371"'), "Mookuthi Amman 2 verified in player MOVIESDA_VERIFIED_MAP");
+assert(updatedPlayer.includes('"yezhu kadal yezhu malai": "103376"'), "Yezhu Kadal Yezhu Malai verified in player MOVIESDA_VERIFIED_MAP");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

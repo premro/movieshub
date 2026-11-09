@@ -50,8 +50,8 @@ class MovieshubApp {
     // Dynamically load fresh synced catalog from all servers
     this.loadDashboardData();
 
-    // Auto-sync movies from all servers every 30 minutes
-    setInterval(() => this.loadDashboardData(true), 30 * 60 * 1000);
+    // Auto-sync movies from all servers every 1 hour
+    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
 
     // Auto-refresh when tab becomes active / focused if 10 minutes have passed
     let lastTabFocusSync = Date.now();
@@ -280,6 +280,27 @@ class MovieshubApp {
               mediaType: "movie",
               overview: item.overview || `${title} (${year}) - Latest high definition release.`
             };
+
+            const tLower = (title || "").toLowerCase();
+            if (item.id === 1234139 || tLower.includes("jailer 2")) {
+              movieObj.moviesdaFileId = "103358";
+              movieObj.isTheatrePrint = true;
+              movieObj.qualities = ["1080p HD", "720p HD", "Original HD Print"];
+              movieObj.platformBadge = "ORIGINAL 1080P HD";
+            } else if (item.id === 1327835 || tLower.includes("mookuthi amman 2")) {
+              movieObj.moviesdaFileId = "103371";
+              movieObj.isTheatrePrint = true;
+              movieObj.qualities = ["1080p HD", "720p HD", "HQ HDTS"];
+              movieObj.platformBadge = "1080P HQ HDTS";
+            } else if (item.id === 954445 || tLower.includes("yezhu kadal")) {
+              movieObj.moviesdaFileId = "103376";
+              movieObj.isTheatrePrint = true;
+              movieObj.qualities = ["1080p HD", "720p HD", "Original HD Print"];
+              movieObj.platformBadge = "ORIGINAL 1080P HD";
+            } else if (item.id === 1402181 || tLower === "scene") {
+              movieObj.moviesdaFileId = "103361";
+              movieObj.isTheatrePrint = true;
+            }
             if (typeof mergeMovie === "function") {
               mergeMovie(movieObj);
             }

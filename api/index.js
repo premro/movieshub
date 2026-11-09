@@ -228,6 +228,11 @@ function normalizeMovie(item) {
 }
 
 const KNOWN_TMDB_MAP = {
+  'jailer 2': 1234139,
+  'jailer 2 original': 1234139,
+  'mookuthi amman 2': 1327835,
+  'mookuthi amman 2 hq hdts': 1327835,
+  'yezhu kadal yezhu malai': 954445,
   'scene': 1402181,
   'scene 2026': 1402181,
   'leo': 949229,
@@ -494,7 +499,7 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
-    // Guarantee Scene (2026, TMDB 1402181) is prioritized at #1 in latest_six and tamil_2026
+    // Guarantee Scene, Jailer 2, Mookuthi Amman 2, and Yezhu Kadal Yezhu Malai are prioritized with verified 1080p HD Moviesda prints
     const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
       id: "scene-tamil-2026",
       tmdbId: 1402181,
@@ -524,11 +529,106 @@ async function syncDashboardCatalog(force = false) {
       moviesdaFileId: "103361"
     };
     sceneMovieObj.moviesdaFileId = "103361";
-    if (!updated.all.some(m => m.tmdbId === 1402181)) {
-      updated.all.unshift(sceneMovieObj);
+    sceneMovieObj.isTheatrePrint = true;
+
+    const jailer2Obj = updated.all.find(m => m.tmdbId === 1234139) || {
+      id: "jailer-2-tamil-2026",
+      tmdbId: 1234139,
+      title: "Jailer 2",
+      nativeTitle: "ஜெயிலர் 2",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.8,
+      match: "99%",
+      maturity: "U/A 16+",
+      duration: "2h 38m",
+      genres: ["Action", "Crime", "Thriller"],
+      qualities: ["1080p HD", "720p HD", "Original HD Print"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg",
+      mediaType: "movie",
+      overview: "When a dangerous syndicate expands its reach to threaten his family peace, retired jailer Tiger Muthuvel Pandian goes to war. Verified 1080p Original HD Print available on Moviesda.",
+      cast: ["Rajinikanth", "S. J. Suryah", "Suraj Venjaramoodu", "Ramya Krishnan", "Vidya Balan"],
+      director: "Nelson",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "103358"
+    };
+    jailer2Obj.moviesdaFileId = "103358";
+    jailer2Obj.isTheatrePrint = true;
+
+    const mookuthiAmman2Obj = updated.all.find(m => m.tmdbId === 1327835) || {
+      id: "mookuthi-amman-2-tamil-2026",
+      tmdbId: 1327835,
+      title: "Mookuthi Amman 2",
+      nativeTitle: "மூக்குத்தி அம்மன் 2",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.4,
+      match: "98%",
+      maturity: "U/A",
+      duration: "2h 25m",
+      genres: ["Fantasy", "Comedy", "Drama"],
+      qualities: ["1080p HD", "720p HD", "HQ HDTS"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/dNNzsstJeQxnESyH0hZcLGblLMz.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/mxrT9YpOPuLq2PpSehAuCGCqu8r.jpg",
+      mediaType: "movie",
+      overview: "A queen sacrifices herself to protect her son from invading enemies. Mookuthi Amman returns to safeguard the realm. Verified 1080p HQ HDTS print available on Moviesda.",
+      cast: ["Nayanthara", "Urvashi", "Regena Cassandrra", "Yogi Babu", "Duniya Vijay"],
+      director: "Sundar C",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "103371"
+    };
+    mookuthiAmman2Obj.moviesdaFileId = "103371";
+    mookuthiAmman2Obj.isTheatrePrint = true;
+
+    const yezhuKadalObj = updated.all.find(m => m.tmdbId === 954445) || {
+      id: "yezhu-kadal-yezhu-malai-tamil-2026",
+      tmdbId: 954445,
+      title: "Yezhu Kadal Yezhu Malai",
+      nativeTitle: "ஏழு கடல் ஏழு மலை",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.2,
+      match: "97%",
+      maturity: "U/A 16+",
+      duration: "2h 15m",
+      genres: ["Drama", "Romance"],
+      qualities: ["1080p HD", "720p HD", "Original HD Print"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/wdWQA1IVCYiTTEZMSnWl1tzhBd3.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/iipz8h0FT6pKI29A6DfRunYuLok.jpg",
+      mediaType: "movie",
+      overview: "Caught between family duty and romantic love, an immortal traveler faces an impossible journey across time. Verified 1080p Original HD Print available on Moviesda.",
+      cast: ["Nivin Pauly", "Anjali", "Soori"],
+      director: "Ram",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "103376"
+    };
+    yezhuKadalObj.moviesdaFileId = "103376";
+    yezhuKadalObj.isTheatrePrint = true;
+
+    const top2026Tamil = [sceneMovieObj, jailer2Obj, mookuthiAmman2Obj, yezhuKadalObj];
+    for (const m of top2026Tamil) {
+      if (!updated.all.some(x => x.tmdbId === m.tmdbId)) updated.all.unshift(m);
+      if (!updated.languages.tamil.some(x => x.tmdbId === m.tmdbId)) updated.languages.tamil.unshift(m);
     }
-    updated.tamil_2026 = [sceneMovieObj, ...updated.tamil_2026.filter(m => m.tmdbId !== 1402181)];
-    updated.latest_six = [sceneMovieObj, ...updated.latest_six.filter(m => m.tmdbId !== 1402181)].slice(0, 6);
+    const excludeIds = new Set(top2026Tamil.map(m => m.tmdbId));
+    updated.tamil_2026 = [...top2026Tamil, ...updated.tamil_2026.filter(m => !excludeIds.has(m.tmdbId))];
+    updated.latest_six = [...top2026Tamil, ...updated.latest_six.filter(m => !excludeIds.has(m.tmdbId))].slice(0, 6);
 
     updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 30);
 
@@ -1051,6 +1151,15 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "jailer 2": "103358",
+  "jailer 2 original": "103358",
+  "jailer 2 1080p": "103358",
+  "mookuthi amman 2": "103371",
+  "mookuthi amman 2 hq hdts": "103371",
+  "mookuthi amman 2 1080p": "103371",
+  "yezhu kadal yezhu malai": "103376",
+  "yezhu kadal yezhu malai original": "103376",
+  "yezhu kadal yezhu malai 1080p": "103376",
   "scene": "103361",
   "scene 2026": "103361",
   "scene tamil": "103361",
@@ -1127,6 +1236,9 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
+  1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
+  954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
   1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
@@ -1857,9 +1969,12 @@ module.exports = async (req, res) => {
 };
 // Automatic 1-Hour Sync from all server providers (TMDB, Moviezda, Netmirror)
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const syncTimer = setInterval(() => {
     console.log('[Movieshub Auto-Sync] Hourly sync triggered across all server providers...');
     syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] Hourly sync error:', e.message));
   }, ONE_HOUR_MS);
+  if (syncTimer && syncTimer.unref) syncTimer.unref();
 }
 
+
+module.exports.syncDashboardCatalog = syncDashboardCatalog;

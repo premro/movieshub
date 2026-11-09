@@ -8,6 +8,15 @@
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
+  "jailer 2": "103358",
+  "jailer 2 original": "103358",
+  "jailer 2 1080p": "103358",
+  "mookuthi amman 2": "103371",
+  "mookuthi amman 2 hq hdts": "103371",
+  "mookuthi amman 2 1080p": "103371",
+  "yezhu kadal yezhu malai": "103376",
+  "yezhu kadal yezhu malai original": "103376",
+  "yezhu kadal yezhu malai 1080p": "103376",
   "scene": "103361",
   "scene 2026": "103361",
   "scene tamil": "103361",
@@ -87,6 +96,9 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
+  1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
+  954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
   1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
   1538457: "103225",  // Meesaya Murukku 2
