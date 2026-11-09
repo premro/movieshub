@@ -1555,7 +1555,7 @@ module.exports = async (req, res) => {
     }
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+      'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
       'Access-Control-Allow-Origin': '*'
     });
     return res.end(JSON.stringify(cachedDashboard || { all: [], latest_six: [], trending: [], languages: {} }));

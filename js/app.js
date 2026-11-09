@@ -161,7 +161,7 @@ class MovieshubApp {
   async loadDashboardData(silent = false) {
     try {
       const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
-      const res = await fetch(`${pfx}/api/dashboard`);
+      const res = await fetch(`${pfx}/api/dashboard?t=${Date.now()}`, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         this.dashboardData = data;
@@ -222,13 +222,35 @@ class MovieshubApp {
           this.renderMainContent();
           if (addedCount > 0 && !silent) this.showToast(`Synced ${addedCount} latest releases`);
         }
+      } else {
+        await this.syncClientSideLiveReleases();
       }
     } catch (e) {
-      // Quiet failover
+      await this.syncClientSideLiveReleases();
     }
   }
 
   async syncClientSideLiveReleases(mergeMovie) {
+    let internalMerge = false;
+    if (typeof mergeMovie !== "function") {
+      internalMerge = true;
+      mergeMovie = (m) => {
+        if (!m || !m.title) return;
+        this.registerMovie(m);
+        const existing = this.catalog.find(c => 
+          (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) ||
+          (c.id && m.id && c.id === m.id) ||
+          (c.title && m.title && c.title.toLowerCase() === m.title.toLowerCase())
+        );
+        if (!existing) {
+          this.catalog.unshift(m);
+        } else {
+          if (m.moviesdaFileId) existing.moviesdaFileId = m.moviesdaFileId;
+          if (m.isTheatrePrint) existing.isTheatrePrint = true;
+          if (m.rating && (typeof m.rating === "number" || m.rating === "NEW")) existing.rating = m.rating;
+        }
+      };
+    }
     try {
       const tmdbKey = "3cb41ecea3bf606c56552db3d17adefd";
       const endpoints = [
@@ -307,6 +329,12 @@ class MovieshubApp {
           });
         }
       });
+      if (internalMerge) {
+        if (this.searchEngine) this.searchEngine.catalog = this.catalog;
+        if (!this.searchQuery && (this.activeView === "home" || this.activeView === "movies")) {
+          this.renderMainContent();
+        }
+      }
     } catch (e) {
       // Non-fatal client fallback
     }
