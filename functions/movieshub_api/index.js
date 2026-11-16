@@ -399,7 +399,8 @@ async function syncDashboardCatalog(force = false) {
 
     // Enrich & Merge with Verified Moviesda 2026 Theatrical Prints
     try {
-      const mzRes = await fetchBuffer("https://moviezda.me/tamil-2026-movies/", {
+      const activeMoviesdaDomain = await getActiveMoviesdaDomain();
+      const mzRes = await fetchBuffer(`${activeMoviesdaDomain}/tamil-2026-movies/`, {
         headers: { "User-Agent": "Mozilla/5.0" }
       });
       const mzHtml = mzRes.buffer.toString("utf8");
@@ -425,8 +426,8 @@ async function syncDashboardCatalog(force = false) {
             rating: "NEW",
             moviesdaFileId: fid,
             isTheatrePrint: true,
-            poster: `https://moviezda.me/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
-            backdrop: `https://moviezda.me/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
+            poster: `${activeMoviesdaDomain}/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
+            backdrop: `${activeMoviesdaDomain}/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
             overview: `${cleanTitle} (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.`,
             qualities: ["1080p HD", "720p HD", "Theatre Print"]
           };
@@ -1308,24 +1309,124 @@ const MOVIESDA_TMDB_MAP = {
   1011985: "88746",  // Pushpa 2
 };
 
-const MOVIESDA_DOMAINS = [
+const DEFAULT_MOVIESDA_DOMAINS = [
+  process.env.MOVIESDA_BASE_URL,
+  "https://www.moviesda.pet",
+  "https://moviesda.pet",
   "https://moviezda.me",
   "https://moviesda.io",
   "https://moviesda.mobi",
   "https://moviesda.net"
-];
+].filter(Boolean);
 
+// Preserved for backwards-compatibility & test suite
+const MOVIESDA_DOMAINS = DEFAULT_MOVIESDA_DOMAINS;
+
+let cachedActiveMoviesdaOrigin = null;
+let cachedOriginTimestamp = 0;
+let cachedFolderPaths = null;
+let cachedFoldersTimestamp = 0;
+const DOMAIN_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const moviesdaLiveCache = new Map();
 
-async function resolveMoviesdaLive(titleOrUrl) {
+/**
+ * Dynamic Active Domain Resolver
+ * Checks MOVIESDA_BASE_URL, remote SERVERS_CONFIG_URL, and fallback mirrors.
+ * Follows HTTP 301/302 redirects automatically and caches the origin for 1 hour.
+ */
+async function getActiveMoviesdaDomain() {
+  if (cachedActiveMoviesdaOrigin && (Date.now() - cachedOriginTimestamp < DOMAIN_CACHE_TTL_MS)) {
+    return cachedActiveMoviesdaOrigin;
+  }
+
+  let candidates = [...DEFAULT_MOVIESDA_DOMAINS];
+  if (process.env.SERVERS_CONFIG_URL) {
+    try {
+      const cfg = await fetchJson(process.env.SERVERS_CONFIG_URL, { timeout: 3000 });
+      if (cfg && cfg.moviesda) {
+        candidates = [cfg.moviesda, ...candidates];
+      }
+    } catch (e) {}
+  }
+
+  for (const domain of candidates) {
+    try {
+      const { statusCode, finalUrl } = await fetchBuffer(domain, {
+        headers: { "User-Agent": "Mozilla/5.0" },
+        timeout: 4000
+      });
+      if (statusCode && statusCode < 400) {
+        const resolvedOrigin = new URL(finalUrl || domain).origin;
+        cachedActiveMoviesdaOrigin = resolvedOrigin;
+        cachedOriginTimestamp = Date.now();
+        return resolvedOrigin;
+      }
+    } catch (e) {
+      continue;
+    }
+  }
+  return candidates[0] || "https://www.moviesda.pet";
+}
+
+/**
+ * All-Folder Dynamic Discovery
+ * Extracts all folder paths matching /href="(\//[^"]*movies\/?)"/gi from homepage
+ */
+async function getMoviesdaFolders(origin) {
+  if (cachedFolderPaths && (Date.now() - cachedFoldersTimestamp < DOMAIN_CACHE_TTL_MS)) {
+    return cachedFolderPaths;
+  }
+
+  const fallbackFolders = [
+    "/tamil-2026-movies/",
+    "/tamil-2025-movies/",
+    "/tamil-2024-movies/",
+    "/tamil-2023-movies/",
+    "/tamil-dubbed-movies/",
+    "/tamil-hd-movies/"
+  ];
+
+  try {
+    const { buffer } = await fetchBuffer(origin, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      timeout: 5000
+    });
+    const html = buffer.toString("utf8");
+    const folderSet = new Set();
+    const linkRegex = /href="(\/[^"]*movies\/?)"/gi;
+    let match;
+    while ((match = linkRegex.exec(html)) !== null) {
+      const path = match[1].endsWith("/") ? match[1] : `${match[1]}/`;
+      folderSet.add(path);
+    }
+
+    if (folderSet.size > 0) {
+      cachedFolderPaths = Array.from(folderSet);
+      cachedFoldersTimestamp = Date.now();
+      return cachedFolderPaths;
+    }
+  } catch (e) {}
+
+  return fallbackFolders;
+}
+
+/**
+ * Multi-Year & All-Folder Live Resolver
+ * Normalizes domain to activeOrigin, extracts 4-digit year, tries slug guesses across years,
+ * and crawls all discovered folders prioritizing targetYear.
+ */
+async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
   if (!titleOrUrl) return null;
   const inputStr = String(titleOrUrl).trim();
+  const activeOrigin = await getActiveMoviesdaDomain();
 
-  // 1. If direct URL is provided (e.g. https://moviezda.me/scene-2026-tamil-movie/)
+  // 1. Direct URL resolution (normalizes stale domain to activeOrigin)
   if (inputStr.startsWith("http://") || inputStr.startsWith("https://")) {
     try {
-      const { buffer, finalUrl } = await fetchBuffer(inputStr);
-      const origin = new URL(finalUrl || inputStr).origin;
+      const parsed = new URL(inputStr);
+      const normalizedUrl = `${activeOrigin}${parsed.pathname}${parsed.search}`;
+      const { buffer, finalUrl } = await fetchBuffer(normalizedUrl);
+      const origin = new URL(finalUrl || activeOrigin).origin;
       let pageHtml = buffer.toString("utf8");
 
       let subMatch = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
@@ -1348,57 +1449,75 @@ async function resolveMoviesdaLive(titleOrUrl) {
           return fid[1];
         }
       }
-    } catch (e) {
-      // Continue to title based search
-    }
+    } catch (e) {}
   }
 
+  const extractedYearMatch = inputStr.match(/\b(19\d{2}|20\d{2})\b/);
+  const targetYear = yearHint || (extractedYearMatch ? extractedYearMatch[1] : null);
+
   const raw = inputStr.toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
-  const clean = raw.replace(/\b(2026|2025|2024|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
+  const clean = raw.replace(/\b(20\d{2}|19\d{2}|tamil|movie|movies|web|series|hq|predvd|hd|dvd|rip|original)\b/g, "").replace(/\s+/g, " ").trim();
   if (!clean) return null;
-  
+
+  const cacheKey = `${clean}:${targetYear || "any"}`;
+  if (moviesdaLiveCache.has(cacheKey)) return moviesdaLiveCache.get(cacheKey);
   if (moviesdaLiveCache.has(clean)) return moviesdaLiveCache.get(clean);
 
-  // Try domain mirrors with automatic redirect handling
-  for (const baseDomain of MOVIESDA_DOMAINS) {
-    try {
-      // Direct slug guess first (e.g. /scene-2026-tamil-movie/ or /scene-tamil-movie/)
-      const slugGuesses = [
-        `${baseDomain}/${clean.replace(/\s+/g, "-")}-2026-tamil-movie/`,
-        `${baseDomain}/${clean.replace(/\s+/g, "-")}-tamil-movie/`
-      ];
-      for (const slugUrl of slugGuesses) {
-        try {
-          const directRes = await fetchBuffer(slugUrl);
-          if (directRes && directRes.statusCode === 200) {
-            const fid = await resolveMoviesdaLive(directRes.finalUrl || slugUrl);
-            if (fid) {
-              moviesdaLiveCache.set(clean, fid);
-              return fid;
-            }
-          }
-        } catch (e) {}
-      }
+  // 2. Direct slug guesses across targetYear + recent years
+  const slugBase = clean.replace(/\s+/g, "-");
+  const yearsToTry = Array.from(new Set([targetYear, "2026", "2025", "2024", "2023"].filter(Boolean)));
+  const slugGuesses = [
+    ...yearsToTry.map(y => `${activeOrigin}/${slugBase}-${y}-tamil-movie/`),
+    `${activeOrigin}/${slugBase}-tamil-movie/`,
+    `${activeOrigin}/${slugBase}-tamil-dubbed-movie/`
+  ];
 
-      // Catalog page crawl
-      const { buffer, finalUrl } = await fetchBuffer(`${baseDomain}/tamil-2026-movies/`);
-      const origin = new URL(finalUrl || baseDomain).origin;
+  for (const slugUrl of slugGuesses) {
+    try {
+      const directRes = await fetchBuffer(slugUrl, { timeout: 3500 });
+      if (directRes && directRes.statusCode === 200) {
+        const fid = await resolveMoviesdaLive(directRes.finalUrl || slugUrl, targetYear);
+        if (fid) {
+          moviesdaLiveCache.set(cacheKey, fid);
+          moviesdaLiveCache.set(clean, fid);
+          return fid;
+        }
+      }
+    } catch (e) {}
+  }
+
+  // 3. Crawl ALL discovered folders on activeOrigin (prioritizing targetYear first)
+  let folders = await getMoviesdaFolders(activeOrigin);
+  if (targetYear) {
+    folders = [
+      ...folders.filter(f => f.includes(String(targetYear))),
+      ...folders.filter(f => !f.includes(String(targetYear)))
+    ];
+  }
+
+  const firstWord = clean.split(" ")[0];
+  for (const folderPath of folders) {
+    try {
+      const { buffer, finalUrl } = await fetchBuffer(`${activeOrigin}${folderPath}`, { timeout: 4500 });
+      const origin = new URL(finalUrl || activeOrigin).origin;
       const html = buffer.toString("utf8");
       const regex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
       let m;
       let targetUrl = null;
-      const firstWord = clean.split(" ")[0];
+
       while ((m = regex.exec(html)) !== null) {
         const itemTitle = m[2].toLowerCase().replace(/[^a-z0-9]/g, " ").replace(/\s+/g, " ").trim();
-        if (itemTitle.includes(clean) || clean.includes(itemTitle.replace(/ 2026| 2025/g, "")) || (firstWord.length > 3 && itemTitle.includes(firstWord))) {
+        const itemClean = itemTitle.replace(/\b20\d{2}\b/g, "").trim();
+        if (itemTitle.includes(clean) || (itemClean && clean.includes(itemClean)) || (firstWord.length > 3 && itemTitle.includes(firstWord))) {
           targetUrl = new URL(m[1], origin).toString();
           break;
         }
       }
 
       if (targetUrl) {
-        const fid = await resolveMoviesdaLive(targetUrl);
+        const fid = await resolveMoviesdaLive(targetUrl, targetYear);
         if (fid) {
+          moviesdaLiveCache.set(cacheKey, fid);
           moviesdaLiveCache.set(clean, fid);
           return fid;
         }
@@ -1407,6 +1526,7 @@ async function resolveMoviesdaLive(titleOrUrl) {
       continue;
     }
   }
+
   return null;
 }
 
@@ -1489,9 +1609,9 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>⬇ Download 720p / 1080p MP4</span>
         </a>
-        <a href="https://moviezda.me/tamil-2026-movies/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+        <a href="${(cachedActiveMoviesdaOrigin || 'https://www.moviesda.pet')}/tamil-${year || '2026'}-movies/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
-          <span>Moviesda 2026 Hub</span>
+          <span>Moviesda ${year || '2026'} Hub</span>
         </a>
         <button id="reloadBtn" class="m-link-btn" title="Reload Video Stream">
           <span>🔄 Reload</span>
@@ -1738,6 +1858,7 @@ module.exports = async (req, res) => {
     const title = u.searchParams.get("title") || "";
     const tmId = u.searchParams.get("tmdb_id") || null;
     const urlParam = u.searchParams.get("url") || "";
+    const year = u.searchParams.get("year") || null;
     let fileId = null;
     if (urlParam) {
       fileId = await resolveMoviesdaLive(urlParam);
@@ -1746,7 +1867,7 @@ module.exports = async (req, res) => {
       fileId = getVerifiedMoviesdaFileId(title, tmId);
     }
     if (!fileId && title) {
-      fileId = await resolveMoviesdaLive(title);
+      fileId = await resolveMoviesdaLive(title, year);
     }
     const resolvedId = fileId || tmId || null;
     let streamTarget = null;
@@ -2015,3 +2136,6 @@ if (typeof setInterval !== 'undefined') {
 
 
 module.exports.syncDashboardCatalog = syncDashboardCatalog;
+module.exports.getActiveMoviesdaDomain = getActiveMoviesdaDomain;
+module.exports.getMoviesdaFolders = getMoviesdaFolders;
+module.exports.resolveMoviesdaLive = resolveMoviesdaLive;

@@ -1,0 +1,10 @@
+{
+  "moviesda": "https://www.moviesda.pet",
+  "fallback_mirrors": [
+    "https://moviesda.pet",
+    "https://moviezda.me",
+    "https://moviesda.io",
+    "https://moviesda.mobi",
+    "https://moviesda.net"
+  ]
+}

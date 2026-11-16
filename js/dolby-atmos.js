@@ -161,7 +161,7 @@ class DolbyAtmosEngine {
 
       // Master output chain with Cinema DRC Compressor & +3dB Gain Engine
       this.masterGain = ctx.createGain();
-      this.masterGain.gain.value = 1.30;
+      this.masterGain.gain.value = 1.25;
 
       this.compressor = ctx.createDynamicsCompressor();
       this.compressor.threshold.value = -12.0; // dB
@@ -344,7 +344,7 @@ class DolbyAtmosEngine {
         this.setBassBoost(4.5);
         this.setDialogueBoost(3.0);
         if (this.reverbGain) this.reverbGain.gain.value = 0.14;
-        this.masterGain.gain.value = 1.30;
+        this.masterGain.gain.value = 1.25;
         break;
 
       case "cinema":

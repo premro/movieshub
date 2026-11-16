@@ -59,6 +59,7 @@ class MovieshubApp {
       const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
       this.loadDashboardData(true, dayChanged);
     }, 30 * 60 * 1000);
+    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
 
     // Auto-refresh when tab becomes active / focused if day changed or 10 minutes passed
     let lastTabFocusSync = Date.now();
