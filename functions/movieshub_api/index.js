@@ -208,6 +208,7 @@ function normalizeMovie(item) {
     language: langName,
     languageBadge: langName,
     year,
+    releaseDate: relDate,
     rating: vote,
     match: matchPct,
     maturity: 'U/A 16+',
@@ -270,13 +271,16 @@ const KNOWN_TMDB_MAP = {
 
 // Sync states declared above
 
-// 1-Hour Automatic Sync Timer across all server providers (TMDB, Moviezda, Netmirror)
+// 1-Hour Automatic Sync Timer & Daily Sync across all server providers (TMDB, Moviezda, Netmirror)
 const ONE_HOUR_MS = 60 * 60 * 1000;
 
 async function syncDashboardCatalog(force = false) {
   if (isSyncingDashboard) return cachedDashboard;
   const now = Date.now();
-  if (!force && (now - lastDashboardSyncTime < ONE_HOUR_MS) && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const isDayChanged = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayStr;
+
+  if (!force && !isDayChanged && (now - lastDashboardSyncTime < ONE_HOUR_MS) && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
     return cachedDashboard;
   }
 
@@ -285,6 +289,8 @@ async function syncDashboardCatalog(force = false) {
     const updated = {
       last_synced: Math.floor(now / 1000),
       last_synced_human: new Date().toISOString().replace('T', ' ').slice(0, 19),
+      last_synced_date: todayStr,
+      hero: [],
       latest_six: [],
       tamil_2026: [],
       tamil_2025: [],
@@ -311,9 +317,10 @@ async function syncDashboardCatalog(force = false) {
       }
     };
 
-    // Parallel multi-language discovery: fetches 2026 & 2025 for all major languages + Now Playing + Trending
+    // Parallel multi-language discovery: fetches 2026 & 2025 for all major languages + Now Playing + Daily Trending + Weekly Trending
     const [
       npRes,
+      dayTrRes,
       trRes,
       ta26Res,
       ta25Res,
@@ -327,6 +334,7 @@ async function syncDashboardCatalog(force = false) {
       ml25Res
     ] = await Promise.allSettled([
       fetchTmdbApi('/movie/now_playing', { page: 1 }),
+      fetchTmdbApi('/trending/movie/day', { page: 1 }),
       fetchTmdbApi('/trending/movie/week', { page: 1 }),
       fetchTmdbApi('/discover/movie', { with_original_language: 'ta', primary_release_year: 2026, sort_by: 'popularity.desc' }),
       fetchTmdbApi('/discover/movie', { with_original_language: 'ta', primary_release_year: 2025, sort_by: 'popularity.desc' }),
@@ -340,15 +348,29 @@ async function syncDashboardCatalog(force = false) {
       fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2025, sort_by: 'popularity.desc' })
     ]);
 
-    // Process Now Playing
-    if (npRes.status === 'fulfilled' && npRes.value && npRes.value.results) {
-      const npList = npRes.value.results.map(normalizeMovie).filter(m => (m.year || 2026) >= 2025);
-      npList.slice(0, 8).forEach(m => addMovie(m, null));
+    // Process Daily Trending (Populates Top 5 Billboard Hero Slider with today's hot movies)
+    if (dayTrRes.status === 'fulfilled' && dayTrRes.value && Array.isArray(dayTrRes.value.results)) {
+      const dayTrendingList = dayTrRes.value.results
+        .filter(m => m.backdrop_path || m.poster_path)
+        .map(normalizeMovie);
+      updated.hero = dayTrendingList.slice(0, 5);
+      dayTrendingList.forEach(m => {
+        addMovie(m, updated.trending);
+      });
     }
 
-    // Process Trending
-    if (trRes.status === 'fulfilled' && trRes.value && trRes.value.results) {
-      trRes.value.results.slice(0, 18).map(normalizeMovie).forEach(m => {
+    // Process Now Playing (Theatrical releases currently in cinemas)
+    let npList = [];
+    if (npRes.status === 'fulfilled' && npRes.value && Array.isArray(npRes.value.results)) {
+      npList = npRes.value.results.map(normalizeMovie).filter(m => (m.year || 2026) >= 2025);
+      npList.forEach(m => {
+        addMovie(m, updated.latest);
+      });
+    }
+
+    // Process Weekly Trending
+    if (trRes.status === 'fulfilled' && trRes.value && Array.isArray(trRes.value.results)) {
+      trRes.value.results.slice(0, 20).map(normalizeMovie).forEach(m => {
         addMovie(m, updated.trending);
       });
     }
@@ -482,22 +504,7 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
-    // Assemble latest_six (strictly 2026/2025 releases across all languages)
-    const latestCandidates = [
-      ...updated.tamil_2026,
-      ...updated.languages.english.filter(m => (m.year || 0) >= 2026),
-      ...updated.languages.hindi.filter(m => (m.year || 0) >= 2026),
-      ...updated.languages.telugu.filter(m => (m.year || 0) >= 2026),
-      ...updated.languages.malayalam.filter(m => (m.year || 0) >= 2026),
-      ...updated.all.filter(m => (m.year || 0) >= 2026)
-    ];
 
-    for (const cand of latestCandidates) {
-      if (!updated.latest_six.some(m => m.tmdbId === cand.tmdbId)) {
-        updated.latest_six.push(cand);
-        if (updated.latest_six.length >= 6) break;
-      }
-    }
 
     // Guarantee Scene, Jailer 2, Mookuthi Amman 2, and Yezhu Kadal Yezhu Malai are prioritized with verified 1080p HD Moviesda prints
     const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
@@ -628,7 +635,35 @@ async function syncDashboardCatalog(force = false) {
     }
     const excludeIds = new Set(top2026Tamil.map(m => m.tmdbId));
     updated.tamil_2026 = [...top2026Tamil, ...updated.tamil_2026.filter(m => !excludeIds.has(m.tmdbId))];
-    updated.latest_six = [...top2026Tamil, ...updated.latest_six.filter(m => !excludeIds.has(m.tmdbId))].slice(0, 6);
+
+    // Assemble latest_six (True freshest releases across all languages + Now Playing)
+    const freshCandidates = [
+      ...npList,
+      ...updated.latest,
+      ...updated.tamil_2026.slice(0, 4),
+      ...updated.languages.english.filter(m => (m.year || 0) >= 2026).slice(0, 4),
+      ...updated.languages.hindi.filter(m => (m.year || 0) >= 2026).slice(0, 4),
+      ...updated.languages.telugu.filter(m => (m.year || 0) >= 2026).slice(0, 4),
+      ...updated.languages.malayalam.filter(m => (m.year || 0) >= 2026).slice(0, 4)
+    ];
+
+    for (const cand of freshCandidates) {
+      if (!updated.latest_six.some(m => (m.tmdbId && cand.tmdbId && m.tmdbId === cand.tmdbId) || m.id === cand.id)) {
+        updated.latest_six.push(cand);
+        if (updated.latest_six.length >= 6) break;
+      }
+    }
+
+    // Ensure hero always has 5 items (fallback to trending / latest if needed)
+    if (updated.hero.length < 5) {
+      const heroPool = [...updated.trending, ...updated.latest_six, ...updated.all];
+      for (const hm of heroPool) {
+        if ((hm.backdrop || hm.poster) && !updated.hero.some(h => (h.tmdbId && hm.tmdbId && h.tmdbId === hm.tmdbId) || h.id === hm.id)) {
+          updated.hero.push(hm);
+          if (updated.hero.length >= 5) break;
+        }
+      }
+    }
 
     updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 30);
 
@@ -1546,9 +1581,11 @@ module.exports = async (req, res) => {
     }));
   }
 
-  // 2. Dashboard (Auto-updating live releases & accurate ratings every 1 hour)
+  // 2. Dashboard (Auto-updating live releases & accurate ratings every day & every hour)
   if (pathname === '/api/dashboard') {
-    const isStale = !cachedDashboard || (Date.now() - lastDashboardSyncTime > ONE_HOUR_MS);
+    const todayDate = new Date().toISOString().slice(0, 10);
+    const isDayRollover = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayDate;
+    const isStale = !cachedDashboard || isDayRollover || (Date.now() - lastDashboardSyncTime > 12 * 60 * 60 * 1000);
     const forceRefresh = u.searchParams.get('refresh') === '1';
     if (forceRefresh || isStale) {
       await syncDashboardCatalog(forceRefresh);
@@ -1558,7 +1595,7 @@ module.exports = async (req, res) => {
       'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
       'Access-Control-Allow-Origin': '*'
     });
-    return res.end(JSON.stringify(cachedDashboard || { all: [], latest_six: [], trending: [], languages: {} }));
+    return res.end(JSON.stringify(cachedDashboard || { all: [], hero: [], latest_six: [], trending: [], languages: {} }));
   }
 
   // 2b. Force Catalog Sync Endpoint

@@ -1603,29 +1603,503 @@ body {
   font-size: 13px;
 }
 
-/* Mobile responsive */
-@media (max-width: 768px) {
-  .header-nav {
-    padding: 0 16px;
-  }
-  .nav-links {
-    display: none;
-  }
-  .language-filter-bar {
-    padding: 12px 16px;
-  }
-  .content-row {
-    padding: 0 16px;
+/* ==========================================================================
+   UNIVERSAL RESPONSIVE ENGINE (Mobile, Tablet, Laptop, Desktop & Ultra-wide)
+   ========================================================================== */
+
+/* 1. Ultra-wide & 4K Displays (> 1440px) */
+@media (min-width: 1441px) {
+  .header-nav,
+  .main-content,
+  .category-header-wrap,
+  .movies-catalog-grid,
+  .footer {
+    max-width: 1800px;
+    margin-left: auto;
+    margin-right: auto;
   }
   .hero-billboard {
-    padding: 0 16px;
-    height: 50vh;
+    height: 65vh;
+    min-height: 480px;
+    max-height: 620px;
+    padding: 0 48px;
   }
   .hero-title {
-    font-size: 32px;
+    font-size: clamp(42px, 3.8vw, 56px);
+  }
+  .movies-catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+    gap: 24px;
+    padding: 0 48px;
+  }
+  .movie-card {
+    flex: 0 0 200px;
+  }
+  .card-media {
+    height: 290px;
+  }
+}
+
+/* 2. Laptop & Standard Desktop (1025px - 1440px) */
+@media (min-width: 1025px) and (max-width: 1440px) {
+  .hero-billboard {
+    height: 60vh;
+    min-height: 440px;
+    max-height: 540px;
+    padding: 0 36px;
+  }
+  .hero-title {
+    font-size: clamp(34px, 3.2vw, 44px);
+  }
+  .movies-catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+    gap: 20px;
+    padding: 0 36px;
+  }
+  .movie-card {
+    flex: 0 0 180px;
+  }
+  .card-media {
+    height: 260px;
+  }
+}
+
+/* 3. Tablet (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .header-nav {
+    padding: 0 24px;
+    height: 66px;
+  }
+  .header-search {
+    min-width: 200px;
+    max-width: 380px;
+    margin: 0 12px;
+  }
+  .nav-links {
+    gap: 10px;
+  }
+  .nav-link {
+    font-size: 13px;
+    padding: 5px 8px;
+  }
+  .hero-billboard {
+    height: 54vh;
+    min-height: 390px;
+    max-height: 480px;
+    padding: 0 24px;
+  }
+  .hero-title {
+    font-size: clamp(28px, 4vw, 36px);
+    margin-bottom: 10px;
+  }
+  .hero-synopsis {
+    font-size: 14px;
+    -webkit-line-clamp: 2;
+    max-width: 500px;
+    margin-bottom: 16px;
+  }
+  .hero-buttons {
+    gap: 10px;
+  }
+  .content-row {
+    padding: 0 24px;
+  }
+  .cards-carousel {
+    gap: 14px;
+  }
+  .movie-card {
+    flex: 0 0 160px;
+  }
+  .card-media {
+    height: 235px;
+  }
+  .movies-catalog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+    gap: 16px;
+    padding: 0 24px;
+  }
+}
+
+/* 4. Complete Mobile Engine (Phones, Foldables & Tablets <= 768px) */
+@media (max-width: 768px) {
+  /* Global Width & Viewport autofit */
+  html, body {
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+  }
+
+  /* Compact Sleek Mobile Header (56px) */
+  .header-nav {
+    height: 56px !important;
+    padding: 0 10px !important;
+    gap: 8px !important;
+  }
+  .header-left {
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .brand-logo {
+    font-size: 16px !important;
+    gap: 6px !important;
+  }
+  .brand-icon {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+  }
+  .nav-links {
+    display: none !important;
+  }
+  .header-search {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  .search-input-wrapper {
+    width: 100% !important;
+  }
+  .live-search-input {
+    height: 36px !important;
+    padding: 6px 28px 6px 32px !important;
+    font-size: 12.5px !important;
+    border-radius: 18px !important;
+  }
+  .search-icon-left {
+    left: 10px !important;
+    width: 14px !important;
+    height: 14px !important;
+  }
+  .header-right {
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .brand-creator-badge, 
+  .vip-badge {
+    display: none !important;
+  }
+  .profile-chip-btn {
+    padding: 3px 6px !important;
+    height: 32px !important;
+    border-radius: 16px !important;
+  }
+  .profile-chip-name {
+    display: none !important;
+  }
+  .profile-chip-avatar {
+    font-size: 15px !important;
+    margin: 0 !important;
+  }
+
+  /* Sleek Horizontal Scroll Language Bar (Zero 5-row wrap, 44px height) */
+  .language-filter-bar {
+    margin-top: 56px !important;
+    padding: 6px 10px !important;
+    background: rgba(14, 12, 22, 0.98) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    position: sticky !important;
+    top: 56px !important;
+    z-index: 95 !important;
+    overflow: hidden !important;
+  }
+  .lang-container {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    width: 100% !important;
+    padding: 2px 0 !important;
+  }
+  .lang-container::-webkit-scrollbar {
+    display: none !important;
+  }
+  .lang-heading {
+    display: none !important; /* Hides 'SELECT LANGUAGE:' on mobile to eliminate clumsy 5-row vertical stack */
+  }
+  .lang-pills {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
+  }
+  .lang-pill {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 18px !important;
+    gap: 5px !important;
+    background: rgba(255, 255, 255, 0.07) !important;
+  }
+  .pill-native {
+    font-size: 10px !important;
+    padding: 1px 5px !important;
+  }
+  .genre-filter-wrap {
+    flex-shrink: 0 !important;
+  }
+  .genre-select {
+    padding: 5px 10px !important;
+    font-size: 11.5px !important;
+    height: 30px !important;
+    border-radius: 6px !important;
+    background: #181524 !important;
+    color: #fff !important;
+  }
+
+  /* Autofit Hero Billboard (Touch Swiping, Arrow Overlap Removed, Dark Gradient) */
+  .hero-billboard {
+    height: auto !important;
+    min-height: 380px !important;
+    max-height: 520px !important;
+    padding: 24px 14px 20px !important;
+    margin-bottom: 18px !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    background-position: center 20% !important;
+    background-size: cover !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+  /* Heavy bottom-to-top cinematic gradient so title and synopsis pop with pure clarity */
+  .hero-billboard::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(0deg, rgba(8, 7, 13, 0.98) 0%, rgba(8, 7, 13, 0.85) 45%, rgba(8, 7, 13, 0.35) 100%) !important;
+    pointer-events: none !important;
+    z-index: 2 !important;
+  }
+  .hero-arrow {
+    display: none !important; /* Completely removed on mobile: eliminates text obstruction */
+  }
+  .hero-content {
+    position: relative !important;
+    z-index: 5 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .hero-badges {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    margin-bottom: 6px !important;
+  }
+  .badge-lang, 
+  .badge-match, 
+  .badge-quality, 
+  .badge-sound, 
+  .badge-creator {
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    white-space: nowrap !important;
+    line-height: 1.2 !important;
+  }
+  .hero-title {
+    font-size: clamp(20px, 5.8vw, 28px) !important;
+    font-weight: 900 !important;
+    line-height: 1.15 !important;
+    margin-bottom: 6px !important;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
+    word-break: break-word !important;
+  }
+  .hero-synopsis {
+    font-size: 12px !important;
+    line-height: 1.35 !important;
+    color: #e4e4e7 !important;
+    -webkit-line-clamp: 2 !important;
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    margin-bottom: 12px !important;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9) !important;
+  }
+
+  /* Symmetrical 2x2 Clean Mobile Action Grid */
+  .hero-buttons {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .btn-main-play {
+    grid-column: 1 / 2 !important;
+    height: 40px !important;
+    padding: 0 10px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+  #hero-btn-download {
+    grid-column: 2 / 3 !important;
+    height: 40px !important;
+    padding: 0 10px !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    justify-content: center !important;
+    border-radius: 8px !important;
+  }
+  #hero-btn-trailer {
+    grid-column: 1 / 2 !important;
+    height: 35px !important;
+    padding: 0 6px !important;
+    font-size: 11.5px !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+  }
+  #hero-btn-info {
+    grid-column: 2 / 3 !important;
+    height: 35px !important;
+    padding: 0 6px !important;
+    font-size: 11.5px !important;
+    justify-content: center !important;
+    border-radius: 6px !important;
+  }
+  #hero-btn-list {
+    display: none !important;
+  }
+  .hero-indicators {
+    bottom: 6px !important;
+    right: 12px !important;
+    gap: 4px !important;
+  }
+  .hero-dot {
+    width: 14px !important;
+    height: 3px !important;
+  }
+  .hero-dot.active {
+    width: 24px !important;
+  }
+
+  /* Clean Mobile Content Rows */
+  .content-row {
+    padding: 0 10px !important;
+    margin-bottom: 20px !important;
+  }
+  .row-header {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 2px !important;
+    margin-bottom: 8px !important;
+  }
+  .row-header h2 {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    line-height: 1.2 !important;
+  }
+  .row-subtitle {
+    font-size: 11px !important;
+    color: #a1a1aa !important;
+  }
+  .cards-carousel {
+    gap: 10px !important;
+    padding: 4px 2px 10px 2px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .cards-carousel::-webkit-scrollbar {
+    display: none !important;
+  }
+  .movie-card {
+    flex: 0 0 clamp(120px, 35vw, 142px) !important;
+    width: clamp(120px, 35vw, 142px) !important;
+  }
+  .card-media {
+    height: clamp(175px, 50vw, 205px) !important;
+    border-radius: 6px !important;
+  }
+  .card-title {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.25 !important;
+    margin-top: 5px !important;
+  }
+  .card-meta {
+    font-size: 10.5px !important;
+    margin-top: 2px !important;
+  }
+
+  /* 2-Column Catalog Grid on Mobile */
+  .movies-catalog-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 0 10px !important;
+  }
+  .grid-page-header {
+    padding: 14px 10px 8px !important;
+  }
+  .grid-page-title {
+    font-size: 18px !important;
+  }
+
+  /* Top 10 Billboard on Mobile */
+  .top10-item {
+    flex: 0 0 170px !important;
+  }
+  .top10-rank {
+    font-size: 70px !important;
+    line-height: 65px !important;
+  }
+  .top10-poster-wrap {
+    width: 105px !important;
+    height: 155px !important;
+  }
+
+  /* Modals Autofit on Mobile */
+  .modal-box, 
+  .download-modal-box,
+  .profile-modal-content,
+  .dolby-dialog {
+    width: 95vw !important;
+    max-height: 88vh !important;
+    padding: 16px !important;
+    border-radius: 12px !important;
   }
   .modal-body {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+  .download-opt-card {
+    padding: 10px 12px !important;
+    gap: 10px !important;
+  }
+  .btn-start-download {
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* 5. Extra Small Compact Mobile (< 380px, e.g. iPhone SE / mini) */
+@media (max-width: 379px) {
+  .brand-text {
+    font-size: 15px !important;
+  }
+  .hero-title {
+    font-size: 19px !important;
+  }
+  .movie-card {
+    flex: 0 0 115px !important;
+    width: 115px !important;
+  }
+  .card-media {
+    height: 168px !important;
+  }
+  .movies-catalog-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    padding: 0 8px !important;
   }
 }
 

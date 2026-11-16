@@ -47,19 +47,28 @@ class MovieshubApp {
       this.switchView(hash);
     }
 
-    // Dynamically load fresh synced catalog from all servers
-    this.loadDashboardData();
+    // Auto-sync on startup: check if new day or needs fresh sync
+    const todayDateStr = new Date().toDateString();
+    const lastClientSyncDay = localStorage.getItem("movieshub_last_sync_date");
+    const needsDailySync = lastClientSyncDay !== todayDateStr;
+    this.loadDashboardData(false, needsDailySync);
 
-    // Auto-sync movies from all servers every 1 hour
-    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
+    // Auto-sync movies from all servers every 30 minutes / on day rollover
+    setInterval(() => {
+      const today = new Date().toDateString();
+      const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
+      this.loadDashboardData(true, dayChanged);
+    }, 30 * 60 * 1000);
 
-    // Auto-refresh when tab becomes active / focused if 10 minutes have passed
+    // Auto-refresh when tab becomes active / focused if day changed or 10 minutes passed
     let lastTabFocusSync = Date.now();
     const checkTabFocusSync = () => {
       const now = Date.now();
-      if (now - lastTabFocusSync > 10 * 60 * 1000) {
+      const today = new Date().toDateString();
+      const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
+      if (dayChanged || (now - lastTabFocusSync > 10 * 60 * 1000)) {
         lastTabFocusSync = now;
-        this.loadDashboardData(true);
+        this.loadDashboardData(true, dayChanged);
       }
     };
     window.addEventListener("focus", checkTabFocusSync);
@@ -158,13 +167,16 @@ class MovieshubApp {
   }
 
   /* ================= 2-HOUR DASHBOARD SYNC ================= */
-  async loadDashboardData(silent = false) {
+  async loadDashboardData(silent = false, force = false) {
     try {
       const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
-      const res = await fetch(`${pfx}/api/dashboard?t=${Date.now()}`, { cache: "no-store" });
+      const url = `${pfx}/api/dashboard?t=${Date.now()}${force ? "&refresh=1" : ""}`;
+      const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         this.dashboardData = data;
+        localStorage.setItem("movieshub_last_sync_date", new Date().toDateString());
+        localStorage.setItem("movieshub_dash_last_sync", Date.now());
         let addedCount = 0;
 
         const mergeMovie = (m) => {
@@ -191,6 +203,7 @@ class MovieshubApp {
           }
         };
 
+        if (Array.isArray(data.hero)) data.hero.forEach(mergeMovie);
         (data.all || []).forEach(mergeMovie);
         (data.latest_six || []).forEach(mergeMovie);
         (data.trending || []).forEach(mergeMovie);
@@ -955,7 +968,7 @@ class MovieshubApp {
           <div class="hero-buttons">
             <button class="btn-main-play" id="hero-btn-play">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <span>Play Movie (1-Click)</span>
+              <span>Play</span>
             </button>
             <button class="btn-main-info" id="hero-btn-download" style="background:#22c55e;color:#000;font-weight:800;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1046,6 +1059,31 @@ class MovieshubApp {
       this.heroInterval = setInterval(nextSlide, 5000);
     });
 
+    // Touch swipe support (Mobile, Tablet & Touchscreen Laptops)
+    let touchStartX = 0;
+    let touchStartY = 0;
+    section.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches.length > 0) {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }
+      if (this.heroInterval) clearInterval(this.heroInterval);
+    }, { passive: true });
+
+    section.addEventListener("touchend", (e) => {
+      if (!e.changedTouches || e.changedTouches.length === 0) return;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      if (Math.abs(diffX) > 40 && Math.abs(diffX) > Math.abs(diffY)) {
+        if (diffX < 0) nextSlide();
+        else prevSlide();
+      }
+      if (this.heroInterval) clearInterval(this.heroInterval);
+      this.heroInterval = setInterval(nextSlide, 5000);
+    }, { passive: true });
+
     const prevBtn = document.getElementById("hero-arrow-prev");
     const nextBtn = document.getElementById("hero-arrow-next");
     if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevSlide(); });
@@ -1111,7 +1149,9 @@ class MovieshubApp {
       return (b.rating || 0) - (a.rating || 0);
     });
 
-    const tamilHeroMovies = sortedTamil.slice(0, 5);
+    const tamilHeroMovies = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
+      ? this.dashboardData.tamil_2026.filter(m => (m.backdrop || m.poster)).slice(0, 5)
+      : sortedTamil.slice(0, 5);
     const latestTamil = sortedTamil.slice(0, 6);
 
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
@@ -1210,11 +1250,33 @@ class MovieshubApp {
     };
     const sortByLatest = (arr) => [...arr].sort((a, b) => getSortScore(b) - getSortScore(a));
 
-    // Top 5 Verified Released Blockbusters for the Auto-Rotating Billboard (Prioritizing 2026/2025 releases)
     const sortedCatalog = [...this.catalog]
       .filter(m => (m.backdrop || m.poster))
       .sort((a, b) => getSortScore(b) - getSortScore(a));
-    const top5Imdb = sortedCatalog.slice(0, 5);
+
+    // Dynamic Top 5 Blockbusters for the Auto-Rotating Billboard Slider (Daily Trending & Live Releases)
+    let heroCandidates = [];
+    if (this.dashboardData?.hero && Array.isArray(this.dashboardData.hero) && this.dashboardData.hero.length > 0) {
+      heroCandidates = this.dashboardData.hero.filter(m => (m.backdrop || m.poster));
+    } else if (this.dashboardData?.trending && Array.isArray(this.dashboardData.trending) && this.dashboardData.trending.length > 0) {
+      heroCandidates = this.dashboardData.trending.filter(m => (m.backdrop || m.poster));
+    } else if (this.dashboardData?.latest_six && Array.isArray(this.dashboardData.latest_six) && this.dashboardData.latest_six.length > 0) {
+      heroCandidates = this.dashboardData.latest_six.filter(m => (m.backdrop || m.poster));
+    }
+    if (heroCandidates.length < 5) {
+      heroCandidates = [...heroCandidates, ...sortedCatalog];
+    }
+    const cleanHeroList = [];
+    const seenHeroIds = new Set();
+    for (const hm of heroCandidates) {
+      const key = String(hm.tmdbId || hm.id || hm.title);
+      if (!seenHeroIds.has(key)) {
+        seenHeroIds.add(key);
+        cleanHeroList.push(hm);
+        if (cleanHeroList.length >= 5) break;
+      }
+    }
+    const top5Imdb = cleanHeroList;
     const featuredMovie = top5Imdb[0] || this.catalog.find(m => m.id === "goat-tamil") || this.catalog.find(m => m.id === "leo-tamil") || this.catalog.find(m => m.isTrending && m.backdrop) || this.catalog[0];
     
     // Top 6 Latest Releases from IMDb / TMDB (Strictly 2026/2025 releases across all languages)
