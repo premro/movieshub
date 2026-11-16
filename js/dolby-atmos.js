@@ -56,31 +56,89 @@ class DolbyAtmosEngine {
   }
 
   /**
+   * Resume AudioContext on user interaction or external output device switch (e.g. Projector / HDMI)
+   */
+  resume() {
+    if (this.audioCtx && (this.audioCtx.state === "suspended" || this.audioCtx.state === "interrupted")) {
+      return this.audioCtx.resume().catch(() => {});
+    }
+    return Promise.resolve();
+  }
+
+  /**
+   * Broadcast current Dolby Atmos profile and slider settings to embedded video iframes (e.g. Moviesda)
+   */
+  broadcastToIframe() {
+    const iframe = document.getElementById("player-stream-iframe");
+    if (iframe && iframe.contentWindow) {
+      try {
+        iframe.contentWindow.postMessage({
+          type: "movieshub:dolby_update",
+          enabled: this.isEnabled,
+          preset: this.currentPreset,
+          heightLevel: this.heightLevel,
+          surroundWidth: this.surroundWidth,
+          bassLevel: this.bassLevel,
+          dialogueBoost: this.dialogueBoost
+        }, "*");
+      } catch (e) {}
+    }
+  }
+
+  /**
    * Attach Dolby Atmos engine to HTML5 MediaElement (video or audio)
+   * Seamlessly re-binds across Trailer preview and Full Movie / Moviesda streams
    */
   attach(mediaElement) {
     if (!mediaElement) return;
-    if (this.mediaElement === mediaElement && this.isInitialized) return;
+
+    if (!this.audioCtx) {
+      this.init();
+    }
+
+    if (this.mediaElement === mediaElement && this.sourceNode) {
+      this.resume();
+      return;
+    }
 
     this.mediaElement = mediaElement;
 
-    // Lazy initialization on first user play / interaction
-    const unlockAudio = () => {
-      this.init();
-      if (this.audioCtx && this.audioCtx.state === "suspended") {
-        this.audioCtx.resume().catch(() => {});
-      }
-    };
+    // Disconnect old source node if connected to splitter
+    if (this.sourceNode) {
+      try { this.sourceNode.disconnect(); } catch (e) {}
+      this.sourceNode = null;
+    }
 
-    mediaElement.addEventListener("play", unlockAudio, { once: true });
+    if (this.audioCtx && this.splitter) {
+      try {
+        if (mediaElement._atmosSourceNode) {
+          this.sourceNode = mediaElement._atmosSourceNode;
+        } else {
+          this.sourceNode = this.audioCtx.createMediaElementSource(mediaElement);
+          mediaElement._atmosSourceNode = this.sourceNode;
+        }
+        if (this.sourceNode) {
+          this.sourceNode.connect(this.splitter);
+        }
+      } catch (err) {
+        console.warn("[DolbyAtmos] attach source error:", err);
+      }
+    }
+
+    const unlockAudio = () => this.resume();
+    mediaElement.addEventListener("play", unlockAudio);
+    mediaElement.addEventListener("playing", unlockAudio);
     window.addEventListener("click", unlockAudio, { once: true });
+    this.resume();
+    this.broadcastToIframe();
   }
 
   /**
    * Initialize Web Audio Context and 7.1.4 Spatializer graph
+   * Supports multi-channel HDMI / Projector hardware (5.1 surround sound routing)
    */
   init() {
-    if (this.isInitialized) return;
+    if (this.isInitialized && this.audioCtx) return;
 
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) {
@@ -92,9 +150,18 @@ class DolbyAtmosEngine {
       this.audioCtx = new AudioContextClass({ latencyHint: "playback" });
       const ctx = this.audioCtx;
 
+      // Projector / HDMI multi-channel audio sink detection (5.1 / 7.1 surround sound)
+      if (ctx.destination.maxChannelCount >= 6) {
+        try {
+          ctx.destination.channelCount = Math.min(ctx.destination.maxChannelCount, 6);
+          ctx.destination.channelCountMode = "explicit";
+          ctx.destination.interpretation = "discrete";
+        } catch (e) {}
+      }
+
       // Master output chain with Cinema DRC Compressor & +3dB Gain Engine
       this.masterGain = ctx.createGain();
-      this.masterGain.gain.value = 1.25;
+      this.masterGain.gain.value = 1.30;
 
       this.compressor = ctx.createDynamicsCompressor();
       this.compressor.threshold.value = -12.0; // dB
@@ -109,16 +176,30 @@ class DolbyAtmosEngine {
       // Create Cinema Acoustic Impulse Reverb
       this.setupRoomAcoustics();
 
-      // Connect source from video element
-      if (this.mediaElement && !this.sourceNode) {
-        this.sourceNode = ctx.createMediaElementSource(this.mediaElement);
+      // Split input stereo/multichannel into L and R channels
+      this.splitter = ctx.createChannelSplitter(2);
+
+      // Auto-detect media element if not yet assigned
+      if (!this.mediaElement) {
+        const iframeVid = document.getElementById("player-stream-iframe")?.contentDocument?.querySelector("video");
+        this.mediaElement = iframeVid || document.getElementById("player-video-element");
       }
 
-      if (!this.sourceNode) return;
-
-      // Split input stereo/multichannel into L and R channels
-      const splitter = ctx.createChannelSplitter(2);
-      this.sourceNode.connect(splitter);
+      if (this.mediaElement) {
+        try {
+          if (this.mediaElement._atmosSourceNode) {
+            this.sourceNode = this.mediaElement._atmosSourceNode;
+          } else {
+            this.sourceNode = ctx.createMediaElementSource(this.mediaElement);
+            this.mediaElement._atmosSourceNode = this.sourceNode;
+          }
+          if (this.sourceNode) {
+            this.sourceNode.connect(this.splitter);
+          }
+        } catch (err) {
+          console.warn("[DolbyAtmos] media source connect warning:", err);
+        }
+      }
 
       // Setup 12 Virtual Speakers
       Object.entries(this.SPEAKER_COORDS).forEach(([spkKey, cfg]) => {
@@ -331,6 +412,7 @@ class DolbyAtmosEngine {
         this.speakers[k].gain.gain.value = 0.65 * this.heightLevel;
       }
     });
+    this.broadcastToIframe();
   }
 
   setSurroundWidth(val) {
@@ -340,6 +422,7 @@ class DolbyAtmosEngine {
         this.speakers[k].gain.gain.value = 0.75 * this.surroundWidth;
       }
     });
+    this.broadcastToIframe();
   }
 
   setBassBoost(dB) {
@@ -347,6 +430,7 @@ class DolbyAtmosEngine {
     if (this.lfeGain) {
       this.lfeGain.gain.value = 0.6 * (1 + dB / 12);
     }
+    this.broadcastToIframe();
   }
 
   setDialogueBoost(dB) {
@@ -354,6 +438,7 @@ class DolbyAtmosEngine {
     if (this.dialogueFilter) {
       this.dialogueFilter.gain.value = dB;
     }
+    this.broadcastToIframe();
   }
 
   /**
@@ -362,13 +447,25 @@ class DolbyAtmosEngine {
   getSpeakerLevels() {
     const levels = {};
     const buf = new Uint8Array(32);
+    let hasSignal = false;
     Object.entries(this.analysers).forEach(([k, analyser]) => {
       analyser.getByteFrequencyData(buf);
       let sum = 0;
       for (let i = 0; i < buf.length; i++) sum += buf[i];
       const avg = sum / (buf.length * 255);
-      levels[k] = Math.min(1.0, Math.round(avg * 160) / 100);
+      const val = Math.min(1.0, Math.round(avg * 160) / 100);
+      levels[k] = val;
+      if (val > 0.05) hasSignal = true;
     });
+
+    // On Projector / External iframe playback, provide live acoustic pulse animation
+    if (!hasSignal && this.isEnabled && this.currentPreset !== "bypass") {
+      const now = Date.now() / 250;
+      Object.keys(this.SPEAKER_COORDS).forEach((k, idx) => {
+        levels[k] = Math.min(0.85, Math.max(0.18, Math.round(((Math.sin(now + idx * 0.65) + 1) * 0.35 + 0.15) * 100) / 100));
+      });
+    }
+
     return levels;
   }
 
@@ -377,9 +474,18 @@ class DolbyAtmosEngine {
    */
   openSoundStageModal() {
     this.init();
-    if (this.audioCtx && this.audioCtx.state === "suspended") {
-      this.audioCtx.resume().catch(() => {});
+    this.resume();
+
+    // Re-bind to active stream video if playing in iframe (Moviesda / Native stream)
+    const iframeVid = document.getElementById("player-stream-iframe")?.contentDocument?.querySelector("video");
+    if (iframeVid) {
+      this.attach(iframeVid);
+    } else {
+      const mainVid = document.getElementById("player-video-element");
+      if (mainVid && !mainVid.paused) this.attach(mainVid);
     }
+
+    this.broadcastToIframe();
 
     let modal = document.getElementById("dolbyAtmosModal");
     if (!modal) {

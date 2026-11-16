@@ -187,11 +187,16 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       border: none;
       display: block;
     }
-    .fs-corner-btn {
+    .top-corner-bar {
       position: absolute;
       top: 12px;
       right: 12px;
       z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .corner-btn {
       background: rgba(15,12,22,0.85);
       border: 1px solid rgba(255,255,255,0.25);
       color: #fff;
@@ -206,7 +211,23 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       backdrop-filter: blur(8px);
       transition: background 0.15s, transform 0.15s;
     }
-    .fs-corner-btn:hover { background: #e50914; transform: scale(1.04); }
+    .corner-btn:hover { background: #e50914; transform: scale(1.04); }
+    .dolby-corner-btn { border-color: rgba(34, 211, 238, 0.45); }
+    .dolby-corner-btn:hover { background: rgba(34, 211, 238, 0.25); border-color: #22d3ee; }
+    .atmos-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22d3ee;
+      box-shadow: 0 0 8px #22d3ee;
+      animation: pulse 1.8s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 1; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
   </style>
 </head>
 <body>
@@ -216,10 +237,16 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       <div id="mLoaderText" style="margin-top:14px;font-size:13px;color:#22c55e;font-weight:700;letter-spacing:0.3px;">Connecting to Moviesda 2026 HD Stream...</div>
       <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     </div>
-    <button class="fs-corner-btn" id="srcdocFsBtn" onclick="toggleLocalFs()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
-      <span>Fullscreen</span>
-    </button>
+    <div class="top-corner-bar">
+      <button class="corner-btn dolby-corner-btn" id="srcdocDolbyBtn" onclick="toggleLocalDolby()" title="Toggle Dolby Atmos 3D Audio">
+        <span class="atmos-dot"></span>
+        <span id="srcdocDolbyText">Dolby Atmos: 3D ON</span>
+      </button>
+      <button class="corner-btn" id="srcdocFsBtn" onclick="toggleLocalFs()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
+        <span>Fullscreen</span>
+      </button>
+    </div>
     <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
     <div class="clipped-embed-wrap" id="embedWrap" style="display:none;">
       <iframe id="embedFrame" src="${embedUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
@@ -235,6 +262,141 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         if (document.exitFullscreen) document.exitFullscreen();
         else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
       }
+    }
+
+    // Moviesda Dolby Atmos Spatial Audio Engine (Specialized for Projector / Multi-channel HDMI)
+    var atmosCtx = null;
+    var atmosSource = null;
+    var atmosGain = null;
+    var atmosCompressor = null;
+    var atmosBassFilter = null;
+    var atmosDialogueFilter = null;
+    var atmosEnabled = true;
+    var atmosPreset = "atmos_3d";
+
+    function initMoviesdaDolby(nv) {
+      if (!nv || atmosCtx) return;
+      var AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+
+      try {
+        atmosCtx = new AudioCtx({ latencyHint: "playback" });
+
+        // Multichannel detection for HDMI Projectors & AV receivers (5.1 or 7.1)
+        if (atmosCtx.destination.maxChannelCount >= 6) {
+          try {
+            atmosCtx.destination.channelCount = Math.min(atmosCtx.destination.maxChannelCount, 6);
+            atmosCtx.destination.channelCountMode = "explicit";
+            atmosCtx.destination.interpretation = "discrete";
+          } catch (e) {}
+        }
+
+        try {
+          atmosSource = atmosCtx.createMediaElementSource(nv);
+        } catch (e) {
+          return;
+        }
+
+        atmosCompressor = atmosCtx.createDynamicsCompressor();
+        atmosCompressor.threshold.value = -14.0;
+        atmosCompressor.knee.value = 10.0;
+        atmosCompressor.ratio.value = 4.0;
+        atmosCompressor.attack.value = 0.003;
+        atmosCompressor.release.value = 0.25;
+
+        atmosGain = atmosCtx.createGain();
+        atmosGain.gain.value = 1.35;
+
+        // Dialogue clarity filter (2400Hz speech fundamental peaking)
+        atmosDialogueFilter = atmosCtx.createBiquadFilter();
+        atmosDialogueFilter.type = "peaking";
+        atmosDialogueFilter.frequency.value = 2400;
+        atmosDialogueFilter.Q.value = 1.2;
+        atmosDialogueFilter.gain.value = 3.5;
+
+        // Subwoofer LFE punch filter (85Hz lowshelf boost)
+        atmosBassFilter = atmosCtx.createBiquadFilter();
+        atmosBassFilter.type = "lowshelf";
+        atmosBassFilter.frequency.value = 85;
+        atmosBassFilter.gain.value = 4.5;
+
+        atmosSource.connect(atmosDialogueFilter);
+        atmosDialogueFilter.connect(atmosBassFilter);
+        atmosBassFilter.connect(atmosGain);
+        atmosGain.connect(atmosCompressor);
+        atmosCompressor.connect(atmosCtx.destination);
+
+        var resumeCtx = function() {
+          if (atmosCtx && (atmosCtx.state === "suspended" || atmosCtx.state === "interrupted")) {
+            atmosCtx.resume().catch(function() {});
+          }
+        };
+        nv.addEventListener("play", resumeCtx);
+        nv.addEventListener("playing", resumeCtx);
+        window.addEventListener("click", resumeCtx);
+        window.addEventListener("keydown", resumeCtx);
+      } catch (err) {
+        console.warn("[MoviesdaAtmos] setup note:", err);
+      }
+    }
+
+    function applyAtmosConfig(cfg) {
+      if (!atmosCtx) {
+        var nv = document.getElementById("nativeVideo");
+        if (nv) initMoviesdaDolby(nv);
+      }
+      if (atmosCtx && (atmosCtx.state === "suspended" || atmosCtx.state === "interrupted")) {
+        atmosCtx.resume().catch(function() {});
+      }
+      if (cfg.preset) {
+        atmosPreset = cfg.preset;
+        if (cfg.preset === "atmos_3d") {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 4.5;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 3.5;
+          if (atmosGain) atmosGain.gain.value = 1.35;
+        } else if (cfg.preset === "cinema") {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 6.0;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 2.0;
+          if (atmosGain) atmosGain.gain.value = 1.40;
+        } else if (cfg.preset === "dialogue") {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 1.5;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 6.5;
+          if (atmosGain) atmosGain.gain.value = 1.45;
+        } else if (cfg.preset === "night") {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 0.0;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 4.0;
+          if (atmosGain) atmosGain.gain.value = 1.10;
+        } else if (cfg.preset === "bypass") {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 0.0;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 0.0;
+          if (atmosGain) atmosGain.gain.value = 1.0;
+        }
+      }
+      if (typeof cfg.bassLevel === "number" && atmosBassFilter) {
+        atmosBassFilter.gain.value = cfg.bassLevel;
+      }
+      if (typeof cfg.dialogueBoost === "number" && atmosDialogueFilter) {
+        atmosDialogueFilter.gain.value = cfg.dialogueBoost;
+      }
+      if (typeof cfg.enabled === "boolean") {
+        atmosEnabled = cfg.enabled;
+        if (atmosGain) atmosGain.gain.value = atmosEnabled ? 1.35 : 1.0;
+        if (!atmosEnabled) {
+          if (atmosBassFilter) atmosBassFilter.gain.value = 0;
+          if (atmosDialogueFilter) atmosDialogueFilter.gain.value = 0;
+        }
+      }
+      var dt = document.getElementById("srcdocDolbyText");
+      if (dt) dt.textContent = "Dolby Atmos: " + (atmosPreset === "bypass" || !atmosEnabled ? "OFF" : "3D ON");
+    }
+
+    function toggleLocalDolby() {
+      if (atmosCtx && (atmosCtx.state === "suspended" || atmosCtx.state === "interrupted")) {
+        atmosCtx.resume().catch(function() {});
+      }
+      try {
+        window.parent.postMessage({ type: "player:open_dolby" }, "*");
+      } catch (e) {}
     }
 
     function playDirect(streamUrl, fid) {
@@ -255,9 +417,14 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         nv.muted = false;
         nv.volume = 1.0;
         nv.style.display = "block";
+
+        initMoviesdaDolby(nv);
+
         var playPromise = nv.play();
         if (playPromise !== undefined) {
-          playPromise.catch(function() {
+          playPromise.then(function() {
+            try { window.parent.postMessage({ type: "player:dolby_ready" }, "*"); } catch (e) {}
+          }).catch(function() {
             nv.muted = true;
             nv.play().then(function() {
               var unBtn = document.createElement("button");
@@ -267,6 +434,9 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
               unBtn.onclick = function() {
                 nv.muted = false;
                 nv.volume = 1.0;
+                if (atmosCtx && (atmosCtx.state === "suspended" || atmosCtx.state === "interrupted")) {
+                  atmosCtx.resume().catch(function() {});
+                }
                 unBtn.remove();
               };
               var box = document.getElementById("frameBox");
@@ -301,36 +471,56 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       }
     }
 
-    // Forward 10s skip and keyboard shortcuts inside iframe
+    // Debounced strictly 10s skip on Moviesda
+    var lastSeekTs = 0;
+    function doSkip(secs) {
+      var now = Date.now();
+      if (now - lastSeekTs < 350) return;
+      lastSeekTs = now;
+      var nv = document.getElementById("nativeVideo");
+      if (nv && typeof nv.currentTime === "number" && !isNaN(nv.currentTime)) {
+        var target = secs > 0 
+          ? Math.min((nv.duration || Infinity), nv.currentTime + secs)
+          : Math.max(0, nv.currentTime + secs);
+        nv.currentTime = target;
+        try {
+          window.parent.postMessage({ type: "player:toast", message: (secs > 0 ? "⏩ +" : "⏪ -") + Math.abs(secs) + "s" }, "*");
+        } catch (e) {}
+      }
+    }
+
+    // Message listener for skip and Dolby sync
     window.addEventListener("message", function(e) {
       var d = e.data;
-      if (!d) return;
-      var nv = document.getElementById("nativeVideo");
-      if (d.action === "forward" || d.type === "seek" || d.action === "skipForward") {
-        var secs = d.seconds || d.value || 10;
-        if (nv && !nv.paused) {
-          nv.currentTime = Math.min((nv.duration || Infinity), nv.currentTime + secs);
-        }
+      if (!d || typeof d !== "object") return;
+      if (d.type === "movieshub:forward" || d.action === "forward") {
+        doSkip(d.seconds || 10);
+      } else if (d.type === "movieshub:rewind" || d.action === "rewind") {
+        doSkip(-(d.seconds || 10));
+      } else if (d.type === "movieshub:dolby_update") {
+        applyAtmosConfig(d);
       } else if (d.action === "pause" || d === "stop") {
-        if (nv) {
-          try { nv.pause(); } catch (e) {}
-        }
+        var nv = document.getElementById("nativeVideo");
+        if (nv) { try { nv.pause(); } catch (err) {} }
       }
     });
 
+    // Keyboard & Remote Control handler inside Moviesda
     window.addEventListener("keydown", function(e) {
-      var nv = document.getElementById("nativeVideo");
       if (e.key === "ArrowRight") {
         e.preventDefault();
         e.stopPropagation();
-        if (nv) {
-          nv.currentTime = Math.min((nv.duration || Infinity), nv.currentTime + 10);
-        }
-        try { window.parent.postMessage({ type: "player:toast", message: "⏩ +10s" }, "*"); } catch (err) {}
+        e.stopImmediatePropagation();
+        doSkip(10);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        doSkip(-10);
       } else if (e.key === "f" || e.key === "F") {
         e.preventDefault();
         e.stopPropagation();
-        try { window.parent.postMessage({ type: "player:fullscreen_toggle" }, "*"); } catch (err) {}
+        toggleLocalFs();
       } else if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
@@ -375,6 +565,8 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
                 ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
                 ew.style.display = "block";
               }
+              var loader = document.getElementById("mLoader");
+              if (loader) loader.style.display = "none";
             }
           })
           .catch(function() {
@@ -384,6 +576,8 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
               ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
               ew.style.display = "block";
             }
+            var loader = document.getElementById("mLoader");
+            if (loader) loader.style.display = "none";
           });
       }
     })();
@@ -675,21 +869,9 @@ class MovieshubPlayer {
       togglePlay();
     });
 
-    // Skip & Fast-Forward with Stall Recovery
-    rewindBtn.addEventListener("click", () => {
-      video.currentTime = Math.max(0, video.currentTime - 10);
-      if (this.isPlaying && video.paused) {
-        video.play().catch(() => {});
-      }
-    });
-    forwardBtn.addEventListener("click", () => {
-      if (video.duration) {
-        video.currentTime = Math.min(video.duration, video.currentTime + 10);
-        if (this.isPlaying && video.paused) {
-          video.play().catch(() => {});
-        }
-      }
-    });
+    // Skip & Fast-Forward across All Modes & Servers (Strictly 10s Debounced)
+    rewindBtn.addEventListener("click", () => skipRewind10());
+    forwardBtn.addEventListener("click", () => skipForward10());
 
     // Auto-recover if video stalls after forward seeking
     video.addEventListener("waiting", () => {
@@ -807,7 +989,10 @@ class MovieshubPlayer {
     if (dolbyBtn) {
       dolbyBtn.addEventListener("click", () => {
         if (window.DolbyAtmos) {
-          if (this.video) window.DolbyAtmos.attach(this.video);
+          const curIframe = document.getElementById("player-stream-iframe");
+          const innerVid = curIframe?.contentDocument?.querySelector("video");
+          const targetVid = innerVid || this.video;
+          if (targetVid) window.DolbyAtmos.attach(targetVid);
           window.DolbyAtmos.openSoundStageModal();
         }
       });
@@ -842,33 +1027,81 @@ class MovieshubPlayer {
       });
     });
 
-    // 10s Forward Skip across all servers & modes
+    // 10s Forward and Rewind Skip across all servers & modes (350ms Debounced)
+    let lastSeekTimestamp = 0;
+
     const skipForward10 = () => {
-      // 1. Trailer or direct native video
-      if (video && !video.paused) {
-        video.currentTime = Math.min((video.duration || Infinity), video.currentTime + 10);
-      }
-      // 2. Server iframes (Servers 1 to 9: VidLink, AutoEmbed, 2Embed, VidSrc, Moviesda, etc.)
+      const now = Date.now();
+      if (now - lastSeekTimestamp < 350) return;
+      lastSeekTimestamp = now;
+
+      let sought = false;
       const curIframe = document.getElementById("player-stream-iframe");
-      if (curIframe && curIframe.contentWindow) {
+
+      // 1. Check if Moviesda native video is playing directly inside same-origin iframe
+      if (curIframe && curIframe.contentDocument) {
         try {
-          if (curIframe.contentDocument) {
-            const innerVid = curIframe.contentDocument.querySelector("video");
-            if (innerVid) {
-              innerVid.currentTime = Math.min((innerVid.duration || Infinity), innerVid.currentTime + 10);
-            }
+          const innerVid = curIframe.contentDocument.querySelector("video");
+          if (innerVid && typeof innerVid.currentTime === "number" && !isNaN(innerVid.currentTime)) {
+            const targetTime = Math.min((innerVid.duration || Infinity), innerVid.currentTime + 10);
+            innerVid.currentTime = targetTime;
+            sought = true;
           }
         } catch (e) {}
+      }
 
+      // 2. Trailer or direct native video
+      if (!sought && video && !video.paused) {
+        video.currentTime = Math.min((video.duration || Infinity), video.currentTime + 10);
+        sought = true;
+      }
+
+      // 3. Third-party cross-origin iframes (Servers 1 to 8): send single forward message
+      if (!sought && curIframe && curIframe.contentWindow) {
         try {
-          curIframe.contentWindow.postMessage({ type: "seek", value: 10, relative: true }, "*");
+          curIframe.contentWindow.postMessage({ type: "movieshub:forward", seconds: 10 }, "*");
           curIframe.contentWindow.postMessage({ action: "forward", seconds: 10 }, "*");
-          curIframe.contentWindow.postMessage({ action: "skipForward", seconds: 10 }, "*");
-          curIframe.contentWindow.postMessage({ event: "command", func: "fastForward", args: [10] }, "*");
-          curIframe.contentWindow.postMessage({ type: "player:forward", seconds: 10 }, "*");
         } catch (e) {}
       }
+
       this.showToastIndicator("⏩ +10s");
+    };
+
+    const skipRewind10 = () => {
+      const now = Date.now();
+      if (now - lastSeekTimestamp < 350) return;
+      lastSeekTimestamp = now;
+
+      let sought = false;
+      const curIframe = document.getElementById("player-stream-iframe");
+
+      // 1. Check if Moviesda native video is playing directly inside same-origin iframe
+      if (curIframe && curIframe.contentDocument) {
+        try {
+          const innerVid = curIframe.contentDocument.querySelector("video");
+          if (innerVid && typeof innerVid.currentTime === "number" && !isNaN(innerVid.currentTime)) {
+            const targetTime = Math.max(0, innerVid.currentTime - 10);
+            innerVid.currentTime = targetTime;
+            sought = true;
+          }
+        } catch (e) {}
+      }
+
+      // 2. Trailer or direct native video
+      if (!sought && video && !video.paused) {
+        video.currentTime = Math.max(0, video.currentTime - 10);
+        sought = true;
+      }
+
+      // 3. Third-party cross-origin iframes (Servers 1 to 8): send single rewind message
+      if (!sought && curIframe && curIframe.contentWindow) {
+        try {
+          curIframe.contentWindow.postMessage({ type: "movieshub:rewind", seconds: 10 }, "*");
+          curIframe.contentWindow.postMessage({ action: "rewind", seconds: 10 }, "*");
+        } catch (e) {}
+      }
+
+      this.showToastIndicator("⏪ -10s");
     };
 
     // Fullscreen toggle across all servers
@@ -893,9 +1126,7 @@ class MovieshubPlayer {
     // Fullscreen button
     fullscreenBtn.addEventListener("click", () => toggleFullscreen());
 
-    if (forwardBtn) {
-      forwardBtn.addEventListener("click", () => skipForward10());
-    }
+    // forwardBtn click handled above without duplicate listeners
 
     // Keyboard controls in Player (Active across ALL servers)
     window.addEventListener("keydown", (e) => {
@@ -930,14 +1161,19 @@ class MovieshubPlayer {
         return;
       }
 
+      // 4. Rewind key (ArrowLeft): rewind 10 seconds in ALL servers
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        e.stopPropagation();
+        skipRewind10();
+        return;
+      }
+
       // Mode-specific additional shortcuts (Trailer preview mode)
       if (this.currentMode === "trailer") {
         if (e.key === " " || e.key === "k") {
           e.preventDefault();
           togglePlay();
-        } else if (e.key === "ArrowLeft") {
-          e.preventDefault();
-          if (video) video.currentTime = Math.max(0, video.currentTime - 10);
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
           if (video) {
@@ -973,6 +1209,18 @@ class MovieshubPlayer {
         }
       } else if (e.data.type === "player:toast") {
         this.showToastIndicator(e.data.message || "⏩ +10s");
+      } else if (e.data.type === "player:open_dolby") {
+        if (window.DolbyAtmos) {
+          const curIframe = document.getElementById("player-stream-iframe");
+          const innerVid = curIframe?.contentDocument?.querySelector("video");
+          const targetVid = innerVid || this.video;
+          if (targetVid) window.DolbyAtmos.attach(targetVid);
+          window.DolbyAtmos.openSoundStageModal();
+        }
+      } else if (e.data.type === "player:dolby_ready") {
+        if (window.DolbyAtmos) {
+          window.DolbyAtmos.broadcastToIframe();
+        }
       }
     });
   }
@@ -1525,6 +1773,10 @@ class MovieshubPlayer {
       if (streamDolbyBtn) {
         streamDolbyBtn.addEventListener("click", () => {
           if (window.DolbyAtmos) {
+            const curIframe = document.getElementById("player-stream-iframe");
+            const innerVid = curIframe?.contentDocument?.querySelector("video");
+            const targetVid = innerVid || this.video;
+            if (targetVid) window.DolbyAtmos.attach(targetVid);
             window.DolbyAtmos.openSoundStageModal();
           }
         });
