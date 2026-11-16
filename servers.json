@@ -1,8 +1,9 @@
 {
-  "moviesda": "https://www.moviesda.pet",
+  "moviesda": "https://moviezda.co",
   "fallback_mirrors": [
-    "https://moviesda.pet",
     "https://moviezda.me",
+    "https://www.moviesda.pet",
+    "https://moviesda.pet",
     "https://moviesda.io",
     "https://moviesda.mobi",
     "https://moviesda.net"

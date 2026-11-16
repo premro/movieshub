@@ -1269,9 +1269,13 @@ const MOVIESDA_VERIFIED_MAP = {
   "lubber pandhu": "87208",
   "meiyazhagan": "87066",
   "pushpa 2": "88746",
+  "madha gaja raja": "88685",
+  "madha gaja raja 2025": "88685",
+  "madhagajaraja": "88685",
 };
 
 const MOVIESDA_TMDB_MAP = {
+  280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
   1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
   954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
@@ -1311,9 +1315,10 @@ const MOVIESDA_TMDB_MAP = {
 
 const DEFAULT_MOVIESDA_DOMAINS = [
   process.env.MOVIESDA_BASE_URL,
+  "https://moviezda.co",
+  "https://moviezda.me",
   "https://www.moviesda.pet",
   "https://moviesda.pet",
-  "https://moviezda.me",
   "https://moviesda.io",
   "https://moviesda.mobi",
   "https://moviesda.net"
@@ -1356,10 +1361,13 @@ async function getActiveMoviesdaDomain() {
         timeout: 4000
       });
       if (statusCode && statusCode < 400) {
-        const resolvedOrigin = new URL(finalUrl || domain).origin;
-        cachedActiveMoviesdaOrigin = resolvedOrigin;
-        cachedOriginTimestamp = Date.now();
-        return resolvedOrigin;
+        const htmlSample = buffer ? buffer.toString("utf8", 0, 1500) : "";
+        if (!htmlSample.includes("gotopage.top") && !htmlSample.includes("domain for sale")) {
+          const resolvedOrigin = new URL(finalUrl || domain).origin;
+          cachedActiveMoviesdaOrigin = resolvedOrigin;
+          cachedOriginTimestamp = Date.now();
+          return resolvedOrigin;
+        }
       }
     } catch (e) {
       continue;
@@ -1427,27 +1435,33 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
       const normalizedUrl = `${activeOrigin}${parsed.pathname}${parsed.search}`;
       const { buffer, finalUrl } = await fetchBuffer(normalizedUrl);
       const origin = new URL(finalUrl || activeOrigin).origin;
-      let pageHtml = buffer.toString("utf8");
+      let pageHtml = buffer ? buffer.toString("utf8") : "";
 
-      let subMatch = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
-      if (subMatch) {
-        const pRes = await fetchBuffer(new URL(subMatch[1], origin).toString());
-        pageHtml = pRes.buffer.toString("utf8");
-        let subMatch2 = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/);
-        if (subMatch2) {
-          const pRes2 = await fetchBuffer(new URL(subMatch2[1], origin).toString());
-          pageHtml = pRes2.buffer.toString("utf8");
+      let depth = 0;
+      while (depth < 4) {
+        let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/i);
+        if (dlPageMatch) {
+          const dlRes = await fetchBuffer(new URL(dlPageMatch[1], origin).toString());
+          if (dlRes && dlRes.buffer) {
+            const dlHtml = dlRes.buffer.toString("utf8");
+            let fid = dlHtml.match(/\/file\/(\d+)/);
+            if (fid) {
+              moviesdaLiveCache.set(inputStr, fid[1]);
+              return fid[1];
+            }
+          }
+          break;
         }
-      }
-      let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/);
-      if (dlPageMatch) {
-        const dlRes = await fetchBuffer(new URL(dlPageMatch[1], origin).toString());
-        const dlHtml = dlRes.buffer.toString("utf8");
-        let fid = dlHtml.match(/\/file\/(\d+)/);
-        if (fid) {
-          moviesdaLiveCache.set(inputStr, fid[1]);
-          return fid[1];
+        let subMatch = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/i);
+        if (subMatch) {
+          const pRes = await fetchBuffer(new URL(subMatch[1], origin).toString());
+          if (pRes && pRes.buffer) {
+            pageHtml = pRes.buffer.toString("utf8");
+            depth++;
+            continue;
+          }
         }
+        break;
       }
     } catch (e) {}
   }
@@ -1467,7 +1481,14 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
   const slugBase = clean.replace(/\s+/g, "-");
   const yearsToTry = Array.from(new Set([targetYear, "2026", "2025", "2024", "2023"].filter(Boolean)));
   const slugGuesses = [
-    ...yearsToTry.map(y => `${activeOrigin}/${slugBase}-${y}-tamil-movie/`),
+    ...yearsToTry.flatMap(y => [
+      `${activeOrigin}/${slugBase}-${y}-movie-1/`,
+      `${activeOrigin}/${slugBase}-${y}-movie/`,
+      `${activeOrigin}/${slugBase}-${y}-tamil-movie/`,
+      `${activeOrigin}/${slugBase}-${y}-tamil-dubbed-movie/`
+    ]),
+    `${activeOrigin}/${slugBase}-movie-1/`,
+    `${activeOrigin}/${slugBase}-movie/`,
     `${activeOrigin}/${slugBase}-tamil-movie/`,
     `${activeOrigin}/${slugBase}-tamil-dubbed-movie/`
   ];
@@ -1609,7 +1630,7 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>⬇ Download 720p / 1080p MP4</span>
         </a>
-        <a href="${(cachedActiveMoviesdaOrigin || 'https://www.moviesda.pet')}/tamil-${year || '2026'}-movies/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
+        <a href="${(cachedActiveMoviesdaOrigin || 'https://moviezda.co')}/tamil-${year || '2026'}-movies/" class="m-link-btn" target="_blank" rel="noopener noreferrer">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
           <span>Moviesda ${year || '2026'} Hub</span>
         </a>

@@ -93,9 +93,13 @@ const MOVIESDA_VERIFIED_MAP = {
   "meiyazhagan": "87066",
   "pushpa 2": "88746",
   "pushpa 2: the rule": "88746",
+  "madha gaja raja": "88685",
+  "madha gaja raja 2025": "88685",
+  "madhagajaraja": "88685",
 };
 
 const MOVIESDA_TMDB_MAP = {
+  280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
   1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
   954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
@@ -164,7 +168,7 @@ function resolveMoviesdaFileId(title, fallback = null, tmdbId = null) {
 }
 
 function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFileId = null) {
-  const fileId = customFileId || getVerifiedMoviesdaFileId(title, tmId) || (String(tmId).length === 6 ? String(tmId) : null);
+  const fileId = customFileId || getVerifiedMoviesdaFileId(title, tmId);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const embedUrl = fileId ? `https://play.onestream.today/stream/page/${fileId}` : "";
 
@@ -173,7 +177,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>${safeTitle} - Moviesda 2026 Tamil HD</title>
+  <title>${safeTitle} - Moviesda ${year || ''} Tamil HD</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #fff; }
@@ -234,7 +238,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
   <div class="m-frame-box" id="frameBox">
     <div id="mLoader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;">
       <div style="width:42px;height:42px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
-      <div id="mLoaderText" style="margin-top:14px;font-size:13px;color:#22c55e;font-weight:700;letter-spacing:0.3px;">Connecting to Moviesda 2026 HD Stream...</div>
+      <div id="mLoaderText" style="margin-top:14px;font-size:13px;color:#22c55e;font-weight:700;letter-spacing:0.3px;">Connecting to Moviesda ${year ? year + ' ' : ''}HD Stream...</div>
       <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     </div>
     <div class="top-corner-bar">
@@ -278,6 +282,29 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       if (!nv || atmosCtx) return;
       var AudioCtx = window.AudioContext || window.webkitAudioContext;
       if (!AudioCtx) return;
+
+      // Check cross-origin stream status:
+      // When a video element loads a stream from a CDN without Access-Control-Allow-Origin,
+      // createMediaElementSource forces silence (all zeros) due to browser CORS security
+      // and disconnects the native hardware audio.
+      // In that case, we keep native hardware audio un-hijacked so sound plays directly to speakers/projector!
+      var isCrossOrigin = false;
+      try {
+        if (nv.src) {
+          var u = new URL(nv.src, window.location.href);
+          if (u.origin !== window.location.origin) {
+            isCrossOrigin = true;
+          }
+        }
+      } catch (e) {
+        isCrossOrigin = true;
+      }
+
+      if (isCrossOrigin) {
+        var dt = document.getElementById("srcdocDolbyText");
+        if (dt) dt.textContent = "Dolby Atmos: Direct 5.1 HD";
+        return;
+      }
 
       try {
         atmosCtx = new AudioCtx({ latencyHint: "playback" });
@@ -327,6 +354,10 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         atmosCompressor.connect(atmosCtx.destination);
 
         var resumeCtx = function() {
+          if (nv) {
+            nv.muted = false;
+            if (nv.volume < 0.1) nv.volume = 1.0;
+          }
           if (atmosCtx && (atmosCtx.state === "suspended" || atmosCtx.state === "interrupted")) {
             atmosCtx.resume().catch(function() {});
           }
@@ -334,6 +365,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         nv.addEventListener("play", resumeCtx);
         nv.addEventListener("playing", resumeCtx);
         window.addEventListener("click", resumeCtx);
+        window.addEventListener("touchstart", resumeCtx);
         window.addEventListener("keydown", resumeCtx);
       } catch (err) {
         console.warn("[MoviesdaAtmos] setup note:", err);
@@ -552,8 +584,8 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
         handleFileId(initialFileId);
       } else {
         var lt = document.getElementById("mLoaderText");
-        if (lt) lt.textContent = "Resolving latest 2026 Tamil release...";
-        fetch(apiPfx + "/api/moviesda_resolve?title=" + encodeURIComponent("${safeTitle}") + "&tmdb_id=${tmId}")
+        if (lt) lt.textContent = "Resolving latest " + ("${year || 'Tamil'}") + " release...";
+        fetch(apiPfx + "/api/moviesda_resolve?title=" + encodeURIComponent("${safeTitle}") + "&tmdb_id=${tmId}&year=" + encodeURIComponent("${year || ''}"))
           .then(function(r) { return r.json(); })
           .then(function(d) {
             if (d && (d.fileId || d.file_id)) {
@@ -1483,7 +1515,7 @@ class MovieshubPlayer {
           badge: "Moviesda Tamil HD",
           url: (movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
             ? `https://play.onestream.today/stream/page/${movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
-            : `https://moviezda.me/tamil-2026-movies/`
+            : `https://moviezda.co/tamil-${movie?.year || 2026}-movies/`
         }
       ];
 
@@ -1642,7 +1674,7 @@ class MovieshubPlayer {
             }
           };
 
-          const mFileId = movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle) || (String(resolvedTmdbId).length === 6 ? String(resolvedTmdbId) : null);
+          const mFileId = movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId);
 
           if (srv.id === "s9") {
             curIframe.removeAttribute("src");

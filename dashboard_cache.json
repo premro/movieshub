@@ -1695,7 +1695,8 @@
       ],
       "qualities": [
         "4K",
-        "1080p"
+        "1080p",
+        "Moviesda HD"
       ],
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
@@ -1706,7 +1707,8 @@
       "overview": "Raja, a witty and fearless young man, becomes entangled in a conflict with a corrupt industrialist while trying to protect his family, friends and the woman he loves.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "moviesdaFileId": "88685"
     },
     {
       "id": "tmdb-1357713",
@@ -5601,7 +5603,8 @@
         ],
         "qualities": [
           "4K",
-          "1080p"
+          "1080p",
+          "Moviesda HD"
         ],
         "platform": "Direct",
         "platformBadge": "MOVIESHUB",
@@ -5612,7 +5615,8 @@
         "overview": "Raja, a witty and fearless young man, becomes entangled in a conflict with a corrupt industrialist while trying to protect his family, friends and the woman he loves.",
         "cast": [],
         "director": "Cinematic Director",
-        "isTrending": false
+        "isTrending": false,
+        "moviesdaFileId": "88685"
       },
       {
         "id": "tmdb-1357713",
@@ -13379,7 +13383,8 @@
       ],
       "qualities": [
         "4K",
-        "1080p"
+        "1080p",
+        "Moviesda HD"
       ],
       "platform": "Direct",
       "platformBadge": "MOVIESHUB",
@@ -13390,7 +13395,8 @@
       "overview": "Raja, a witty and fearless young man, becomes entangled in a conflict with a corrupt industrialist while trying to protect his family, friends and the woman he loves.",
       "cast": [],
       "director": "Cinematic Director",
-      "isTrending": false
+      "isTrending": false,
+      "moviesdaFileId": "88685"
     },
     {
       "id": "tmdb-1357713",

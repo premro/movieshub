@@ -396,6 +396,18 @@ assert(updatedPlayer.includes('"jailer 2": "103358"'), "Jailer 2 verified in pla
 assert(updatedPlayer.includes('"mookuthi amman 2": "103371"'), "Mookuthi Amman 2 verified in player MOVIESDA_VERIFIED_MAP");
 assert(updatedPlayer.includes('"yezhu kadal yezhu malai": "103376"'), "Yezhu Kadal Yezhu Malai verified in player MOVIESDA_VERIFIED_MAP");
 
+// 21. Testing Madha Gaja Raja (2025) & Moviesda Audio Passthrough
+console.log("\n21. Testing Madha Gaja Raja (2025) & Moviesda Audio Passthrough...");
+assert(updatedDashCache.tamil_2025.some(m => m.tmdbId === 280951 && m.moviesdaFileId === "88685"), "Madha Gaja Raja (88685) verified in dashboard cache tamil_2025");
+assert(updatedPlayer.includes('280951: "88685"'), "Madha Gaja Raja TMDB 280951 mapped to 88685 in player MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('280951: "88685"'), "Madha Gaja Raja TMDB 280951 mapped to 88685 in api MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('"madha gaja raja": "88685"'), "Madha Gaja Raja verified in player MOVIESDA_VERIFIED_MAP");
+assert(updatedApi.includes('"madha gaja raja": "88685"'), "Madha Gaja Raja verified in api MOVIESDA_VERIFIED_MAP");
+assert(updatedPlayer.includes("Connecting to Moviesda ${year ? year + ' ' : ''}HD Stream..."), "Player loader uses dynamic year instead of hardcoded 2026");
+assert(updatedPlayer.includes("isCrossOrigin") && updatedPlayer.includes("Direct 5.1 HD"), "Player preserves native hardware audio on cross-origin CDN streams to prevent silence");
+assert(updatedApi.includes("https://moviezda.co"), "API includes active mirror moviezda.co");
+assert(updatedApi.includes("!htmlSample.includes(\"gotopage.top\")"), "API rejects ad-parked domains like gotopage.top");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
