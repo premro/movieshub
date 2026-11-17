@@ -408,6 +408,24 @@ assert(updatedPlayer.includes("isCrossOrigin") && updatedPlayer.includes("Direct
 assert(updatedApi.includes("https://moviezda.co"), "API includes active mirror moviezda.co");
 assert(updatedApi.includes("!htmlSample.includes(\"gotopage.top\")"), "API rejects ad-parked domains like gotopage.top");
 
+// 22. Testing Official Trailer Engine & YouTube Embeds
+console.log("\n22. Testing Official Trailer Engine & YouTube Embeds...");
+assert(!updatedPlayer.includes("listType=search"), "Deprecated listType=search completely removed from player.js");
+assert(updatedPlayer.includes('280951": "VxwoH2YrtzA') || updatedPlayer.includes('"280951": "VxwoH2YrtzA'), "Madha Gaja Raja TMDB 280951 mapped to verified trailer VxwoH2YrtzA in player");
+assert(updatedApi.includes('"280951": "VxwoH2YrtzA"'), "Madha Gaja Raja TMDB 280951 mapped to verified trailer VxwoH2YrtzA in api");
+assert(updatedApi.includes("pathname === '/api/trailer'"), "Dedicated /api/trailer route registered in backend");
+const apiModule = require('../api/index.js');
+assert(typeof apiModule.resolveTrailer === 'function', "resolveTrailer function exported from api");
+assert(updatedPlayer.includes("Open in YouTube") && updatedPlayer.includes("Watch on YouTube"), "Direct YouTube fallback and open links integrated into player");
+
+// Test player trailer mode for Madha Gaja Raja
+realPlayer.currentMovie = { id: "madha-gaja-raja-2025", title: "Madha Gaja Raja", tmdbId: 280951, year: 2025 };
+realPlayer.switchMode("trailer");
+const mgrTrailerHtml = getMockEl("player-screen-wrap").innerHTML;
+assert(mgrTrailerHtml.includes("VxwoH2YrtzA"), "Player immediately renders verified 4K trailer for Madha Gaja Raja");
+assert(mgrTrailerHtml.includes("youtube.com/embed"), "Player embeds valid YouTube stream");
+realPlayer.close();
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

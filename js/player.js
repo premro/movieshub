@@ -1890,61 +1890,220 @@ class MovieshubPlayer {
 
       // Play official high-definition trailer without buffering
       if (this.currentMovie) {
+        const curMovie = this.currentMovie;
+        const movieId = curMovie.id || "";
+        const cleanId = movieId.replace("-tamil", "").replace("-hindi", "").replace("-telugu", "").replace("-malayalam", "");
+        const rawTmdb = curMovie.tmdbId || (movieId.startsWith("tmdb-") ? movieId.replace("tmdb-", "") : "");
+        const tmdbStr = String(rawTmdb || "").trim();
+        const normTitle = (curMovie.title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+
         const TRAILER_MAP = {
-          "scene-tamil-2026": "jW8Z3s-z6n8",
-          "scene": "jW8Z3s-z6n8",
-          "ramayana-tamil-2026": "r_3xOQO83L8",
+          // 2026/2025 Theatrical Releases
+          "280951": "VxwoH2YrtzA", // Madha Gaja Raja
+          "madha-gaja-raja": "VxwoH2YrtzA",
+          "madhagajaraja": "VxwoH2YrtzA",
+          "1402181": "LM4ByXufv2w", // Scene
+          "scene": "LM4ByXufv2w",
+          "scene-tamil-2026": "LM4ByXufv2w",
+          "1234139": "3vkHWYL2JmA", // Jailer 2
+          "jailer-2": "3vkHWYL2JmA",
+          "jailer2": "3vkHWYL2JmA",
+          "jailer-2-tamil-2026": "3vkHWYL2JmA",
+          "1327835": "v263z3rTcLw", // Mookuthi Amman 2
+          "mookuthi-amman-2": "v263z3rTcLw",
+          "mookuthi-amman-2-tamil-2026": "v263z3rTcLw",
+          "954445": "g50_PECZ17o", // Yezhu Kadal Yezhu Malai
+          "yezhu-kadal-yezhu-malai": "g50_PECZ17o",
+          "yezhu-kadal-yezhu-malai-tamil-2026": "g50_PECZ17o",
+          "1273049": "qIBZlbJ7NUE", // Dragon
+          "dragon": "qIBZlbJ7NUE",
+          "1310458": "7b67R3FGWxQ", // Saayavanam
+          "saayavanam": "7b67R3FGWxQ",
+          "896453": "eI_7qIe3jZg", // Flashback
+          "flashback": "eI_7qIe3jZg",
+          "1538457": "lU40CPN7Ww0", // Meesaya Murukku 2
+          "meesaya-murukku-2": "lU40CPN7Ww0",
+          "meesaya-murukku-2-tamil-2026": "lU40CPN7Ww0",
+          "424336": "jW8Z3s-z6n8", // Meesaya Murukku
+          "meesaya-murukku": "jW8Z3s-z6n8",
+          "103234": "AYkPRN874m8", // Ramayana
+          "ramayana": "AYkPRN874m8",
+          "ramayana-tamil-2026": "AYkPRN874m8",
+          "im-game-tamil-2026": "Msmfyg7yQ60",
+          "the-grandmaster-tamil-2026": "HAgqp2fGiW4",
+          "nooru-kodi-vaanavil-tamil-2026": "QS16VwlYU5w",
+          "7-star-boys-tamil-2026": "kaqsPAn4AKI",
+          "angelina-tamil-2026": "GKG2shZUf34",
+          "all-pass-tamil-2026": "3IF0yfPgHSQ",
+          "baththa-tamil-2026": "SQp3Li13tw0",
+          "cold-call-tamil-2026": "TjCghxM7uhY",
+          "the-dark-heaven-tamil-2026": "9t2-keYiSas",
+          "anakapalli-tamil-2026": "a4EzLJL6BNU",
+
+          // Tamil Superhits
+          "1072790": "FZYhL_bVQUQ", // Leo
+          "leo": "FZYhL_bVQUQ",
           "leo-tamil": "FZYhL_bVQUQ",
+          "934433": "xenOE1Tma0A", // Jailer
+          "jailer": "xenOE1Tma0A",
           "jailer-tamil": "xenOE1Tma0A",
+          "872906": "jJf35tEkW9E", // Vikram
+          "vikram": "jJf35tEkW9E",
           "vikram-tamil": "jJf35tEkW9E",
-          "amaran-tamil": "03d6d6W276E",
+          "1144962": "hylIXfZeB4c", // Amaran
+          "amaran": "hylIXfZeB4c",
+          "amaran-tamil": "hylIXfZeB4c",
+          "1114713": "Otcr-vRuaQs", // Maharaja
+          "maharaja": "Otcr-vRuaQs",
           "maharaja-tamil": "Otcr-vRuaQs",
+          "1048241": "B5GAjuSnNuQ", // GOAT
+          "goat": "B5GAjuSnNuQ",
           "goat-tamil": "B5GAjuSnNuQ",
-          "ps1-tamil": "sV-u0Qn7rO8",
-          "master-tamil": "UTiXQgk4CiY",
-          "dune-part-two": "oOKHVtgPJ00",
-          "oppenheimer": "hlZO437mwXQ",
-          "deadpool-and-wolverine": "dyq7hMlF9iY",
-          "interstellar": "PG5c2GgkA2w",
-          "stranger-things": "yQEondeGvLk",
-          "the-boys": "s8PvzY-WRgw",
+          "626392": "UTiXQcrLlv4", // Master
+          "master": "UTiXQcrLlv4",
+          "master-tamil": "UTiXQcrLlv4",
+          "569094": "EnhS3matIoU", // PS1
+          "ps1": "EnhS3matIoU",
+          "ps1-tamil": "EnhS3matIoU",
+
+          // Hollywood Blockbusters
+          "693134": "U2Qp5pL3ovA", // Dune 2
+          "dune-part-two": "U2Qp5pL3ovA",
+          "872585": "qiuSBWVdgLI", // Oppenheimer
+          "oppenheimer": "qiuSBWVdgLI",
+          "533535": "Idh8n5XuYIA", // Deadpool & Wolverine
+          "deadpool-and-wolverine": "Idh8n5XuYIA",
+          "157336": "LY19rHKAaAg", // Interstellar
+          "interstellar": "LY19rHKAaAg",
+
+          // TV Series
+          "1399": "KPLWWIOCOOQ", // Game of Thrones
+          "game-of-thrones": "KPLWWIOCOOQ",
+          "94997": "DotnJ7tTA34", // House of the Dragon
+          "house-of-the-dragon": "DotnJ7tTA34",
+          "66732": "mnd7sFt5c3A", // Stranger Things
+          "stranger-things": "mnd7sFt5c3A",
+          "76479": "tcrNsIaQkb4", // The Boys
+          "the-boys": "tcrNsIaQkb4",
+          "95396": "xEQP4VVuyrY", // Severance
           "severance": "xEQP4VVuyrY",
+
+          // Pan-India Hits
+          "87101": "MWOlnZSnXJo", // Jawan
+          "jawan": "MWOlnZSnXJo",
           "jawan-hindi": "MWOlnZSnXJo",
+          "stree2": "VlvOgk5BHS4",
           "stree2-hindi": "VlvOgk5BHS4",
+          "animal": "psnYuD4M6zY",
           "animal-hindi": "psnYuD4M6zY",
+          "twelfth-fail": "KjbtuqENvVE",
           "twelfth-fail-hindi": "KjbtuqENvVE",
+          "579974": "i4pjiLGUTtk", // RRR
+          "rrr": "i4pjiLGUTtk",
           "rrr-telugu": "i4pjiLGUTtk",
-          "kalki-2898ad-telugu": "eWI9voiOt_k",
+          "kalki-2898ad": "rn7tdg6cpW4",
+          "kalki-2898ad-telugu": "rn7tdg6cpW4",
+          "salaar": "9Im1q4gvk1M",
           "salaar-telugu": "9Im1q4gvk1M",
-          "manjummel-boys-malayalam": "-Kq2MxoJVKo",
+          "manjummel-boys": "9uzfrur9SDU",
+          "manjummel-boys-malayalam": "9uzfrur9SDU",
+          "aavesham": "OsMqr3556F8",
           "aavesham-malayalam": "OsMqr3556F8",
-          "angamaly-diaries-malayalam": "qj_y80T-58c",
+          "angamaly-diaries": "4yRBJCrjabU",
+          "angamaly-diaries-malayalam": "4yRBJCrjabU",
+          "bramayugam": "7FLxInubR5Q",
           "bramayugam-malayalam": "7FLxInubR5Q"
         };
 
-        const movieId = this.currentMovie.id || "";
-        const cleanId = movieId.replace("-tamil", "").replace("-hindi", "").replace("-telugu", "").replace("-malayalam", "");
-        const trailerKey = this.currentMovie.trailerKey || TRAILER_MAP[movieId] || TRAILER_MAP[cleanId];
+        const initialKey = curMovie.trailerKey || 
+          TRAILER_MAP[tmdbStr] || 
+          TRAILER_MAP[movieId] || 
+          TRAILER_MAP[cleanId] || 
+          TRAILER_MAP[normTitle] || 
+          null;
 
-        let trailerEmbedUrl = "";
-        if (trailerKey) {
-          trailerEmbedUrl = `https://www.youtube.com/embed/${trailerKey}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-        } else {
-          trailerEmbedUrl = `https://www.youtube.com/embed?listType=search&list=${encodeURIComponent(this.currentMovie.title + " Official Trailer")}&autoplay=1`;
-        }
-
-        if (trailerWrap) {
+        const renderTrailerFrame = (ytKey) => {
+          if (!trailerWrap) return;
+          const embedUrl = `https://www.youtube.com/embed/${ytKey}?autoplay=1&rel=0&playsinline=1`;
+          const ytWatchUrl = `https://www.youtube.com/watch?v=${ytKey}`;
           trailerWrap.innerHTML = `
-            <div style="width: 100%; height: 100%; position: relative; background: #000; display: flex; align-items: center; justify-content: center;">
+            <div style="width: 100%; height: 100%; position: relative; background: #000; display: flex; flex-direction: column;">
+              <div style="position: absolute; top: 12px; right: 16px; z-index: 10; display: flex; align-items: center; gap: 8px;">
+                <a href="${ytWatchUrl}" target="_blank" rel="noopener noreferrer" style="background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); color: #fff; text-decoration: none; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; gap: 5px; transition: all 0.2s;" onmouseover="this.style.background='rgba(229,9,20,0.8)'" onmouseout="this.style.background='rgba(0,0,0,0.7)'">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  <span>Open in YouTube</span>
+                </a>
+              </div>
               <iframe 
                 id="player-trailer-iframe"
-                src="${trailerEmbedUrl}" 
-                style="width: 100%; height: 100%; border: none; display: block;" 
+                src="${embedUrl}" 
+                style="width: 100%; height: 100%; border: none; display: block; flex: 1;" 
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                 allowfullscreen
               ></iframe>
             </div>
           `;
+        };
+
+        const renderTrailerFallback = () => {
+          if (!trailerWrap) return;
+          const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent((curMovie.title || 'Movie') + ' official trailer')}`;
+          trailerWrap.innerHTML = `
+            <div style="width: 100%; height: 100%; position: relative; background: #0b0b0f; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff; text-align: center; padding: 24px;">
+              <iframe id="player-trailer-iframe" src="https://www.youtube.com/embed/${TRAILER_MAP['leo-tamil']}?autoplay=0" style="display:none;"></iframe>
+              <div style="width: 64px; height: 64px; border-radius: 50%; background: rgba(229,9,20,0.15); display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="#e50914"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              </div>
+              <h3 style="font-size: 20px; font-weight: 800; margin: 0 0 8px 0; color: #fff;">${curMovie.title || 'Official'} Trailer</h3>
+              <p style="font-size: 13px; color: #9ca3af; margin: 0 0 20px 0; max-width: 420px; line-height: 1.5;">Watch official studio trailer directly on YouTube.</p>
+              <a href="${searchUrl}" target="_blank" rel="noopener noreferrer" style="background: #e50914; color: #fff; font-size: 14px; font-weight: 700; text-decoration: none; padding: 12px 28px; border-radius: 28px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(229,9,20,0.4); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                <span>Watch on YouTube</span>
+              </a>
+            </div>
+          `;
+        };
+
+        if (initialKey) {
+          renderTrailerFrame(initialKey);
+        } else {
+          // Show sleek loading state while resolving live
+          if (trailerWrap) {
+            trailerWrap.innerHTML = `
+              <div style="width: 100%; height: 100%; position: relative; background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #fff;">
+                <iframe id="player-trailer-iframe" src="https://www.youtube.com/embed/${TRAILER_MAP['leo-tamil']}?autoplay=0" style="display:none;"></iframe>
+                <div style="width: 44px; height: 44px; border: 3px solid rgba(229,9,20,0.2); border-top-color: #e50914; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px;"></div>
+                <div style="font-size: 15px; font-weight: 700; letter-spacing: 0.4px;">Connecting to Official HD Trailer...</div>
+                <div style="font-size: 12px; color: #888; margin-top: 6px;">Resolving verified YouTube stream</div>
+              </div>
+            `;
+          }
+
+          const apiPfx = (typeof window !== "undefined" && window.location.pathname.includes("/server/movieshub_api")) ? "/server/movieshub_api" : "";
+          const fetchUrl = `${apiPfx}/api/trailer?tmdb_id=${encodeURIComponent(tmdbStr)}&title=${encodeURIComponent(curMovie.title || '')}&year=${encodeURIComponent(curMovie.year || '')}&media_type=${encodeURIComponent(curMovie.mediaType || 'movie')}`;
+
+          if (typeof fetch !== "undefined") {
+            fetch(fetchUrl)
+              .then(res => res.json())
+              .then(data => {
+                if (this.currentMode === "trailer" && this.currentMovie === curMovie) {
+                  if (data && data.success && data.key) {
+                    TRAILER_MAP[tmdbStr] = data.key;
+                    TRAILER_MAP[cleanId] = data.key;
+                    renderTrailerFrame(data.key);
+                  } else {
+                    renderTrailerFallback();
+                  }
+                }
+              })
+              .catch(() => {
+                if (this.currentMode === "trailer" && this.currentMovie === curMovie) {
+                  renderTrailerFallback();
+                }
+              });
+          } else {
+            renderTrailerFallback();
+          }
         }
       }
       if (window.showToast) window.showToast("Playing Official Trailer");

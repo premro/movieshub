@@ -1689,6 +1689,197 @@ function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
 </html>`;
 }
 
+// Verified working YouTube Trailer IDs for theatrical hits and catalog movies
+const VERIFIED_TRAILERS = {
+  // 2026/2025 Theatrical Releases
+  "280951": "VxwoH2YrtzA", // Madha Gaja Raja
+  "madha-gaja-raja": "VxwoH2YrtzA",
+  "madhagajaraja": "VxwoH2YrtzA",
+  "1402181": "LM4ByXufv2w", // Scene
+  "scene": "LM4ByXufv2w",
+  "scene-tamil-2026": "LM4ByXufv2w",
+  "1234139": "3vkHWYL2JmA", // Jailer 2
+  "jailer-2": "3vkHWYL2JmA",
+  "jailer2": "3vkHWYL2JmA",
+  "jailer-2-tamil-2026": "3vkHWYL2JmA",
+  "1327835": "v263z3rTcLw", // Mookuthi Amman 2
+  "mookuthi-amman-2": "v263z3rTcLw",
+  "mookuthi-amman-2-tamil-2026": "v263z3rTcLw",
+  "954445": "g50_PECZ17o", // Yezhu Kadal Yezhu Malai
+  "yezhu-kadal-yezhu-malai": "g50_PECZ17o",
+  "yezhu-kadal-yezhu-malai-tamil-2026": "g50_PECZ17o",
+  "1273049": "qIBZlbJ7NUE", // Dragon
+  "dragon": "qIBZlbJ7NUE",
+  "1310458": "7b67R3FGWxQ", // Saayavanam
+  "saayavanam": "7b67R3FGWxQ",
+  "896453": "eI_7qIe3jZg", // Flashback
+  "flashback": "eI_7qIe3jZg",
+  "1538457": "lU40CPN7Ww0", // Meesaya Murukku 2
+  "meesaya-murukku-2": "lU40CPN7Ww0",
+  "meesaya-murukku-2-tamil-2026": "lU40CPN7Ww0",
+  "424336": "jW8Z3s-z6n8", // Meesaya Murukku
+  "meesaya-murukku": "jW8Z3s-z6n8",
+  "103234": "AYkPRN874m8", // Ramayana
+  "ramayana": "AYkPRN874m8",
+  "ramayana-tamil-2026": "AYkPRN874m8",
+  "im-game-tamil-2026": "Msmfyg7yQ60",
+  "the-grandmaster-tamil-2026": "HAgqp2fGiW4",
+  "nooru-kodi-vaanavil-tamil-2026": "QS16VwlYU5w",
+  "7-star-boys-tamil-2026": "kaqsPAn4AKI",
+  "angelina-tamil-2026": "GKG2shZUf34",
+  "all-pass-tamil-2026": "3IF0yfPgHSQ",
+  "baththa-tamil-2026": "SQp3Li13tw0",
+  "cold-call-tamil-2026": "TjCghxM7uhY",
+  "the-dark-heaven-tamil-2026": "9t2-keYiSas",
+  "anakapalli-tamil-2026": "a4EzLJL6BNU",
+
+  // Tamil Superhits
+  "1072790": "FZYhL_bVQUQ", // Leo
+  "leo": "FZYhL_bVQUQ",
+  "leo-tamil": "FZYhL_bVQUQ",
+  "934433": "xenOE1Tma0A", // Jailer
+  "jailer": "xenOE1Tma0A",
+  "jailer-tamil": "xenOE1Tma0A",
+  "872906": "jJf35tEkW9E", // Vikram
+  "vikram": "jJf35tEkW9E",
+  "vikram-tamil": "jJf35tEkW9E",
+  "1144962": "hylIXfZeB4c", // Amaran
+  "amaran": "hylIXfZeB4c",
+  "amaran-tamil": "hylIXfZeB4c",
+  "1114713": "Otcr-vRuaQs", // Maharaja
+  "maharaja": "Otcr-vRuaQs",
+  "maharaja-tamil": "Otcr-vRuaQs",
+  "1048241": "B5GAjuSnNuQ", // GOAT
+  "goat": "B5GAjuSnNuQ",
+  "goat-tamil": "B5GAjuSnNuQ",
+  "626392": "UTiXQcrLlv4", // Master
+  "master": "UTiXQcrLlv4",
+  "master-tamil": "UTiXQcrLlv4",
+  "569094": "EnhS3matIoU", // PS1
+  "ps1": "EnhS3matIoU",
+  "ps1-tamil": "EnhS3matIoU",
+
+  // Hollywood Blockbusters
+  "693134": "U2Qp5pL3ovA", // Dune 2
+  "dune-part-two": "U2Qp5pL3ovA",
+  "872585": "qiuSBWVdgLI", // Oppenheimer
+  "oppenheimer": "qiuSBWVdgLI",
+  "533535": "Idh8n5XuYIA", // Deadpool & Wolverine
+  "deadpool-and-wolverine": "Idh8n5XuYIA",
+  "157336": "LY19rHKAaAg", // Interstellar
+  "interstellar": "LY19rHKAaAg",
+
+  // TV Series
+  "1399": "KPLWWIOCOOQ", // Game of Thrones
+  "game-of-thrones": "KPLWWIOCOOQ",
+  "94997": "DotnJ7tTA34", // House of the Dragon
+  "house-of-the-dragon": "DotnJ7tTA34",
+  "66732": "mnd7sFt5c3A", // Stranger Things
+  "stranger-things": "mnd7sFt5c3A",
+  "76479": "tcrNsIaQkb4", // The Boys
+  "the-boys": "tcrNsIaQkb4",
+  "95396": "xEQP4VVuyrY", // Severance
+  "severance": "xEQP4VVuyrY",
+
+  // Pan-India Hits
+  "87101": "MWOlnZSnXJo", // Jawan
+  "jawan": "MWOlnZSnXJo",
+  "jawan-hindi": "MWOlnZSnXJo",
+  "stree2": "VlvOgk5BHS4",
+  "stree2-hindi": "VlvOgk5BHS4",
+  "animal": "psnYuD4M6zY",
+  "animal-hindi": "psnYuD4M6zY",
+  "twelfth-fail": "KjbtuqENvVE",
+  "twelfth-fail-hindi": "KjbtuqENvVE",
+  "579974": "i4pjiLGUTtk", // RRR
+  "rrr": "i4pjiLGUTtk",
+  "rrr-telugu": "i4pjiLGUTtk",
+  "kalki-2898ad": "rn7tdg6cpW4",
+  "kalki-2898ad-telugu": "rn7tdg6cpW4",
+  "salaar": "9Im1q4gvk1M",
+  "salaar-telugu": "9Im1q4gvk1M",
+  "manjummel-boys": "9uzfrur9SDU",
+  "manjummel-boys-malayalam": "9uzfrur9SDU",
+  "aavesham": "OsMqr3556F8",
+  "aavesham-malayalam": "OsMqr3556F8",
+  "angamaly-diaries": "4yRBJCrjabU",
+  "angamaly-diaries-malayalam": "4yRBJCrjabU",
+  "bramayugam": "7FLxInubR5Q",
+  "bramayugam-malayalam": "7FLxInubR5Q"
+};
+
+const TRAILER_CACHE = new Map();
+
+async function isYouTubeVideoValid(key) {
+  if (!key || typeof key !== 'string' || key.length < 5) return false;
+  try {
+    const res = await fetchBuffer(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${encodeURIComponent(key)}&format=json`, { timeout: 3000 });
+    return res && res.statusCode === 200;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function resolveTrailer(tmdbId, title, year, mediaType = 'movie') {
+  const normTitle = (title || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normId = String(tmdbId || '').replace(/[^0-9]/g, '');
+  const cacheKey = normId || normTitle;
+
+  if (cacheKey && TRAILER_CACHE.has(cacheKey)) {
+    return TRAILER_CACHE.get(cacheKey);
+  }
+
+  // 1. Check verified list
+  if (normId && VERIFIED_TRAILERS[normId]) {
+    const key = VERIFIED_TRAILERS[normId];
+    const res = { success: true, key, embed_url: `https://www.youtube.com/embed/${key}?autoplay=1&rel=0&playsinline=1`, source: 'verified_id' };
+    TRAILER_CACHE.set(cacheKey, res);
+    return res;
+  }
+  if (normTitle && VERIFIED_TRAILERS[normTitle]) {
+    const key = VERIFIED_TRAILERS[normTitle];
+    const res = { success: true, key, embed_url: `https://www.youtube.com/embed/${key}?autoplay=1&rel=0&playsinline=1`, source: 'verified_title' };
+    TRAILER_CACHE.set(cacheKey, res);
+    return res;
+  }
+
+  // 2. Query TMDB API
+  if (normId) {
+    const type = mediaType === 'tv' ? 'tv' : 'movie';
+    const data = await fetchTmdbApi(`/${type}/${normId}/videos`);
+    if (data && data.results && data.results.length > 0) {
+      const yt = data.results.filter(v => v.site === 'YouTube');
+      const candidate = yt.find(v => v.type === 'Trailer') || yt.find(v => v.type === 'Teaser') || yt[0];
+      if (candidate && await isYouTubeVideoValid(candidate.key)) {
+        const res = { success: true, key: candidate.key, name: candidate.name, embed_url: `https://www.youtube.com/embed/${candidate.key}?autoplay=1&rel=0&playsinline=1`, source: 'tmdb' };
+        TRAILER_CACHE.set(cacheKey, res);
+        return res;
+      }
+    }
+  }
+
+  // 3. YouTube Search Scraper fallback
+  if (title) {
+    try {
+      const q = `${title} ${year || ''} official trailer`;
+      const searchRes = await fetchBuffer(`https://www.youtube.com/results?search_query=${encodeURIComponent(q)}`, { timeout: 4000 });
+      if (searchRes && searchRes.buffer) {
+        const html = searchRes.buffer.toString('utf8');
+        const matches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
+        for (const m of matches.slice(0, 5)) {
+          if (await isYouTubeVideoValid(m[1])) {
+            const res = { success: true, key: m[1], embed_url: `https://www.youtube.com/embed/${m[1]}?autoplay=1&rel=0&playsinline=1`, source: 'youtube_search' };
+            TRAILER_CACHE.set(cacheKey, res);
+            return res;
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  return { success: false, error: 'Trailer not found' };
+}
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -1758,6 +1949,22 @@ module.exports = async (req, res) => {
     const results = q ? await searchMovies(q, lang) : [];
     res.writeHead(200, { 'Content-Type': 'application/json' });
     return res.end(JSON.stringify({ query: q, results }));
+  }
+
+  // 3b. Official Trailer Resolver (Dynamic TMDB + YouTube Verified Streaming)
+  if (pathname === '/api/trailer') {
+    const tmdbId = u.searchParams.get('tmdb_id') || u.searchParams.get('id') || '';
+    const title = (u.searchParams.get('title') || '').trim();
+    const year = u.searchParams.get('year') || '';
+    const mediaType = u.searchParams.get('media_type') || 'movie';
+
+    const trailerData = await resolveTrailer(tmdbId, title, year, mediaType);
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(JSON.stringify(trailerData));
   }
 
   // 4. Latest & Movies by Language (Replicated from Netmirror)
@@ -2160,3 +2367,5 @@ module.exports.syncDashboardCatalog = syncDashboardCatalog;
 module.exports.getActiveMoviesdaDomain = getActiveMoviesdaDomain;
 module.exports.getMoviesdaFolders = getMoviesdaFolders;
 module.exports.resolveMoviesdaLive = resolveMoviesdaLive;
+module.exports.resolveTrailer = resolveTrailer;
+module.exports.VERIFIED_TRAILERS = VERIFIED_TRAILERS;
