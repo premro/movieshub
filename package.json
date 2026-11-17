@@ -5,5 +5,8 @@
   "main": "api/index.js",
   "scripts": {
     "start": "node functions/movieshub_api/index.js"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }
