@@ -1,0 +1,11 @@
+# Large local video files (Unused in production, streaming uses CDN Servers 1-9)
+assets/videos/
+assets/stream.mp4
+assets/sample.mp4
+
+# Test suites & developer tooling
+tests/
+tools/
+server.log
+server.py
+*.tmp
