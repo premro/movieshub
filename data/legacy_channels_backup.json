@@ -1,0 +1,547 @@
+[
+  {
+    "id": "ftv-paris-hd",
+    "name": "Fashion TV Paris HD (FTV)",
+    "category": "Fashion",
+    "country": "FR",
+    "resolution": "1080p",
+    "badge": "FTV Official",
+    "logo": "👗",
+    "streamUrl": "https://edge-fast3.evrideo.tv/bfdbb576-83f7-11f0-9f89-0200170e3e04_1000028043_HLS/manifest.m3u8",
+    "backupUrl": "https://pubgfc.teleosmedia.com/linear/globalfashionchannel/globalfashionchannel/playlist.m3u8"
+  },
+  {
+    "id": "ftv-global-runway",
+    "name": "FTV Global Fashion Channel",
+    "category": "Fashion",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Runway 24/7",
+    "logo": "✨",
+    "streamUrl": "https://pubgfc.teleosmedia.com/linear/globalfashionchannel/globalfashionchannel/playlist.m3u8",
+    "backupUrl": "https://edge-fast3.evrideo.tv/bfdbb576-83f7-11f0-9f89-0200170e3e04_1000028043_HLS/manifest.m3u8"
+  },
+  {
+    "id": "ktv-tamil-movies",
+    "name": "KTV HD - Tamil Movies 24/7",
+    "category": "Movies",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "KTV Movies",
+    "logo": "🍿",
+    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
+    "backupUrl": "https://d2px1d6ssc60fw.cloudfront.net/SunTV/SunTV-HDR10-IN-index.m3u8"
+  },
+  {
+    "id": "star-sports-1-hd",
+    "name": "Star Sports 1 HD",
+    "category": "Sports",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "Cricket Live",
+    "logo": "🏏",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "backupUrl": "https://fta.ektv.in/live/697/master.m3u8"
+  },
+  {
+    "id": "star-sports-tamil",
+    "name": "Star Sports 1 Tamil",
+    "category": "Sports",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Tamil Sports",
+    "logo": "🏆",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "backupUrl": "https://fta.ektv.in/live/697/master.m3u8"
+  },
+  {
+    "id": "sony-sports-ten-1-hd",
+    "name": "Sony Sports Ten 1 HD",
+    "category": "Sports",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "Sony LIV / Ten 1",
+    "logo": "⚽",
+    "streamUrl": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+    "backupUrl": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+  },
+  {
+    "id": "sony-liv-sports-live",
+    "name": "Sony LIV Sports Live",
+    "category": "Sports",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "Sony LIV HD",
+    "logo": "🥊",
+    "streamUrl": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8",
+    "backupUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+  },
+  {
+    "id": "sky-sports-news-hd",
+    "name": "Sky Sports News HD",
+    "category": "Sports",
+    "country": "UK",
+    "resolution": "1080p",
+    "badge": "Sky World Sports",
+    "logo": "🌐",
+    "streamUrl": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8",
+    "backupUrl": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+  },
+  {
+    "id": "bloomberg-originals-hd",
+    "name": "Bloomberg Originals HD",
+    "category": "News",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Global Markets",
+    "logo": "📈",
+    "streamUrl": "https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8",
+    "backupUrl": "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8"
+  },
+  {
+    "id": "cnn-originals-hd",
+    "name": "CNN Originals HD",
+    "category": "News",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "CNN World",
+    "logo": "🌍",
+    "streamUrl": "https://amg01918-cnnus-amg01918c2-vizio-us-9192.playouts.now.amagi.tv/playlist/amg01918-cnnus-cnnoriginals-vizious/playlist.m3u8",
+    "backupUrl": "https://86fdc85a.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfQmxvb21iZXJnT3JpZ2luYWxzX0hMUw/playlist.m3u8"
+  },
+  {
+    "id": "euronews-english-hd",
+    "name": "Euronews English HD",
+    "category": "News",
+    "country": "FR",
+    "resolution": "1080p",
+    "badge": "Europe 24/7",
+    "logo": "🇪🇺",
+    "streamUrl": "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8",
+    "backupUrl": "https://488f4ce4.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfVGFsa19ITFM/playlist.m3u8"
+  },
+  {
+    "id": "nasa-tv-ultra",
+    "name": "NASA TV HD - Live Space",
+    "category": "Entertainment",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "NASA Space HD",
+    "logo": "🚀",
+    "streamUrl": "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8",
+    "backupUrl": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+  },
+  {
+    "id": "talk-tv-uk-hd",
+    "name": "TalkTV Live HD",
+    "category": "News",
+    "country": "UK",
+    "resolution": "1080p",
+    "badge": "UK Debate & News",
+    "logo": "🇬🇧",
+    "streamUrl": "https://488f4ce4.wurl.com/master/f36d25e7e52f1ba8d7e56eb859c636563214f541/TEctZ2JfVGFsa19ITFM/playlist.m3u8",
+    "backupUrl": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
+  },
+  {
+    "id": "sports-18-1-hd",
+    "name": "Sports 18 1 HD",
+    "category": "Sports",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "JioCinema Sports",
+    "logo": "🎯",
+    "streamUrl": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+    "backupUrl": "https://raycom-accdn-firetv.amagi.tv/playlist.m3u8"
+  },
+  {
+    "id": "dd-sports-hd",
+    "name": "DD Sports HD",
+    "category": "Sports",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "India Sports",
+    "logo": "🇮🇳",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "backupUrl": "https://fta.ektv.in/live/697/master.m3u8"
+  },
+  {
+    "id": "sun-tv-hd",
+    "name": "Sun TV HD",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Tamil HD",
+    "logo": "☀️",
+    "streamUrl": "https://d2px1d6ssc60fw.cloudfront.net/SunTV/SunTV-HDR10-IN-index.m3u8"
+  },
+  {
+    "id": "zee-tamil-hd",
+    "name": "Zee Tamil HD",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Tamil HD",
+    "logo": "📺",
+    "streamUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8"
+  },
+  {
+    "id": "star-vijay",
+    "name": "Star Vijay",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "⭐",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8"
+  },
+  {
+    "id": "kalaignar-tv",
+    "name": "Kalaignar TV",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "🎭",
+    "streamUrl": "https://segment.yuppcdn.net/240122/kalaignartv/playlist.m3u8"
+  },
+  {
+    "id": "sirippoli-tv",
+    "name": "Sirippoli TV",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Comedy",
+    "logo": "😂",
+    "streamUrl": "https://segment.yuppcdn.net/240122/siripoli/playlist.m3u8"
+  },
+  {
+    "id": "polimer-tv",
+    "name": "Polimer TV",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "📺",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1241/master.m3u8"
+  },
+  {
+    "id": "polimer-news",
+    "name": "Polimer News",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil 24x7",
+    "logo": "📰",
+    "streamUrl": "https://segment.yuppcdn.net/110322/polimernews/playlist.m3u8"
+  },
+  {
+    "id": "puthiya-thalaimurai",
+    "name": "Puthiya Thalaimurai",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil 24x7",
+    "logo": "🗞️",
+    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlPUTHIYAEXPRESS/index.m3u8"
+  },
+  {
+    "id": "puthiya-thalaimurai-exp",
+    "name": "Puthiya Thalaimurai Express",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Express",
+    "logo": "⚡",
+    "streamUrl": "https://samitaorigin.tangotv.in/PUTHIYAEXPRESS/SAMITAORIGIN/index.m3u8"
+  },
+  {
+    "id": "thanthi-tv",
+    "name": "Thanthi TV",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil 24x7",
+    "logo": "📢",
+    "streamUrl": "https://streams.tangotv.in/THANTHITV/ORIGIN/index.m3u8"
+  },
+  {
+    "id": "thanthi-one",
+    "name": "Thanthi One",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "🎬",
+    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8"
+  },
+  {
+    "id": "news7-tamil",
+    "name": "News 7 Tamil",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil News",
+    "logo": "📡",
+    "streamUrl": "https://segment.yuppcdn.net/240122/news7/playlist.m3u8"
+  },
+  {
+    "id": "news-tamil-24x7",
+    "name": "News Tamil 24x7",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil 24x7",
+    "logo": "📺",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1433/master.m3u8"
+  },
+  {
+    "id": "sathiyam-tv",
+    "name": "Sathiyam TV",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "⚖️",
+    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlSATHIYAMTV/index.m3u8"
+  },
+  {
+    "id": "malai-murasu",
+    "name": "Malai Murasu Seithigal",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil News",
+    "logo": "📰",
+    "streamUrl": "https://streams.tangotv.in/MALAIMURASUSEITHIGAL/ORIGIN/index.m3u8"
+  },
+  {
+    "id": "vendhar-tv",
+    "name": "Vendhar TV",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "👑",
+    "streamUrl": "https://mumt04.tangotv.in/m18aqlK4VENDHARTV/index.m3u8"
+  },
+  {
+    "id": "vasanth-tv",
+    "name": "Vasanth TV",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "🌸",
+    "streamUrl": "https://mumt04.tangotv.in/m18aqlK4VASANTHTV/index.m3u8"
+  },
+  {
+    "id": "dd-tamil-hd",
+    "name": "DD Tamil HD (Podhigai)",
+    "category": "General",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "National Tamil",
+    "logo": "🏛️",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1737/master.m3u8"
+  },
+  {
+    "id": "dd-sports-tamil",
+    "name": "DD Sports Live",
+    "category": "Sports",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Live Sports",
+    "logo": "🏆",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8"
+  },
+  {
+    "id": "chithiram-tv",
+    "name": "Chithiram TV",
+    "category": "Kids",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Kids",
+    "logo": "🎨",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1243/master.m3u8"
+  },
+  {
+    "id": "bhagyam-tamil",
+    "name": "Bhagyam TV Tamil",
+    "category": "Movies",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Tamil Cinema",
+    "logo": "🎬",
+    "streamUrl": "https://ott.bhagyam.net/hls/bhagyamweb/index-1409148900-now.m3u8"
+  },
+  {
+    "id": "tunes6-music",
+    "name": "Tunes 6 Music",
+    "category": "Music",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Hits",
+    "logo": "🎵",
+    "streamUrl": "https://stream.d6-pro.com/Tunes6music/live/video.m3u8"
+  },
+  {
+    "id": "7s-music",
+    "name": "7S Music Tamil",
+    "category": "Music",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Songs",
+    "logo": "🎶",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1257/master.m3u8"
+  },
+  {
+    "id": "peppers-tv",
+    "name": "Peppers TV",
+    "category": "Music",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Music",
+    "logo": "🌶️",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1383/master.m3u8"
+  },
+  {
+    "id": "aaryaa-tamil",
+    "name": "Aaryaa TV Tamil",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "1080p",
+    "badge": "Tamil",
+    "logo": "📺",
+    "streamUrl": "https://stream.ottlive.co.in/aryatvtamil/index.m3u8"
+  },
+  {
+    "id": "mk-six",
+    "name": "MK Six Tamil",
+    "category": "Entertainment",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil",
+    "logo": "⚡",
+    "streamUrl": "https://mumt06.tangotv.in/qYyB8fXVMKSIX/index.m3u8"
+  },
+  {
+    "id": "madhimugam-tv",
+    "name": "Madhimugam TV",
+    "category": "News",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil News",
+    "logo": "🗞️",
+    "streamUrl": "https://mumt01.tangotv.in/O5aw8Zn3MATHIMUGAMTV/index.m3u8"
+  },
+  {
+    "id": "aastha-tamil",
+    "name": "Aastha Tamil",
+    "category": "General",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Devotional",
+    "logo": "🪔",
+    "streamUrl": "https://aasthaott.akamaized.net/110923/smil:aasthatamil.smil/playlist.m3u8"
+  },
+  {
+    "id": "vaanavil-tv",
+    "name": "Vaanavil TV",
+    "category": "Music",
+    "country": "TN",
+    "resolution": "720p",
+    "badge": "Tamil Classic",
+    "logo": "🌈",
+    "streamUrl": "https://6n3yope4d9ok-hls-live.5centscdn.com/vaanavil/TV.stream/playlist.m3u8"
+  },
+  {
+    "id": "cbs-sports-golazo",
+    "name": "CBS Sports Golazo HD",
+    "category": "Sports",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "UEFA & Soccer",
+    "logo": "⚽",
+    "streamUrl": "https://dai.google.com/linear/hls/event/7f3Wv6f7QEKfQna22jHqLQ/master.m3u8"
+  },
+  {
+    "id": "ndtv-24x7",
+    "name": "NDTV 24x7 HD",
+    "category": "News",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "National News",
+    "logo": "🇮🇳",
+    "streamUrl": "https://ndtv24x7elemarchana.akamaized.net/hls/live/2003678/ndtv24x7/master.m3u8"
+  },
+  {
+    "id": "9x-jalwa",
+    "name": "9X Jalwa Bollywood",
+    "category": "Music",
+    "country": "IN",
+    "resolution": "1080p",
+    "badge": "Bollywood Hits",
+    "logo": "🎵",
+    "streamUrl": "https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8"
+  },
+  {
+    "id": "24-news-malayalam",
+    "name": "24 News Malayalam",
+    "category": "News",
+    "country": "IN",
+    "resolution": "576p",
+    "badge": "Malayalam",
+    "logo": "🌴",
+    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlTWENTYFOURNEWS/index.m3u8"
+  },
+  {
+    "id": "redbull-tv",
+    "name": "Red Bull TV Live",
+    "category": "Sports",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Sports Live",
+    "logo": "⚡",
+    "streamUrl": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8"
+  },
+  {
+    "id": "fox-sports-news",
+    "name": "Fox Sports News HD",
+    "category": "Sports",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Fox Sports",
+    "logo": "🥊",
+    "streamUrl": "https://skynewsau-live-premium.akamaized.net/hls/live/2105307/foxsportsnews/live_1080p.m3u8"
+  },
+  {
+    "id": "nasa-tv",
+    "name": "NASA TV HD",
+    "category": "Documentary",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Space HD",
+    "logo": "🚀",
+    "streamUrl": "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8"
+  },
+  {
+    "id": "dw-english",
+    "name": "DW English HD",
+    "category": "News",
+    "country": "DE",
+    "resolution": "1080p",
+    "badge": "Global News",
+    "logo": "🌐",
+    "streamUrl": "https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8"
+  },
+  {
+    "id": "bloomberg-quicktake",
+    "name": "Bloomberg Quicktake",
+    "category": "News",
+    "country": "US",
+    "resolution": "1080p",
+    "badge": "Business",
+    "logo": "📈",
+    "streamUrl": "https://bloomberg.com/media-manifest/streams/us.m3u8"
+  }
+]

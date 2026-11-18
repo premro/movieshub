@@ -474,6 +474,27 @@ assert(liveTvInstance.getAllChannels().some(c => c.id === "test-jio-1"), "getAll
 liveTvInstance.removeCustomChannel("test-jio-1");
 assert(liveTvInstance.customChannels.length === 0, "Custom channel removed successfully");
 
+// 24. Testing Tata Play 600+ Channel Network & Category Separation
+console.log("\n24. Testing Tata Play 600+ Channel Network & Category Separation...");
+assert(fs.existsSync(path.join(__dirname, '../data/legacy_channels_backup.json')), "data/legacy_channels_backup.json exists");
+const legacyBackupData = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/legacy_channels_backup.json'), 'utf8'));
+assert(legacyBackupData.length === 53, "All 53 legacy channels backed up in legacy_channels_backup.json");
+assert(updatedLiveTvText.includes("const LEGACY_CHANNELS_BACKUP ="), "LEGACY_CHANNELS_BACKUP is preserved directly in js/livetv.js");
+
+assert(fs.existsSync(path.join(__dirname, '../data/tataplay_channels.json')), "data/tataplay_channels.json exists");
+const tataPlayData = JSON.parse(fs.readFileSync(path.join(__dirname, '../data/tataplay_channels.json'), 'utf8'));
+assert(tataPlayData.length === 669, "Full 669 Tata Play channels present in data/tataplay_channels.json");
+
+assert(liveTvInstance.getChannelsByCategory("Tamil").length > 0, "Tamil channels separated into dedicated category");
+assert(liveTvInstance.getChannelsByCategory("Telugu").length > 0, "Telugu channels separated into dedicated category");
+assert(liveTvInstance.getChannelsByCategory("Sports").length > 0, "Sports channels separated into dedicated category");
+assert(liveTvInstance.getChannelsByCategory("Hindi").length > 0, "Hindi channels separated into dedicated category");
+assert(liveTvInstance.getChannelsByCategory("Movies").length > 0, "Movies channels separated into dedicated category");
+
+assert(fs.existsSync(path.join(__dirname, '../js/shaka-player.compiled.js')), "Shaka Player DASH & ClearKey engine bundled in js/shaka-player.compiled.js");
+const tpIndexHtml = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+assert(tpIndexHtml.includes("shaka-player.compiled.js"), "Shaka Player loaded in index.html");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
