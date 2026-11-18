@@ -232,7 +232,7 @@ const LEGACY_CHANNELS_BACKUP = [
     "resolution": "720p",
     "badge": "Tamil",
     "logo": "\ud83d\udcfa",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1241/master.m3u8"
+    "streamUrl": "https://mumt04.tangotv.in/m18aqlK4POLIMERTV/index.m3u8"
   },
   {
     "id": "polimer-news",
@@ -559,6 +559,20 @@ const LEGACY_CHANNELS_BACKUP = [
 // Verified Working Live Channels across Tamil, Telugu, Sports, News, Movies
 const INITIAL_TATAPLAY_CHANNELS = [
   {
+    "id": "sun-tv-hd",
+    "name": "Sun TV HD",
+    "category": "Tamil",
+    "genre": "Entertainment",
+    "language": "Tamil",
+    "resolution": "1080p",
+    "badge": "Tata Play • 1080p HD",
+    "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11960-j9lu9vow-v1/imageContent-11960-j9lu9vow-m1.png",
+    "streamUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8",
+    "backupUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8",
+    "isTataPlay": true
+  },
+
+  {
     "id": "star-vijay-hd",
     "name": "Star Vijay HD",
     "category": "Tamil",
@@ -617,9 +631,10 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "genre": "Movies",
     "language": "Tamil",
     "resolution": "1080p",
-    "badge": "Tata Play \u2022 1080p HD",
+    "badge": "Tata Play • 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11400-j88l28s0-v1/imageContent-11400-j88l28s0-m1.png",
-    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8",
+    "streamUrl": "https://bpprod5catchup.akamaized.net/bpk-tv/irdeto_com_Channel_600/output/manifest.mpd",
+    "backupUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Cinema/hls/Zee_Cinema.m3u8",
     "isTataPlay": true
   },
   {
@@ -629,9 +644,10 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "genre": "Sports",
     "language": "Tamil",
     "resolution": "1080p",
-    "badge": "Tata Play \u2022 1080p HD",
+    "badge": "Tata Play • 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11394-j88l1m1c-v1/imageContent-11394-j88l1m1c-m1.png",
-    "streamUrl": "https://r2.amml.in/sony-ten-3-hd/live.m3u8",
+    "streamUrl": "https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8",
+    "backupUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8",
     "isTataPlay": true
   },
   {
@@ -773,9 +789,10 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "genre": "Sports",
     "language": "English",
     "resolution": "1080p",
-    "badge": "Tata Play \u2022 1080p HD",
+    "badge": "Tata Play • 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11390-j88l186o-v1/imageContent-11390-j88l186o-m1.png",
-    "streamUrl": "https://r2.amml.in/sony-ten-3-hd/live.m3u8",
+    "streamUrl": "https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8",
+    "backupUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
     "isTataPlay": true
   },
   {
@@ -1764,7 +1781,16 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
 
     // Fallback stream selector
     const fallbackStream = () => {
-      const fallbackUrl = (channel && channel.backupUrl) || "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8";
+      let fallbackUrl = channel && channel.backupUrl;
+      if (!fallbackUrl) {
+        if (channel && channel.category === "Sports") {
+          fallbackUrl = "https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8";
+        } else if (channel && channel.category === "Tamil") {
+          fallbackUrl = "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8";
+        } else {
+          fallbackUrl = "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Cinema/hls/Zee_Cinema.m3u8";
+        }
+      }
       if (url !== fallbackUrl) {
         console.log("[LiveTV] Switching to reliable fallback stream:", fallbackUrl);
         this.streamVideo(fallbackUrl, videoEl, loaderEl, null);
