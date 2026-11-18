@@ -426,6 +426,54 @@ assert(mgrTrailerHtml.includes("VxwoH2YrtzA"), "Player immediately renders verif
 assert(mgrTrailerHtml.includes("youtube.com/embed"), "Player embeds valid YouTube stream");
 realPlayer.close();
 
+// 23. Testing TS-JioTV & M3U Live Stream Importer & Player Controls
+console.log("\n23. Testing TS-JioTV & M3U Live Stream Importer & Player Controls...");
+const updatedLiveTvText = fs.readFileSync(path.join(__dirname, '../js/livetv.js'), 'utf8');
+const updatedStylesText = fs.readFileSync(path.join(__dirname, '../css/styles.css'), 'utf8');
+
+assert(updatedLiveTvText.includes("livetvImportBtn") && updatedLiveTvText.includes("livetvImportModal"), "TS-JioTV / M3U import modal triggers present");
+assert(updatedLiveTvText.includes("livetvQualitySelect") && updatedLiveTvText.includes("livetvAudioSelect"), "Multi-quality and multi-audio player selectors present");
+assert(updatedLiveTvText.includes("parseM3U") && updatedLiveTvText.includes("addCustomChannel"), "M3U parsing and custom channel management present");
+
+assert(updatedStylesText.includes(".livetv-import-btn") && updatedStylesText.includes(".livetv-modal-card"), "Styles for TS-JioTV M3U importer and modal present");
+assert(updatedStylesText.includes(".livetv-stream-select") && updatedStylesText.includes(".livetv-del-btn"), "Styles for stream quality & audio selects and delete button present");
+
+// Test M3U parser functionality
+const LiveTvClass = new Function(
+  `let window = { localStorage: { getItem: () => null, setItem: () => {} } };
+   let localStorage = window.localStorage;
+   let document = { getElementById: () => null, querySelectorAll: () => [] };
+   ` + updatedLiveTvText + `; return MovieshubLiveTV;`
+)();
+const liveTvInstance = new LiveTvClass();
+
+const sampleM3U = `#EXTM3U
+#EXTINF:-1 tvg-id="101" tvg-logo="https://example.com/star.png" group-title="Sports", Star Sports 1 HD
+http://localhost:8080/live/101.m3u8
+#EXTINF:-1 tvg-id="102" tvg-logo="https://example.com/ktv.png" group-title="Movies", KTV Tamil HD
+http://localhost:8080/live/102.m3u8
+`;
+
+const parsedChannels = liveTvInstance.parseM3U(sampleM3U);
+assert(parsedChannels.length === 2, "parseM3U parses 2 channels from sample M3U");
+assert(parsedChannels[0].name === "Star Sports 1 HD", "parseM3U extracts correct channel name");
+assert(parsedChannels[0].category === "Sports", "parseM3U extracts group-title category");
+assert(parsedChannels[0].streamUrl === "http://localhost:8080/live/101.m3u8", "parseM3U extracts stream URL");
+assert(parsedChannels[0].logo === "https://example.com/star.png", "parseM3U extracts tvg-logo");
+
+// Test add and remove custom channel
+liveTvInstance.addCustomChannel({
+  id: "test-jio-1",
+  name: "My Custom JioTV Channel",
+  streamUrl: "http://localhost:8080/live/test.m3u8",
+  category: "JioTV"
+});
+assert(liveTvInstance.customChannels.length === 1, "Custom channel added to liveTvInstance");
+assert(liveTvInstance.getAllChannels().some(c => c.id === "test-jio-1"), "getAllChannels includes custom channel");
+
+liveTvInstance.removeCustomChannel("test-jio-1");
+assert(liveTvInstance.customChannels.length === 0, "Custom channel removed successfully");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
