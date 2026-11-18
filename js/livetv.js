@@ -559,6 +559,58 @@ const LEGACY_CHANNELS_BACKUP = [
 // Verified Working Live Channels across Tamil, Telugu, Sports, News, Movies
 const INITIAL_TATAPLAY_CHANNELS = [
   {
+    "id": "star-vijay-hd",
+    "name": "Star Vijay HD",
+    "category": "Tamil",
+    "genre": "Entertainment",
+    "language": "Tamil",
+    "resolution": "1080p",
+    "badge": "Tata Play • 1080p HD",
+    "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11400-j88l28s0-v1/imageContent-11400-j88l28s0-m1.png",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8",
+    "backupUrl": "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8",
+    "isTataPlay": true
+  },
+  {
+    "id": "colors-tamil-hd",
+    "name": "Colors Tamil HD",
+    "category": "Tamil",
+    "genre": "Entertainment",
+    "language": "Tamil",
+    "resolution": "1080p",
+    "badge": "Tata Play • 1080p HD",
+    "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11406-j88l2v74-v1/imageContent-11406-j88l2v74-m1.png",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:colorstamilhd11.smil/playlist.m3u8",
+    "backupUrl": "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8",
+    "isTataPlay": true
+  },
+  {
+    "id": "zee-tamil-hd",
+    "name": "Zee Tamil HD",
+    "category": "Tamil",
+    "genre": "Entertainment",
+    "language": "Tamil",
+    "resolution": "1080p",
+    "badge": "Tata Play • 1080p HD",
+    "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11410-j88l32lc-v1/imageContent-11410-j88l32lc-m1.png",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:zeetamil1.smil/playlist.m3u8",
+    "backupUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8",
+    "isTataPlay": true
+  },
+  {
+    "id": "dd-sports-hd",
+    "name": "DD Sports HD (Cricket & National Sports)",
+    "category": "Sports",
+    "genre": "Sports",
+    "language": "Hindi",
+    "resolution": "1080p",
+    "badge": "Tata Play • 1080p HD",
+    "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11390-j88l186o-v1/imageContent-11390-j88l186o-m1.png",
+    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "backupUrl": "https://mumt07.tangotv.in/zHjX9OFlDDSPORTS/index.m3u8",
+    "isTataPlay": true
+  },
+  {
     "id": "ktv-tamil-movies",
     "name": "KTV HD - Tamil Movies 24/7",
     "category": "Tamil",
@@ -567,7 +619,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11400-j88l28s0-v1/imageContent-11400-j88l28s0-m1.png",
-    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
+    "streamUrl": "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8",
     "isTataPlay": true
   },
   {
@@ -579,7 +631,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11394-j88l1m1c-v1/imageContent-11394-j88l1m1c-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "streamUrl": "https://r2.amml.in/sony-ten-3-hd/live.m3u8",
     "isTataPlay": true
   },
   {
@@ -723,7 +775,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11390-j88l186o-v1/imageContent-11390-j88l186o-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "streamUrl": "https://r2.amml.in/sony-ten-3-hd/live.m3u8",
     "isTataPlay": true
   },
   {
@@ -735,7 +787,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11392-j88l1e20-v1/imageContent-11392-j88l1e20-m1.png",
-    "streamUrl": "https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8",
+    "streamUrl": "https://r2.amml.in/sony-ten-3-hd/live.m3u8",
     "isTataPlay": true
   },
   {
@@ -795,7 +847,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11440-j88l5f6w-v1/imageContent-11440-j88l5f6w-m1.png",
-    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/chunklist_b2628000.m3u8",
     "isTataPlay": true
   },
   {
@@ -807,7 +859,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11442-j88l5los-v1/imageContent-11442-j88l5los-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:maamovies.smil/chunklist_b2628000.m3u8",
     "isTataPlay": true
   },
   {
@@ -819,7 +871,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11444-j88l5rac-v1/imageContent-11444-j88l5rac-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1241/master.m3u8",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/chunklist_b2628000.m3u8",
     "isTataPlay": true
   },
   {
@@ -831,7 +883,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11446-j88l5x3k-v1/imageContent-11446-j88l5x3k-m1.png",
-    "streamUrl": "https://streams.tangotv.in/THANTHITV/ORIGIN/index.m3u8",
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:maamovies.smil/chunklist_b2628000.m3u8",
     "isTataPlay": true
   },
   {
@@ -855,7 +907,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11452-j88l6ef4-v1/imageContent-11452-j88l6ef4-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1161/master.m3u8",
+    "streamUrl": "https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8",
     "isTataPlay": true
   },
   {
@@ -867,7 +919,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11454-j88l6k40-v1/imageContent-11454-j88l6k40-m1.png",
-    "streamUrl": "https://cdn.pishow.tv/ott/live/1241/master.m3u8",
+    "streamUrl": "https://mumt03.tangotv.in/Dsly5z3HGOLDMINESBOLLYWOOD/index.m3u8",
     "isTataPlay": true
   },
   {
@@ -879,7 +931,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play \u2022 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11456-j88l6ptg-v1/imageContent-11456-j88l6ptg-m1.png",
-    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
+    "streamUrl": "https://mumt06.tangotv.in/qYyB8fXVB4UMOVIES/index.m3u8",
     "isTataPlay": true
   },
   {
@@ -1138,7 +1190,7 @@ class MovieshubLiveTV {
 
           <!-- Screen / Video -->
           <div class="livetv-screen">
-            <button class="livetv-player-back-float" id="livetvFloatingBackBtn" title="Back to Movieshub">
+            <button class="livetv-player-back-float" id="livetvFloatingBackBtn" style="display:none;" title="Back to Movieshub">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
               <span>Back to Movies</span>
             </button>
@@ -1670,15 +1722,35 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
 
     if (loaderEl) {
       loaderEl.style.display = "flex";
+      loaderEl.style.pointerEvents = "none";
       loaderEl.innerHTML = '<div class="spinner"></div><span>Connecting to live feed...</span>';
     }
 
-    const onPlaying = () => {
+    const hideLoader = () => {
       if (loaderEl) loaderEl.style.display = "none";
     };
 
-    videoEl.removeEventListener("playing", onPlaying);
-    videoEl.addEventListener("playing", onPlaying);
+    videoEl.removeEventListener("playing", hideLoader);
+    videoEl.removeEventListener("canplay", hideLoader);
+    videoEl.removeEventListener("loadeddata", hideLoader);
+    videoEl.addEventListener("playing", hideLoader);
+    videoEl.addEventListener("canplay", hideLoader);
+    videoEl.addEventListener("loadeddata", hideLoader);
+    videoEl.addEventListener("timeupdate", () => {
+      if (videoEl.currentTime > 0) hideLoader();
+    });
+
+    if (this.loaderTimeout) clearTimeout(this.loaderTimeout);
+    this.loaderTimeout = setTimeout(() => {
+      hideLoader();
+    }, 2000);
+
+    videoEl.onclick = () => {
+      if (videoEl.paused) {
+        videoEl.play().catch(() => {});
+      }
+      hideLoader();
+    };
 
     const tryAutoplay = () => {
       const p = videoEl.play();
@@ -1692,7 +1764,7 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
 
     // Fallback stream selector
     const fallbackStream = () => {
-      const fallbackUrl = (channel && channel.backupUrl) || "https://fta.ektv.in/live/697/master.m3u8";
+      const fallbackUrl = (channel && channel.backupUrl) || "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8";
       if (url !== fallbackUrl) {
         console.log("[LiveTV] Switching to reliable fallback stream:", fallbackUrl);
         this.streamVideo(fallbackUrl, videoEl, loaderEl, null);
