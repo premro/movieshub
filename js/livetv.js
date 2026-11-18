@@ -590,22 +590,37 @@ class MovieshubLiveTV {
     return [...this.customChannels, ...this.channels];
   }
 
+  isJioChannel(c) {
+    if (!c) return false;
+    return Boolean(
+      c.isCustom ||
+      c.category === "JioTV" ||
+      c.country === "TN" ||
+      c.country === "IN" ||
+      (c.badge && c.badge.toLowerCase().includes("jio"))
+    );
+  }
+
+  getJioChannels() {
+    return this.getAllChannels().filter(c => this.isJioChannel(c));
+  }
+
   getFilteredChannels() {
     let list = this.getAllChannels();
     if (this.activeCountry !== "all") {
       if (this.activeCountry === "JioTV") {
-        list = list.filter(c => c.isCustom || c.category === "JioTV");
+        list = list.filter(c => this.isJioChannel(c));
       } else if (this.activeCountry === "TN") {
         list = list.filter(c => c.country === "TN");
       } else if (this.activeCountry === "IN") {
-        list = list.filter(c => c.country === "IN" || c.country === "TN" || c.isCustom);
+        list = list.filter(c => c.country === "IN" || c.country === "TN");
       } else {
         list = list.filter(c => c.country && c.country.toLowerCase() === this.activeCountry.toLowerCase());
       }
     }
     if (this.activeCategory !== "all") {
       if (this.activeCategory === "JioTV" || this.activeCategory === "Custom") {
-        list = list.filter(c => c.isCustom || c.category === "JioTV");
+        list = list.filter(c => this.isJioChannel(c));
       } else {
         list = list.filter(c => c.category && c.category.toLowerCase() === this.activeCategory.toLowerCase());
       }
@@ -820,7 +835,7 @@ class MovieshubLiveTV {
               <div class="livetv-country-dropdown-wrapper" style="flex:1;">
                 <select id="livetvCountrySelect" class="livetv-select">
                   <option value="all" selected>🌐 All Channels (${totalChannels})</option>
-                  <option value="JioTV">⚡ JioTV & Custom (${this.customChannels.length})</option>
+                  <option value="JioTV">⚡ JioTV Network (${this.getJioChannels().length})</option>
                   <option value="TN">🌴 Tamil Nadu (KTV, Sun, Vijay, Zee)</option>
                   <option value="IN">🇮🇳 India (Star Sports, Sony LIV, Ten 1)</option>
                   <option value="FR">🇫🇷 France & Europe (FTV Paris, Euronews)</option>
@@ -841,7 +856,7 @@ class MovieshubLiveTV {
 
             <div class="livetv-category-tabs">
               <button class="livetv-cat-btn active" data-cat="all">All</button>
-              <button class="livetv-cat-btn" data-cat="JioTV" id="livetvJioTab">⚡ JioTV (${this.customChannels.length})</button>
+              <button class="livetv-cat-btn" data-cat="JioTV" id="livetvJioTab">⚡ JioTV (${this.getJioChannels().length})</button>
               <button class="livetv-cat-btn" data-cat="Fashion">Fashion (FTV)</button>
               <button class="livetv-cat-btn" data-cat="Movies">Movies (KTV)</button>
               <button class="livetv-cat-btn" data-cat="Sports">Sports (Star/Sony)</button>
@@ -921,6 +936,7 @@ class MovieshubLiveTV {
               <textarea id="m3uRawText" rows="5" placeholder="#EXTM3U&#10;#EXTINF:-1 tvg-id=&quot;...&quot; tvg-logo=&quot;...&quot; group-title=&quot;Sports&quot;, Star Sports 1 HD&#10;http://localhost:8080/live/123.m3u8"></textarea>
             </div>
             <button class="livetv-submit-btn" id="btnImportM3u">Parse & Import Channels</button>
+            <button type="button" class="livetv-clear-all-btn" id="btnLoadSampleM3u" style="margin-top:8px;border-color:rgba(255,255,255,0.2);color:#9ca3af;">⚡ Load Sample JioTV M3U Demo</button>
           </div>
 
           <!-- Tab 3: Manage Imported -->
@@ -1081,6 +1097,23 @@ class MovieshubLiveTV {
       });
     }
 
+    // Load Sample JioTV Demo
+    const btnSample = document.getElementById("btnLoadSampleM3u");
+    if (btnSample) {
+      btnSample.addEventListener("click", () => {
+        const rawEl = document.getElementById("m3uRawText");
+        if (rawEl) {
+          rawEl.value = `#EXTM3U
+#EXTINF:-1 tvg-id="101" tvg-logo="⚡" group-title="Sports", Jio Star Sports 1 Tamil HD
+https://cdn.pishow.tv/ott/live/1161/master.m3u8
+#EXTINF:-1 tvg-id="102" tvg-logo="⚡" group-title="Movies", Jio KTV Movies 24/7 HD
+https://edge3-mob.yuppcdn.net/trans_non_drm/smil:ktv_tamil.smil/playlist.m3u8
+#EXTINF:-1 tvg-id="103" tvg-logo="⚡" group-title="Sports", Jio Sports 18 1 HD
+https://cdn.pishow.tv/ott/live/1155/master.m3u8`;
+        }
+      });
+    }
+
     // Fetch M3U from URL
     const btnFetchM3u = document.getElementById("btnFetchM3u");
     if (btnFetchM3u) {
@@ -1143,7 +1176,7 @@ class MovieshubLiveTV {
     const manageCount = document.getElementById("manageCount");
     if (manageCount) manageCount.textContent = this.customChannels.length;
     const jioTab = document.getElementById("livetvJioTab");
-    if (jioTab) jioTab.textContent = `⚡ JioTV (${this.customChannels.length})`;
+    if (jioTab) jioTab.textContent = `⚡ JioTV (${this.getJioChannels().length})`;
   }
 
   renderChannelList() {
@@ -1171,7 +1204,7 @@ class MovieshubLiveTV {
           ${logoHtml}
           <div class="livetv-channel-details">
             <div class="livetv-channel-name">${ch.name} <span class="livetv-res-tag">(${ch.resolution || "HD"})</span></div>
-            <div class="livetv-channel-sub">${ch.badge || ch.category} • ${ch.category}</div>
+            <div class="livetv-channel-sub">${ch.isCustom ? "⚡ Custom M3U" : (this.isJioChannel(ch) ? "⚡ JioTV" : ch.category)} • ${ch.badge || ch.category}</div>
           </div>
           ${ch.isCustom ? `<button class="livetv-del-btn" data-del-id="${ch.id}" title="Remove Channel">✕</button>` : ''}
           <div class="livetv-channel-live-dot"></div>
