@@ -1,6 +1,6 @@
 {
   "name": "movieshub",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Movieshub - Premium Streaming & Live TV Platform",
   "main": "api/index.js",
   "scripts": {
