@@ -45,6 +45,44 @@
       };
     }
 
+    // Anti-Redirect & Anti-Popup Defense Shield (Blocks ad hijackings & rogue popups)
+    (function() {
+      const _origOpen = window.open;
+      window.open = function(url, target, features) {
+        if (typeof url === "string" && url.trim().length > 0) {
+          try {
+            const parsed = new URL(url, window.location.href);
+            const allowed = [window.location.hostname, "youtube.com", "www.youtube.com", "youtu.be"];
+            if (allowed.some(h => parsed.hostname === h || parsed.hostname.endsWith("." + h))) {
+              return _origOpen.call(window, url, target, features);
+            }
+          } catch (e) {}
+          console.warn("[Movieshub Shield] Blocked unauthorized ad popup redirect:", url);
+          return null;
+        }
+        return null;
+      };
+
+      document.addEventListener("click", function(e) {
+        const anchor = e.target && e.target.closest ? e.target.closest("a") : null;
+        if (anchor && anchor.href) {
+          try {
+            const parsed = new URL(anchor.href, window.location.href);
+            const isLocal = parsed.hostname === window.location.hostname;
+            const isYouTube = parsed.hostname.includes("youtube.com") || parsed.hostname.includes("youtu.be");
+            if (!isLocal && !isYouTube) {
+              const h = parsed.hostname.toLowerCase();
+              if (h.includes("popup") || h.includes("coupon") || h.includes("click") || h.includes("track") || h.includes("affiliate") || h.includes("offer") || h.includes("ad") || h.includes("ajio")) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.warn("[Movieshub Shield] Blocked rogue ad anchor click:", anchor.href);
+              }
+            }
+          } catch (err) {}
+        }
+      }, true);
+    })();
+
     function handlePosterError(img, title, year) {
       const pfx = window.API_PREFIX || "";
       if (img.dataset.fallbackTriggered) {
@@ -113,10 +151,6 @@
       <button class="cine-header-btn" id="cine-header-apps" title="Live TV & Streams">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
       </button>
-      <div class="cine-bell-wrap" id="cine-header-bell" title="Notifications">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-        <span class="cine-bell-badge">1</span>
-      </div>
       <button class="profile-chip-btn cine-menu-pill" id="openDeviceProfileBtn" title="Menu & Device Settings">
         <span class="cine-hamburger">☰</span>
         <span class="profile-chip-avatar" id="profileDeviceIcon">🍿</span>

@@ -495,6 +495,20 @@ assert(fs.existsSync(path.join(__dirname, '../js/shaka-player.compiled.js')), "S
 const tpIndexHtml = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
 assert(tpIndexHtml.includes("shaka-player.compiled.js"), "Shaka Player loaded in index.html");
 
+// 25. Testing Anti-Ad Redirection Shield, Clean Header & Unified Search UI
+console.log("\n25. Testing Anti-Ad Redirection Shield, Clean Header & Unified Search UI...");
+const indexHtmlFinal = fs.readFileSync(path.join(__dirname, "../index.html"), "utf8");
+const playerJsFinal = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
+const stylesCssFinal = fs.readFileSync(path.join(__dirname, "../css/styles.css"), "utf8");
+
+assert(playerJsFinal.includes("sandbox=\"allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media\""), "Player stream iframe uses strict sandbox attribute preventing top navigation and popups");
+assert(playerJsFinal.includes("id=\"embedFrame\" src=\"${embedUrl}\" sandbox="), "Moviesda embed frame is protected with strict sandbox attribute");
+assert(indexHtmlFinal.includes("Anti-Redirect & Anti-Popup Defense Shield") && indexHtmlFinal.includes("Blocked unauthorized ad popup redirect"), "Top-level Anti-Redirect & Anti-Popup Defense Shield is active in index.html");
+assert(!indexHtmlFinal.includes("cine-header-bell"), "Notification bell completely removed from header navigation");
+assert(stylesCssFinal.includes(".search-input-wrapper:focus-within") && stylesCssFinal.includes("border-radius: 9999px"), "Unified single-pill search input styling implemented");
+assert(stylesCssFinal.includes(".cine-header-btn {\n    display: none !important;") || stylesCssFinal.includes(".cine-header-btn {\n    display: none !important"), "Mobile header unclutters duplicate buttons giving full width to search input");
+assert(stylesCssFinal.includes("@media (max-width: 600px)") && stylesCssFinal.includes(".brand-text {\n    display: none !important;"), "Ultra-compact mobile viewport collapses brand text for maximum search bar prominence");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

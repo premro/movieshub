@@ -253,7 +253,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
     </div>
     <video id="nativeVideo" controls autoplay playsinline preload="auto"></video>
     <div class="clipped-embed-wrap" id="embedWrap" style="display:none;">
-      <iframe id="embedFrame" src="${embedUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
+      <iframe id="embedFrame" src="${embedUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe>
     </div>
   </div>
   <script>
@@ -688,6 +688,7 @@ class MovieshubPlayer {
         <div class="player-stream-wrap" id="player-stream-wrap">
           <iframe 
             id="player-stream-iframe" 
+            sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media"
             allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
             allowfullscreen 
             
@@ -1560,7 +1561,7 @@ class MovieshubPlayer {
             </div>
           </div>
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
-            <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
+            <iframe id="player-stream-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
           <div class="player-server-bar">
             <div class="player-server-left">
@@ -1643,7 +1644,7 @@ class MovieshubPlayer {
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+            container.innerHTML = `<iframe id="player-stream-iframe" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
           } else {
@@ -1654,6 +1655,8 @@ class MovieshubPlayer {
               curIframe.contentWindow.postMessage("stop", "*");
             } catch (e) {}
             curIframe.removeAttribute("srcdoc");
+            if (curIframe.setAttribute) curIframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media");
+            curIframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media";
             curIframe.src = "about:blank";
           }
 
@@ -1685,6 +1688,8 @@ class MovieshubPlayer {
 
           if (srv.id === "s1") {
             curIframe.removeAttribute("srcdoc");
+            if (curIframe.setAttribute) curIframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media");
+            curIframe.sandbox = "allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media";
             curIframe.src = "about:blank";
 
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY

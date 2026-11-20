@@ -2168,12 +2168,6 @@ class MovieshubApp {
       appsBtn.addEventListener("click", () => this.switchView("livetv"));
     }
 
-    const bellBtn = document.getElementById("cine-header-bell");
-    if (bellBtn) {
-      bellBtn.addEventListener("click", () => {
-        this.showToast("⚡ 10 Fresh 2026 Blockbusters Synced Live & Updated Daily");
-      });
-    }
 
     // Cinecat Floating Bottom Navigation Controls
     const findNav = document.getElementById("cine-nav-find");
