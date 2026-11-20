@@ -47,29 +47,36 @@ class MovieshubApp {
       this.switchView(hash);
     }
 
-    // Auto-sync on startup: check if new day or needs fresh sync
+    // Auto-sync on startup: check if new day or if 2 hours elapsed
     const todayDateStr = new Date().toDateString();
     const lastClientSyncDay = localStorage.getItem("movieshub_last_sync_date");
-    const needsDailySync = lastClientSyncDay !== todayDateStr;
+    const lastClientSyncTimestamp = parseInt(localStorage.getItem("movieshub_dash_last_sync") || "0", 10);
+    const isClientTwoHoursOld = !lastClientSyncTimestamp || (Date.now() - lastClientSyncTimestamp >= 2 * 60 * 60 * 1000);
+    const needsDailySync = (lastClientSyncDay !== todayDateStr) || isClientTwoHoursOld;
     this.loadDashboardData(false, needsDailySync);
 
-    // Auto-sync movies from all servers every 30 minutes / on day rollover
+    // Auto-sync movies from all servers every 30 minutes / on day rollover / 2 hours elapsed
     setInterval(() => {
+      const now = Date.now();
+      const last = parseInt(localStorage.getItem("movieshub_dash_last_sync") || "0", 10);
       const today = new Date().toDateString();
       const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
-      this.loadDashboardData(true, dayChanged);
+      const expired = now - last >= 2 * 60 * 60 * 1000;
+      this.loadDashboardData(true, dayChanged || expired);
     }, 30 * 60 * 1000);
     setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
 
-    // Auto-refresh when tab becomes active / focused if day changed or 10 minutes passed
+    // Auto-refresh when tab becomes active / focused if day changed or 2 hours elapsed
     let lastTabFocusSync = Date.now();
     const checkTabFocusSync = () => {
       const now = Date.now();
+      const last = parseInt(localStorage.getItem("movieshub_dash_last_sync") || "0", 10);
       const today = new Date().toDateString();
       const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
-      if (dayChanged || (now - lastTabFocusSync > 10 * 60 * 1000)) {
+      const expired = now - last >= 2 * 60 * 60 * 1000;
+      if (dayChanged || expired || (now - lastTabFocusSync > 10 * 60 * 1000)) {
         lastTabFocusSync = now;
-        this.loadDashboardData(true, dayChanged);
+        this.loadDashboardData(true, dayChanged || expired);
       }
     };
     window.addEventListener("focus", checkTabFocusSync);
@@ -413,6 +420,10 @@ class MovieshubApp {
     if (badge) {
       badge.textContent = this.myList.length;
     }
+    const mobileBadge = document.getElementById("mobile-mylist-count");
+    if (mobileBadge) {
+      mobileBadge.textContent = this.myList.length;
+    }
   }
 
   /* ================= DEVICE LOCAL STORAGE: CONTINUE WATCHING ================= */
@@ -580,8 +591,8 @@ class MovieshubApp {
       }
     });
 
-    // Nav Links
-    document.querySelectorAll(".nav-link").forEach(link => {
+    // Nav Links & Mobile Nav Items
+    document.querySelectorAll(".nav-link, .mobile-nav-item").forEach(link => {
       link.addEventListener("click", (e) => {
         e.preventDefault();
         const view = link.dataset.view;
@@ -706,7 +717,7 @@ class MovieshubApp {
 
   switchView(viewName) {
     this.activeView = viewName;
-    document.querySelectorAll(".nav-link").forEach(l => {
+    document.querySelectorAll(".nav-link, .mobile-nav-item").forEach(l => {
       if (l.dataset.view === viewName) l.classList.add("active");
       else l.classList.remove("active");
     });
@@ -725,6 +736,12 @@ class MovieshubApp {
       if (langBar) langBar.style.display = "none";
       if (this.liveTv) this.liveTv.destroy();
       this.sports.render(main);
+    } else if (viewName === "mylist") {
+      if (hero) hero.style.display = "none";
+      if (langBar) langBar.style.display = "none";
+      if (this.liveTv) this.liveTv.destroy();
+      if (this.sports) this.sports.destroy();
+      this.renderMainContent();
     } else {
       if (hero) hero.style.display = "block";
       if (langBar) langBar.style.display = "block";
@@ -927,13 +944,15 @@ class MovieshubApp {
   setupTwoHourRefresh() {
     const TWO_HOURS = 2 * 60 * 60 * 1000;
     const now = Date.now();
-    if (!this.lastCacheSync || (now - Number(this.lastCacheSync)) > TWO_HOURS) {
+    const last = Number(this.lastCacheSync) || 0;
+    if (!last || (now - last) >= TWO_HOURS) {
       localStorage.setItem("movieshub_dash_last_sync", now);
       console.log("[Movieshub] 2-Hour dynamic cache update verified at:", new Date(now).toLocaleTimeString());
+      this.loadDashboardData(true, true);
     }
     setInterval(() => {
       localStorage.setItem("movieshub_dash_last_sync", Date.now());
-      this.loadDashboardData().then(() => {
+      this.loadDashboardData(true, true).then(() => {
         if (this.activeView === "home" || this.activeView === "movies") {
           this.renderMainContent();
         }

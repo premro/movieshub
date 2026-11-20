@@ -271,16 +271,18 @@ const KNOWN_TMDB_MAP = {
 
 // Sync states declared above
 
-// 1-Hour Automatic Sync Timer & Daily Sync across all server providers (TMDB, Moviezda, Netmirror)
+// 2-Hour Automatic Sync Timer & Daily Sync across all server providers (TMDB, Moviezda, Netmirror)
 const ONE_HOUR_MS = 60 * 60 * 1000;
+const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 async function syncDashboardCatalog(force = false) {
   if (isSyncingDashboard) return cachedDashboard;
   const now = Date.now();
   const todayStr = new Date().toISOString().slice(0, 10);
   const isDayChanged = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayStr;
+  const isTwoHoursCrossed = !lastDashboardSyncTime || (now - lastDashboardSyncTime >= TWO_HOURS_MS);
 
-  if (!force && !isDayChanged && (now - lastDashboardSyncTime < ONE_HOUR_MS) && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
+  if (!force && !isDayChanged && !isTwoHoursCrossed && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
     return cachedDashboard;
   }
 
@@ -392,6 +394,8 @@ async function syncDashboardCatalog(force = false) {
       ta25Res.value.results.map(normalizeMovie).forEach(m => {
         m.language = 'Tamil';
         m.languageBadge = 'Tamil';
+        const fid = getVerifiedMoviesdaFileId(m.title, m.tmdbId);
+        if (fid) m.moviesdaFileId = fid;
         addMovie(m, updated.tamil_2025);
         addMovie(m, updated.languages.tamil);
       });
@@ -490,6 +494,56 @@ async function syncDashboardCatalog(force = false) {
           seenIds.add(m.tmdbId);
           updated.all.push(m);
         }
+      });
+    }
+
+    // Guarantee Ramayana and Madha Gaja Raja with verified stream IDs
+    if (!updated.tamil_2026.some(m => m.tmdbId === 656908)) {
+      updated.tamil_2026.push({
+        id: "mz-103234",
+        tmdbId: 656908,
+        title: "Ramayana",
+        language: "Tamil",
+        languageBadge: "Tamil",
+        year: 2026,
+        rating: "NEW",
+        moviesdaFileId: "103234",
+        isTheatrePrint: true,
+        poster: "https://moviezda.me/uploads/shots/103234-ramayana-2026-original-720p-hd.jpg",
+        backdrop: "https://moviezda.me/uploads/shots/103234-ramayana-2026-original-720p-hd.jpg",
+        overview: "Ramayana (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.",
+        qualities: ["1080p HD", "720p HD", "Theatre Print"]
+      });
+    }
+    const existingMgr = updated.tamil_2025.find(m => m.tmdbId === 280951);
+    if (existingMgr) { existingMgr.moviesdaFileId = "88685"; }
+    if (!existingMgr) {
+      updated.tamil_2025.push({
+        id: "tmdb-280951",
+        tmdbId: 280951,
+        title: "Madha Gaja Raja",
+        nativeTitle: "மத கஜ ராஜா",
+        language: "Tamil",
+        languageBadge: "Tamil",
+        year: 2025,
+        releaseDate: "2025-01-12",
+        rating: 4.8,
+        match: "70%",
+        maturity: "U/A 16+",
+        duration: "2h 30m",
+        genres: ["Action", "Romance", "Comedy"],
+        qualities: ["4K", "1080p", "Moviesda HD"],
+        platform: "Direct",
+        platformBadge: "MOVIESHUB",
+        platformColor: "#E50914",
+        poster: "https://image.tmdb.org/t/p/w500/hrOnr0eIdBI2Zpeh4EMLmWe58XA.jpg",
+        backdrop: "https://image.tmdb.org/t/p/w1280/53lN3qoCbrYcfhKdSKf5POpJYEN.jpg",
+        mediaType: "movie",
+        overview: "Raja, a witty and fearless young man, becomes entangled in a conflict with a corrupt industrialist while trying to protect his family, friends and the woman he loves.",
+        cast: [],
+        director: "Cinematic Director",
+        isTrending: false,
+        moviesdaFileId: "88685"
       });
     }
 
@@ -639,9 +693,10 @@ async function syncDashboardCatalog(force = false) {
 
     // Assemble latest_six (True freshest releases across all languages + Now Playing)
     const freshCandidates = [
+      sceneMovieObj,
       ...npList,
       ...updated.latest,
-      ...updated.tamil_2026.slice(0, 4),
+      ...updated.tamil_2026.slice(1, 4),
       ...updated.languages.english.filter(m => (m.year || 0) >= 2026).slice(0, 4),
       ...updated.languages.hindi.filter(m => (m.year || 0) >= 2026).slice(0, 4),
       ...updated.languages.telugu.filter(m => (m.year || 0) >= 2026).slice(0, 4),
@@ -666,7 +721,11 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
-    updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).slice(0, 30);
+    updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).sort((a, b) => {
+      const da = a.releaseDate || `${a.year || 2025}-01-01`;
+      const db = b.releaseDate || `${b.year || 2025}-01-01`;
+      return db.localeCompare(da);
+    }).slice(0, 30);
 
     cachedDashboard = updated;
     lastDashboardSyncTime = now;
@@ -1917,10 +1976,10 @@ module.exports = async (req, res) => {
   if (pathname === '/api/dashboard') {
     const todayDate = new Date().toISOString().slice(0, 10);
     const isDayRollover = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayDate;
-    const isStale = !cachedDashboard || isDayRollover || (Date.now() - lastDashboardSyncTime > 12 * 60 * 60 * 1000);
+    const isStale = !cachedDashboard || isDayRollover || (Date.now() - lastDashboardSyncTime >= TWO_HOURS_MS);
     const forceRefresh = u.searchParams.get('refresh') === '1';
     if (forceRefresh || isStale) {
-      await syncDashboardCatalog(forceRefresh);
+      await syncDashboardCatalog(forceRefresh || isStale);
     }
     res.writeHead(200, {
       'Content-Type': 'application/json',
@@ -2353,12 +2412,12 @@ module.exports = async (req, res) => {
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Endpoint not found', path: pathname }));
 };
-// Automatic 1-Hour Sync from all server providers (TMDB, Moviezda, Netmirror)
+// Automatic 2-Hour Sync from all server providers (TMDB, Moviezda, Netmirror)
 if (typeof setInterval !== 'undefined') {
   const syncTimer = setInterval(() => {
-    console.log('[Movieshub Auto-Sync] Hourly sync triggered across all server providers...');
-    syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] Hourly sync error:', e.message));
-  }, ONE_HOUR_MS);
+    console.log('[Movieshub Auto-Sync] 2-Hour sync triggered across all server providers...');
+    syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] 2-Hour sync error:', e.message));
+  }, TWO_HOURS_MS);
   if (syncTimer && syncTimer.unref) syncTimer.unref();
 }
 

@@ -1506,8 +1506,8 @@ class MovieshubPlayer {
           name: "Server 8",
           badge: "Ultra CDN (VidSrc Net)",
           url: mtype === "tv"
-            ? `https://vidsrc.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsrc.net/embed/movie/${resolvedTmdbId}`
+            ? `https://vidsrc.to/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.to/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s9",
@@ -1562,40 +1562,40 @@ class MovieshubPlayer {
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
             <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
           </div>
-          <div class="player-server-bar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;padding:6px 16px;background:rgba(12,11,18,0.98);border-top:1px solid rgba(255,255,255,0.08);z-index:50;min-height:48px;">
-            <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+          <div class="player-server-bar">
+            <div class="player-server-left">
               <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub" style="display:none;"></button>
-              <div class="player-server-pills" id="playerModalServerPills" style="display:flex;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-webkit-overflow-scrolling:touch;flex:1;min-width:0;">
+              <div class="player-server-pills" id="playerModalServerPills" style="white-space:nowrap;">
                 ${servers.map((s, idx) => `
-                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}" style="white-space:nowrap;flex-shrink:0;">
+                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
                     <span>${s.name}</span>
                     <span class="srv-pill-badge">${s.badge}</span>
                   </button>
                 `).join("")}
               </div>
             </div>
-            <div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">
-              <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio" style="background:#e50914;color:#fff;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+            <div class="player-server-right">
+              <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio">
                 <span>🔊 Tamil Dubbed</span>
               </button>
-              <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage" style="white-space:nowrap;flex-shrink:0;">
+              <button class="ctrl-dolby-atmos-btn" id="stream-dolby-btn" title="Open Dolby Atmos 3D Sound Stage">
                 <div class="atmos-pulse-dot"></div>
                 <span>Dolby Atmos</span>
               </button>
-              <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch" style="white-space:nowrap;flex-shrink:0;">
+              <button id="autoSwitchToggleBtn" class="auto-switch-toggle off" title="Toggle Auto-Switch">
                 <span>⏸ Auto-Switch: OFF</span>
               </button>
-              <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck" style="white-space:nowrap;flex-shrink:0;">
+              <button id="reloadServerBtn" class="reload-server-btn" title="Reload stream if buffering or stuck">
                 <span>🔄 Reload</span>
               </button>
-              <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server" style="white-space:nowrap;flex-shrink:0;">
+              <button id="skipServerBtn" class="next-server-btn" title="Switch to Next Server">
                 <span>Next Server ⏭</span>
               </button>
-              <button id="streamFsBtn" class="stream-fs-btn" title="Toggle Fullscreen (F)" style="background:rgba(255,255,255,0.12);color:#fff;border:1px solid rgba(255,255,255,0.22);padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+              <button id="streamFsBtn" class="stream-fs-btn" title="Toggle Fullscreen (F)">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                 <span>Fullscreen</span>
               </button>
-              <div class="stream-live-tag" style="display:flex;align-items:center;gap:6px;white-space:nowrap;flex-shrink:0;">
+              <div class="stream-live-tag">
                 <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
                 <span style="color:#888;">|</span>
                 <span style="color:${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "#f59e0b" : "#e50914"};font-weight:700;font-size:11px;">

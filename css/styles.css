@@ -4251,3 +4251,258 @@ body {
   color: #f87171;
   font-size: 11px;
 }
+
+
+/* ==============================================================
+   UNIVERSAL DEVICE AUTOFIT & RESPONSIVE UI ENHANCEMENTS
+   Autofit on Mobile (320px-480px), Tablets (768px-1024px),
+   Laptops (1280px-1440px) & Ultra-wide/4K (>1440px)
+   ============================================================== */
+
+/* Modern Mobile Bottom Navigation Bar */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Player Server Bar Layout Classes */
+.player-server-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.player-server-left::-webkit-scrollbar {
+  display: none;
+}
+
+.player-server-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stream-live-tag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Responsive Overrides for Mobile & Small Screens (<= 768px) */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 58px !important;
+    background: rgba(12, 10, 18, 0.97) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    z-index: 1000 !important;
+    align-items: center !important;
+    justify-content: space-around !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  .mobile-nav-item {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 3px !important;
+    color: #9ca3af !important;
+    text-decoration: none !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    flex: 1 !important;
+    height: 100% !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    user-select: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    position: relative !important;
+  }
+
+  .mobile-nav-item:active {
+    transform: scale(0.92) !important;
+  }
+
+  .mobile-nav-item.active {
+    color: #e50914 !important;
+    font-weight: 800 !important;
+  }
+
+  .mobile-nav-item svg {
+    transition: transform 0.2s ease, stroke 0.2s ease !important;
+  }
+
+  .mobile-nav-item.active svg {
+    stroke: #e50914 !important;
+    transform: scale(1.1) !important;
+  }
+
+  .mobile-nav-icon-wrap {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .mobile-nav-icon-wrap .live-dot-pulse {
+    position: absolute !important;
+    top: -2px !important;
+    right: -4px !important;
+    width: 7px !important;
+    height: 7px !important;
+  }
+
+  .mobile-nav-icon-wrap .nav-badge {
+    position: absolute !important;
+    top: -4px !important;
+    right: -9px !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    padding: 1px 5px !important;
+    border-radius: 10px !important;
+    background: #e50914 !important;
+    color: #fff !important;
+    line-height: 1.2 !important;
+    box-shadow: 0 0 6px rgba(229, 9, 20, 0.6) !important;
+  }
+
+  .mobile-nav-emoji {
+    font-size: 18px !important;
+    line-height: 1 !important;
+    transition: transform 0.2s ease !important;
+  }
+
+  .mobile-nav-item.active .mobile-nav-emoji {
+    transform: scale(1.15) !important;
+  }
+
+  /* Safe Area padding so content never gets covered by bottom nav */
+  body {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Video Player Mobile Toolbar Fix (Clean 2-Row Scrollable Layout) */
+  .player-server-bar {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 8px 10px !important;
+    gap: 8px !important;
+    min-height: auto !important;
+  }
+
+  .player-server-left {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  .player-server-pills {
+    width: 100% !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
+  }
+
+  .player-server-right {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 6px !important;
+    overflow-x: auto !important;
+    scrollbar-width: none !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  .player-server-right::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .player-header {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 10px !important;
+    gap: 8px !important;
+  }
+
+  .player-back-btn {
+    padding: 6px 10px !important;
+    font-size: 13px !important;
+  }
+
+  .player-movie-title {
+    font-size: 13px !important;
+    max-width: 120px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  .player-mode-switch {
+    padding: 2px !important;
+  }
+
+  .mode-tab-btn {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+
+  /* Live TV & Sports Responsive Margins & Padding */
+  .livetv-page-wrapper {
+    flex-direction: column !important;
+    padding: 0 10px !important;
+    margin-top: 60px !important;
+    gap: 12px !important;
+  }
+
+  .sports-page-wrapper {
+    margin-top: 60px !important;
+    padding: 0 10px !important;
+  }
+
+  .sports-top-header {
+    gap: 12px !important;
+    margin-bottom: 14px !important;
+  }
+
+  .sports-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Watchlist Empty and Grid Layout */
+  .movies-catalog-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    padding: 0 10px !important;
+  }
+}
+
+/* Extra Small Phones (<= 375px) */
+@media (max-width: 375px) {
+  .movie-card {
+    flex: 0 0 135px !important;
+    width: 135px !important;
+  }
+  .card-media {
+    height: 195px !important;
+  }
+  .hero-buttons {
+    grid-template-columns: 1fr !important;
+  }
+  .btn-main-play, #hero-btn-download, #hero-btn-trailer, #hero-btn-info {
+    grid-column: 1 / -1 !important;
+  }
+}
