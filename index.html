@@ -10,7 +10,7 @@
   <meta name="description" content="Movieshub - Pure ad-free streaming with instant language filters for Tamil, English, Hindi, Telugu, and Malayalam. Created by Prem.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
-  <link rel="stylesheet" href="css/styles.css?v=20261120_08">
+  <link rel="stylesheet" href="css/styles.css?v=20261120_09">
   <script>
     window.IS_CATALYST = typeof window !== "undefined" && (
       window.location.hostname.includes("catalystserverless") ||
@@ -45,8 +45,21 @@
       };
     }
 
-    // Anti-Redirect & Anti-Popup Defense Shield (Blocks ad hijackings & rogue popups)
+    // Anti-Redirect & Anti-Popup Defense Shield (Blocks ad hijackings & rogue popups without sandbox playback blockage)
     (function() {
+      window.isStreamPlaying = false;
+      window.userIntentionalNavigation = false;
+
+      // 1. Anti-Framebusting Guard: Prevents cross-origin iframes from executing top.location redirects
+      window.addEventListener("beforeunload", function(e) {
+        if (window.isStreamPlaying && !window.userIntentionalNavigation) {
+          e.preventDefault();
+          e.returnValue = "Stay on Movieshub";
+          return "Stay on Movieshub";
+        }
+      });
+
+      // 2. Override window.open to block unauthorized popups, ad tabs & redirects
       const _origOpen = window.open;
       window.open = function(url, target, features) {
         if (typeof url === "string" && url.trim().length > 0) {
@@ -63,24 +76,33 @@
         return null;
       };
 
+      // 3. Block rogue external ad clicks & link hijacking
       document.addEventListener("click", function(e) {
         const anchor = e.target && e.target.closest ? e.target.closest("a") : null;
         if (anchor && anchor.href) {
           try {
             const parsed = new URL(anchor.href, window.location.href);
-            const isLocal = parsed.hostname === window.location.hostname;
+            const isLocal = parsed.hostname === window.location.hostname || anchor.getAttribute("href")?.startsWith("#");
             const isYouTube = parsed.hostname.includes("youtube.com") || parsed.hostname.includes("youtu.be");
             if (!isLocal && !isYouTube) {
-              const h = parsed.hostname.toLowerCase();
-              if (h.includes("popup") || h.includes("coupon") || h.includes("click") || h.includes("track") || h.includes("affiliate") || h.includes("offer") || h.includes("ad") || h.includes("ajio")) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.warn("[Movieshub Shield] Blocked rogue ad anchor click:", anchor.href);
-              }
+              e.preventDefault();
+              e.stopPropagation();
+              console.warn("[Movieshub Shield] Blocked rogue ad anchor click:", anchor.href);
+            } else if (isLocal) {
+              window.userIntentionalNavigation = true;
             }
           } catch (err) {}
         }
       }, true);
+
+      // 4. Refocus parent window if iframe tries window blur trick
+      window.addEventListener("blur", function() {
+        if (window.isStreamPlaying && !window.userIntentionalNavigation) {
+          setTimeout(function() {
+            try { window.focus(); } catch(err) {}
+          }, 60);
+        }
+      });
     })();
 
     function handlePosterError(img, title, year) {
@@ -265,8 +287,8 @@
   <script src="js/search.js?v=20261109_04"></script>
   <script src="js/livetv.js?v=20261109_04"></script>
   <script src="js/sports.js?v=20261109_04"></script>
-  <script src="js/dolby-atmos.js?v=20261120_08"></script>
-  <script src="js/player.js?v=20261120_08"></script>
-  <script src="js/app.js?v=20261120_08"></script>
+  <script src="js/dolby-atmos.js?v=20261120_09"></script>
+  <script src="js/player.js?v=20261120_09"></script>
+  <script src="js/app.js?v=20261120_09"></script>
 </body>
 </html>

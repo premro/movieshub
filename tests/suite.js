@@ -501,8 +501,8 @@ const indexHtmlFinal = fs.readFileSync(path.join(__dirname, "../index.html"), "u
 const playerJsFinal = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
 const stylesCssFinal = fs.readFileSync(path.join(__dirname, "../css/styles.css"), "utf8");
 
-assert(playerJsFinal.includes("sandbox=\"allow-scripts allow-same-origin allow-forms allow-presentation allow-encrypted-media\""), "Player stream iframe uses strict sandbox attribute preventing top navigation and popups");
-assert(playerJsFinal.includes("id=\"embedFrame\" src=\"${embedUrl}\" sandbox="), "Moviesda embed frame is protected with strict sandbox attribute");
+assert(!playerJsFinal.includes("sandbox=\"allow-scripts"), "Player stream iframe does not use restricted sandbox attribute, allowing VidLink, AutoEmbed, 2Embed and Moviesda playback without block screens");
+assert(indexHtmlFinal.includes("beforeunload") && indexHtmlFinal.includes("Stay on Movieshub"), "Anti-Framebusting Guard intercepts top.location redirects keeping users securely on Movieshub");
 assert(indexHtmlFinal.includes("Anti-Redirect & Anti-Popup Defense Shield") && indexHtmlFinal.includes("Blocked unauthorized ad popup redirect"), "Top-level Anti-Redirect & Anti-Popup Defense Shield is active in index.html");
 assert(!indexHtmlFinal.includes("cine-header-bell"), "Notification bell completely removed from header navigation");
 assert(stylesCssFinal.includes(".search-input-wrapper:focus-within") && stylesCssFinal.includes("border-radius: 9999px"), "Unified single-pill search input styling implemented");
