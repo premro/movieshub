@@ -355,7 +355,7 @@ async function syncDashboardCatalog(force = false) {
       const dayTrendingList = dayTrRes.value.results
         .filter(m => m.backdrop_path || m.poster_path)
         .map(normalizeMovie);
-      updated.hero = dayTrendingList.slice(0, 5);
+      updated.hero = dayTrendingList.slice(0, 10);
       dayTrendingList.forEach(m => {
         addMovie(m, updated.trending);
       });
@@ -430,8 +430,8 @@ async function syncDashboardCatalog(force = false) {
             rating: "NEW",
             moviesdaFileId: fid,
             isTheatrePrint: true,
-            poster: `${activeMoviesdaDomain}/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
-            backdrop: `${activeMoviesdaDomain}/uploads/shots/${fid}-${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "-")}-2026-original-720p-hd.jpg`,
+            poster: (KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()] && KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()].poster) || "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
+            backdrop: (KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()] && KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()].backdrop) || "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
             overview: `${cleanTitle} (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.`,
             qualities: ["1080p HD", "720p HD", "Theatre Print"]
           };
@@ -711,12 +711,12 @@ async function syncDashboardCatalog(force = false) {
     }
 
     // Ensure hero always has 5 items (fallback to trending / latest if needed)
-    if (updated.hero.length < 5) {
+    if (updated.hero.length < 10) {
       const heroPool = [...updated.trending, ...updated.latest_six, ...updated.all];
       for (const hm of heroPool) {
         if ((hm.backdrop || hm.poster) && !updated.hero.some(h => (h.tmdbId && hm.tmdbId && h.tmdbId === hm.tmdbId) || h.id === hm.id)) {
           updated.hero.push(hm);
-          if (updated.hero.length >= 5) break;
+          if (updated.hero.length >= 10) break;
         }
       }
     }
@@ -726,6 +726,25 @@ async function syncDashboardCatalog(force = false) {
       const db = b.releaseDate || `${b.year || 2025}-01-01`;
       return db.localeCompare(da);
     }).slice(0, 30);
+
+    
+    // Enforce verified posters for all movies
+    const sanitizeMovieImages = (m) => {
+      if (!m || !m.title) return;
+      const k = m.title.toLowerCase().trim();
+      if (KNOWN_VERIFIED_POSTERS[k]) {
+        if (!m.poster || m.poster.includes("moviezda") || m.poster.includes("moviesda") || m.poster.includes("/api/poster")) {
+          m.poster = KNOWN_VERIFIED_POSTERS[k].poster;
+          m.backdrop = KNOWN_VERIFIED_POSTERS[k].backdrop;
+          if (KNOWN_VERIFIED_POSTERS[k].tmdbId && (!m.tmdbId || m.tmdbId < 10000)) m.tmdbId = KNOWN_VERIFIED_POSTERS[k].tmdbId;
+        }
+      }
+    };
+    updated.all.forEach(sanitizeMovieImages);
+    updated.tamil_2026.forEach(sanitizeMovieImages);
+    updated.tamil_2025.forEach(sanitizeMovieImages);
+    updated.latest_six.forEach(sanitizeMovieImages);
+    updated.hero.forEach(sanitizeMovieImages);
 
     cachedDashboard = updated;
     lastDashboardSyncTime = now;
@@ -1243,6 +1262,32 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 </body>
 </html>`;
 }
+
+
+const KNOWN_VERIFIED_POSTERS = {
+  "john doe": { poster: "https://image.tmdb.org/t/p/w500/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", tmdbId: 1655020 },
+  "aakhri sawal": { poster: "https://image.tmdb.org/t/p/w500/9CXBZH6sRJpFTMSaY3wj1jx98F4.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/akZ9jTTzvBOx3CeTVCo9WyhxL5q.jpg", tmdbId: 1600771 },
+  "aazam": { poster: "https://image.tmdb.org/t/p/w500/9IdjgWe7XzSHflYWfIVTiZyDDYT.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/3Nqk8XuPe5PHYHWkD33BR0Aszus.jpg", tmdbId: 1038487 },
+  "lakshmikanthan kolai vazhakku": { poster: "https://image.tmdb.org/t/p/w500/pGS1KRODHNYzR35slcgJp9NzMiP.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zOwMpeSzfAQCxfhm2Me8cN1eBib.jpg", tmdbId: 1620357 },
+  "tula pahta": { poster: "https://image.tmdb.org/t/p/w500/aR2nyTzFcKmWQ3JzlMeI5coz336.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4bCNNgmeleTmhDGhjaQa1M2CBND.jpg", tmdbId: 1729796 },
+  "anbil avan": { poster: "https://image.tmdb.org/t/p/w500/4sMOtNG5oMNfBOc3WwWYzEJ3tnw.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/uHSlzN0WbaNMgmmgkpQlod9hWje.jpg", tmdbId: 1431738 },
+  "drones": { poster: "https://image.tmdb.org/t/p/w500/k14luImbnzAhFZzqFKgvVrnOF4D.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/7bIrEDdkZCMjLf2pz9YS8t8r2D2.jpg", tmdbId: 1728763 },
+  "haiku": { poster: "https://image.tmdb.org/t/p/w500/7kdhwEauV07gbHXdlBtVp6AhqZk.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/40bzHa8LA48yUbXeh6TACnUcOu3.jpg", tmdbId: 1593350 },
+  "418": { poster: "https://image.tmdb.org/t/p/w500/oaZFZQtqQFQOdSoaZanDeNQZc25.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/nJjd0EHP5VPWTdGsere75SaSY4j.jpg", tmdbId: 1606527 },
+  "saayavanam": { poster: "https://image.tmdb.org/t/p/w500/tSuqCq3YYLS8VOdiU9ikKOBs5Tz.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/anz69m07H9b2zG5Hw5OSQ71dwxJ.jpg", tmdbId: 1310458 },
+  "crazy kalyanam": { poster: "https://image.tmdb.org/t/p/w500/2PkDjtB12KHFE4tj7P1oVMHrCbO.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4E7AhaPeYQbJQtumREm9IDo16bm.jpg", tmdbId: 1610188 },
+  "cult": { poster: "https://image.tmdb.org/t/p/w500/8jPyjKZE2Bnm3esvDmWZyGA8mkr.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/uekvmfoHfefO1w1HDacdo8hvy8x.jpg", tmdbId: 1637705 },
+  "kiku chiranjeevi": { poster: "https://image.tmdb.org/t/p/w500/uAlTYjwLAX9VCP8mSbKDiKzkqcS.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/gKq0JtdFQy1vp3A6nb0Tx264wYH.jpg", tmdbId: 1748499 },
+  "premada oorali": { poster: "https://image.tmdb.org/t/p/w500/wJsUmiwuZ9eKnOiYLAVk8THFk7i.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/r22LSVD46wOY3rkavnM4gWc3sz2.jpg", tmdbId: 1735270 },
+  "maaya oviyan": { poster: "https://image.tmdb.org/t/p/w500/LDWB8Fi60jcKKenbYI1BKccvKb.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/d3XwTdOmPFcgzYZiCuvwdfLhpI6.jpg", tmdbId: 1827056 },
+  "sandakari": { poster: "https://image.tmdb.org/t/p/w500/uAxbv8F1m0J2sYUihklnRQpqge1.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zHdeIe0REV8FdAalSR75HtWLDql.jpg", tmdbId: 1627516 },
+  "pushpaka vimanam": { poster: "https://image.tmdb.org/t/p/w500/jd5vrm1WnNJ1ifTqajKGEJexzzI.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/i5rbYSbN7kvhOnr0u2pxOHusMrv.jpg", tmdbId: 878470 },
+  "gandhi talks": { poster: "https://image.tmdb.org/t/p/w500/p4iQT3s97T3gQOLhTj0UplzYMOj.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4Cqad6ZpWJRhBumGE1QwHs9pVuB.jpg", tmdbId: 786567 },
+  "manglik": { poster: "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg", tmdbId: 103250 },
+  "mr mrs office": { poster: "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg", tmdbId: 103260 },
+  "ramayana": { poster: "https://image.tmdb.org/t/p/w500/7wHBYs8H4F2Wsh8hP6fM8ZlWwXJ.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4qshTjY0uW1eWz8eB0zXlB8Kx0p.jpg", tmdbId: 656908 },
+  "yezhu kadal yezhu malai": { poster: "https://image.tmdb.org/t/p/w500/wdWQA1IVCYiTTEZMSnWl1tzhBd3.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/iipz8h0FT6pKI29A6DfRunYuLok.jpg", tmdbId: 954445 }
+};
 
 const MOVIESDA_VERIFIED_MAP = {
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)

@@ -1,3 +1,29 @@
+
+const KNOWN_VERIFIED_POSTERS = {
+  "john doe": { poster: "https://image.tmdb.org/t/p/w500/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", tmdbId: 1655020 },
+  "aakhri sawal": { poster: "https://image.tmdb.org/t/p/w500/9CXBZH6sRJpFTMSaY3wj1jx98F4.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/akZ9jTTzvBOx3CeTVCo9WyhxL5q.jpg", tmdbId: 1600771 },
+  "aazam": { poster: "https://image.tmdb.org/t/p/w500/9IdjgWe7XzSHflYWfIVTiZyDDYT.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/3Nqk8XuPe5PHYHWkD33BR0Aszus.jpg", tmdbId: 1038487 },
+  "lakshmikanthan kolai vazhakku": { poster: "https://image.tmdb.org/t/p/w500/pGS1KRODHNYzR35slcgJp9NzMiP.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zOwMpeSzfAQCxfhm2Me8cN1eBib.jpg", tmdbId: 1620357 },
+  "tula pahta": { poster: "https://image.tmdb.org/t/p/w500/aR2nyTzFcKmWQ3JzlMeI5coz336.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4bCNNgmeleTmhDGhjaQa1M2CBND.jpg", tmdbId: 1729796 },
+  "anbil avan": { poster: "https://image.tmdb.org/t/p/w500/4sMOtNG5oMNfBOc3WwWYzEJ3tnw.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/uHSlzN0WbaNMgmmgkpQlod9hWje.jpg", tmdbId: 1431738 },
+  "drones": { poster: "https://image.tmdb.org/t/p/w500/k14luImbnzAhFZzqFKgvVrnOF4D.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/7bIrEDdkZCMjLf2pz9YS8t8r2D2.jpg", tmdbId: 1728763 },
+  "haiku": { poster: "https://image.tmdb.org/t/p/w500/7kdhwEauV07gbHXdlBtVp6AhqZk.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/40bzHa8LA48yUbXeh6TACnUcOu3.jpg", tmdbId: 1593350 },
+  "418": { poster: "https://image.tmdb.org/t/p/w500/oaZFZQtqQFQOdSoaZanDeNQZc25.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/nJjd0EHP5VPWTdGsere75SaSY4j.jpg", tmdbId: 1606527 },
+  "saayavanam": { poster: "https://image.tmdb.org/t/p/w500/tSuqCq3YYLS8VOdiU9ikKOBs5Tz.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/anz69m07H9b2zG5Hw5OSQ71dwxJ.jpg", tmdbId: 1310458 },
+  "crazy kalyanam": { poster: "https://image.tmdb.org/t/p/w500/2PkDjtB12KHFE4tj7P1oVMHrCbO.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4E7AhaPeYQbJQtumREm9IDo16bm.jpg", tmdbId: 1610188 },
+  "cult": { poster: "https://image.tmdb.org/t/p/w500/8jPyjKZE2Bnm3esvDmWZyGA8mkr.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/uekvmfoHfefO1w1HDacdo8hvy8x.jpg", tmdbId: 1637705 },
+  "kiku chiranjeevi": { poster: "https://image.tmdb.org/t/p/w500/uAlTYjwLAX9VCP8mSbKDiKzkqcS.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/gKq0JtdFQy1vp3A6nb0Tx264wYH.jpg", tmdbId: 1748499 },
+  "premada oorali": { poster: "https://image.tmdb.org/t/p/w500/wJsUmiwuZ9eKnOiYLAVk8THFk7i.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/r22LSVD46wOY3rkavnM4gWc3sz2.jpg", tmdbId: 1735270 },
+  "maaya oviyan": { poster: "https://image.tmdb.org/t/p/w500/LDWB8Fi60jcKKenbYI1BKccvKb.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/d3XwTdOmPFcgzYZiCuvwdfLhpI6.jpg", tmdbId: 1827056 },
+  "sandakari": { poster: "https://image.tmdb.org/t/p/w500/uAxbv8F1m0J2sYUihklnRQpqge1.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zHdeIe0REV8FdAalSR75HtWLDql.jpg", tmdbId: 1627516 },
+  "pushpaka vimanam": { poster: "https://image.tmdb.org/t/p/w500/jd5vrm1WnNJ1ifTqajKGEJexzzI.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/i5rbYSbN7kvhOnr0u2pxOHusMrv.jpg", tmdbId: 878470 },
+  "gandhi talks": { poster: "https://image.tmdb.org/t/p/w500/p4iQT3s97T3gQOLhTj0UplzYMOj.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4Cqad6ZpWJRhBumGE1QwHs9pVuB.jpg", tmdbId: 786567 },
+  "manglik": { poster: "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg", tmdbId: 103250 },
+  "mr mrs office": { poster: "https://image.tmdb.org/t/p/w500/upwdEyhhYZ7pT2hD535fr2MGfpx.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/m0ks2o59mOAz6WdCybJ5FAUNTOU.jpg", tmdbId: 103260 },
+  "ramayana": { poster: "https://image.tmdb.org/t/p/w500/7wHBYs8H4F2Wsh8hP6fM8ZlWwXJ.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/4qshTjY0uW1eWz8eB0zXlB8Kx0p.jpg", tmdbId: 656908 },
+  "yezhu kadal yezhu malai": { poster: "https://image.tmdb.org/t/p/w500/wdWQA1IVCYiTTEZMSnWl1tzhBd3.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/iipz8h0FT6pKI29A6DfRunYuLok.jpg", tmdbId: 954445 }
+};
+
 /**
  * Movieshub Main Application Controller
  * Created by Prem
@@ -88,6 +114,14 @@ class MovieshubApp {
   /* ================= MOVIE REGISTRY & LOOKUP ================= */
   registerMovie(m) {
     if (!m || !m.title) return;
+    const cleanK = m.title.toLowerCase().trim();
+    if (KNOWN_VERIFIED_POSTERS[cleanK]) {
+      if (!m.poster || m.poster.includes("moviezda") || m.poster.includes("moviesda") || m.poster.includes("/api/poster")) {
+        m.poster = KNOWN_VERIFIED_POSTERS[cleanK].poster;
+        m.backdrop = KNOWN_VERIFIED_POSTERS[cleanK].backdrop;
+        if (KNOWN_VERIFIED_POSTERS[cleanK].tmdbId && (!m.tmdbId || m.tmdbId < 10000)) m.tmdbId = KNOWN_VERIFIED_POSTERS[cleanK].tmdbId;
+      }
+    }
     if (m.id) {
       const strId = String(m.id);
       this.movieMap.set(strId, m);
@@ -962,56 +996,88 @@ class MovieshubApp {
 
   setupHeroCarousel(heroMovies) {
     if (!heroMovies || heroMovies.length === 0) return "";
-    this.heroCarouselMovies = heroMovies.slice(0, 5);
+    this.heroCarouselMovies = heroMovies.slice(0, 10);
     this.currentHeroIndex = 0;
 
     const m = this.heroCarouselMovies[0];
     const isSaved = this.myList.includes(m.id);
+    const len = this.heroCarouselMovies.length;
+    const next1 = this.heroCarouselMovies[1 % len] || m;
+    const next2 = this.heroCarouselMovies[2 % len] || m;
+
+    const ratingVal = (typeof m.rating === "number" && m.rating > 0)
+      ? m.rating.toFixed(1)
+      : (m.rating === "NEW" ? "8.8" : "7.4");
+    const votesCount = m.voteCount || (m.year >= 2026 ? "460" : "1.2k");
+    const genres = (Array.isArray(m.genres) && m.genres.length > 0)
+      ? m.genres.slice(0, 6)
+      : ["Action", "Adventure", "Thriller", "Drama"];
 
     return `
-      <!-- Hero Billboard Carousel (Netflix & Hotstar Auto-Rotating) -->
-      <section class="hero-billboard" id="hero-billboard-section" style="background-image: linear-gradient(to right, rgba(8, 7, 13, 0.95) 25%, rgba(8, 7, 13, 0.6) 60%, rgba(8, 7, 13, 0.3) 100%), url('${m.backdrop || m.poster}');">
+      <!-- Hero Billboard Carousel (Cinecat Style - Screenshot 2) -->
+      <section class="hero-billboard cinecat-hero" id="hero-billboard-section" style="background-image: linear-gradient(to right, rgba(8, 7, 13, 0.96) 28%, rgba(8, 7, 13, 0.72) 65%, rgba(8, 7, 13, 0.35) 100%), url('${m.backdrop || m.poster}');">
         <button class="hero-arrow prev" id="hero-arrow-prev" title="Previous Movie" aria-label="Previous">‹</button>
         <button class="hero-arrow next" id="hero-arrow-next" title="Next Movie" aria-label="Next">›</button>
 
         <div class="hero-content" id="hero-content-box">
-          <div class="hero-badges">
-            <span class="badge-lang" id="hero-badge-lang">${m.language || "Tamil"} Cinema</span>
-            <span class="badge-match" id="hero-badge-year">${m.year || 2024} RELEASE</span>
-            <span class="badge-quality">4K Ultra HD</span>
-            <span class="badge-sound">Dolby Atmos</span>
-            <span class="badge-creator" style="background:rgba(229,9,20,0.25);border:1px solid #e50914;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:700;">Created by Prem</span>
-            <span class="badge-creator" id="hero-badge-rating" style="background:rgba(234,179,8,0.2);border:1px solid #eab308;color:#facc15;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:800;">${(typeof m.rating === "number" && m.rating > 0) ? `★ ${m.rating.toFixed(1)} TMDB` : (m.rating === "NEW" || (m.year && m.year >= 2026) ? "🆕 NEW RELEASE" : `★ ${m.rating || "7.5"} TMDB`)}</span>
+          <h1 class="hero-title cine-hero-title" id="hero-title">${m.title}</h1>
+
+          <div class="hero-cine-meta" id="hero-cine-meta">
+            <span class="tmdb-pill">
+              <span class="tmdb-icon">TMDB</span>
+              <span class="tmdb-score" id="hero-tmdb-score">${ratingVal}</span>
+              <span class="tmdb-votes" id="hero-tmdb-votes">(${votesCount})</span>
+            </span>
+            <span class="meta-separator">•</span>
+            <span class="hero-meta-year" id="hero-badge-year">${m.year || 2026}</span>
+            <span class="meta-separator">•</span>
+            <span class="hero-meta-lang" id="hero-badge-lang">${m.language || "Tamil"} Cinema</span>
           </div>
-          <h1 class="hero-title" id="hero-title">${m.title}</h1>
-          <p class="hero-synopsis" id="hero-synopsis">${m.overview || ""}</p>
-          <div class="hero-buttons">
-            <button class="btn-main-play" id="hero-btn-play">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-              <span>Play</span>
+
+          <p class="hero-synopsis cine-hero-synopsis" id="hero-synopsis">${m.overview || ""}</p>
+
+          <div class="hero-buttons cine-hero-buttons">
+            <button class="btn-cine-play" id="hero-btn-play">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Play Now</span>
             </button>
-            <button class="btn-main-info" id="hero-btn-download" style="background:#22c55e;color:#000;font-weight:800;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Download</span>
-            </button>
-            <button class="btn-main-info" id="hero-btn-trailer" style="background:rgba(255,255,255,0.12);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-              <span>Trailer</span>
-            </button>
-            <button class="btn-main-info" id="hero-btn-info">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <button class="btn-cine-info" id="hero-btn-info">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
               <span>More Info</span>
             </button>
-            <button class="btn-main-watchlist ${isSaved ? "in-list" : ""}" id="hero-btn-list" title="Add to My List">
-              ${isSaved
-                ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`
-              }
+            <button class="btn-cine-icon" id="hero-btn-trailer" title="Watch Trailer">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
             </button>
+            <button class="btn-cine-icon ${isSaved ? "in-list" : ""}" id="hero-btn-list" title="Add to My List">
+              ${isSaved
+                ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+                : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`}
+            </button>
+          </div>
+
+          <div class="cine-genre-tags" id="hero-genre-tags">
+            ${genres.map(g => `<span class="cine-genre-tag" data-genre="${g}">${g}</span>`).join("")}
+            <span class="cine-genre-tag more" data-genre="more">+ More</span>
           </div>
         </div>
 
-        <!-- 5 Indicators for IMDb Top 5 -->
+        <!-- Stacked Upcoming Slide Preview Cards (Screenshot 2) -->
+        <div class="hero-preview-stack" id="hero-preview-stack">
+          <div class="hero-preview-card" id="hero-prev-card-1" title="Next: ${next1.title}">
+            <img src="${next1.backdrop || next1.poster}" alt="${next1.title}" class="preview-card-img" id="hero-prev-img-1" />
+            <div class="preview-card-overlay">
+              <span class="preview-card-title" id="hero-prev-title-1">${next1.title}</span>
+            </div>
+          </div>
+          <div class="hero-preview-card" id="hero-prev-card-2" title="Next: ${next2.title}">
+            <img src="${next2.backdrop || next2.poster}" alt="${next2.title}" class="preview-card-img" id="hero-prev-img-2" />
+            <div class="preview-card-overlay">
+              <span class="preview-card-title" id="hero-prev-title-2">${next2.title}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10 Indicator Dots for Daily Top 10 Releases -->
         <div class="hero-indicators" id="hero-indicators">
           ${this.heroCarouselMovies.map((_, i) => `<div class="hero-dot ${i === 0 ? "active" : ""}" data-index="${i}"></div>`).join("")}
         </div>
@@ -1031,7 +1097,7 @@ class MovieshubApp {
       const m = this.heroCarouselMovies[this.currentHeroIndex];
       if (!m) return;
 
-      section.style.backgroundImage = `linear-gradient(to right, rgba(8, 7, 13, 0.95) 25%, rgba(8, 7, 13, 0.6) 60%, rgba(8, 7, 13, 0.3) 100%), url('${m.backdrop || m.poster}')`;
+      section.style.backgroundImage = `linear-gradient(to right, rgba(8, 7, 13, 0.96) 28%, rgba(8, 7, 13, 0.72) 65%, rgba(8, 7, 13, 0.35) 100%), url('${m.backdrop || m.poster}')`;
 
       const titleEl = document.getElementById("hero-title");
       if (titleEl) titleEl.textContent = m.title;
@@ -1039,19 +1105,47 @@ class MovieshubApp {
       const synEl = document.getElementById("hero-synopsis");
       if (synEl) synEl.textContent = m.overview || "";
 
+      const scoreEl = document.getElementById("hero-tmdb-score");
+      if (scoreEl) {
+        scoreEl.textContent = (typeof m.rating === "number" && m.rating > 0)
+          ? m.rating.toFixed(1)
+          : (m.rating === "NEW" ? "8.8" : "7.4");
+      }
+
+      const votesEl = document.getElementById("hero-tmdb-votes");
+      if (votesEl) votesEl.textContent = `(${m.voteCount || (m.year >= 2026 ? "460" : "1.2k")})`;
+
+      const yearEl = document.getElementById("hero-badge-year");
+      if (yearEl) yearEl.textContent = m.year || 2026;
+
       const langEl = document.getElementById("hero-badge-lang");
       if (langEl) langEl.textContent = `${m.language || "Tamil"} Cinema`;
 
-      const yearEl = document.getElementById("hero-badge-year");
-      if (yearEl) yearEl.textContent = `${m.year || 2024} RELEASE`;
-
-      const ratEl = document.getElementById("hero-badge-rating");
-      if (ratEl) {
-        ratEl.textContent = (typeof m.rating === "number" && m.rating > 0)
-          ? `★ ${m.rating.toFixed(1)} TMDB`
-          : (m.rating === "NEW" || (m.year && m.year >= 2026) ? "🆕 NEW RELEASE" : `★ ${m.rating || "7.5"} TMDB`);
+      // Update genre tags
+      const genresEl = document.getElementById("hero-genre-tags");
+      if (genresEl) {
+        const genres = (Array.isArray(m.genres) && m.genres.length > 0)
+          ? m.genres.slice(0, 6)
+          : ["Action", "Adventure", "Thriller", "Drama"];
+        genresEl.innerHTML = genres.map(g => `<span class="cine-genre-tag" data-genre="${g}">${g}</span>`).join("") + `<span class="cine-genre-tag more" data-genre="more">+ More</span>`;
       }
 
+      // Update stacked preview cards
+      const len = this.heroCarouselMovies.length;
+      const n1 = this.heroCarouselMovies[(this.currentHeroIndex + 1) % len];
+      const n2 = this.heroCarouselMovies[(this.currentHeroIndex + 2) % len];
+
+      const pImg1 = document.getElementById("hero-prev-img-1");
+      const pTitle1 = document.getElementById("hero-prev-title-1");
+      if (pImg1 && n1) pImg1.src = n1.backdrop || n1.poster;
+      if (pTitle1 && n1) pTitle1.textContent = n1.title;
+
+      const pImg2 = document.getElementById("hero-prev-img-2");
+      const pTitle2 = document.getElementById("hero-prev-title-2");
+      if (pImg2 && n2) pImg2.src = n2.backdrop || n2.poster;
+      if (pTitle2 && n2) pTitle2.textContent = n2.title;
+
+      // Update dots
       document.querySelectorAll(".hero-dot").forEach((dot, i) => {
         dot.classList.toggle("active", i === this.currentHeroIndex);
       });
@@ -1059,10 +1153,10 @@ class MovieshubApp {
       const isSaved = this.myList.includes(m.id);
       const listBtn = document.getElementById("hero-btn-list");
       if (listBtn) {
-        listBtn.className = `btn-main-watchlist ${isSaved ? "in-list" : ""}`;
+        listBtn.className = `btn-cine-icon ${isSaved ? "in-list" : ""}`;
         listBtn.innerHTML = isSaved
-          ? `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
-          : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+          ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`
+          : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
       }
     };
 
@@ -1108,6 +1202,36 @@ class MovieshubApp {
     const nextBtn = document.getElementById("hero-arrow-next");
     if (prevBtn) prevBtn.addEventListener("click", (e) => { e.stopPropagation(); prevSlide(); });
     if (nextBtn) nextBtn.addEventListener("click", (e) => { e.stopPropagation(); nextSlide(); });
+
+    // Preview cards click to jump
+    const card1 = document.getElementById("hero-prev-card-1");
+    const card2 = document.getElementById("hero-prev-card-2");
+    if (card1) card1.addEventListener("click", (e) => {
+      e.stopPropagation();
+      updateSlide(this.currentHeroIndex + 1);
+    });
+    if (card2) card2.addEventListener("click", (e) => {
+      e.stopPropagation();
+      updateSlide(this.currentHeroIndex + 2);
+    });
+
+    // Genre tags click
+    section.addEventListener("click", (e) => {
+      const tag = e.target.closest(".cine-genre-tag");
+      if (tag && tag.dataset.genre) {
+        const g = tag.dataset.genre;
+        if (g === "more") {
+          const lBar = document.getElementById("language-filter-bar");
+          if (lBar) lBar.scrollIntoView({ behavior: "smooth" });
+        } else {
+          const sInput = document.getElementById("live-search-input");
+          if (sInput) {
+            sInput.value = g;
+            this.handleSearch(g);
+          }
+        }
+      }
+    });
 
     document.querySelectorAll(".hero-dot").forEach(dot => {
       dot.addEventListener("click", (e) => {
@@ -1161,7 +1285,7 @@ class MovieshubApp {
     }
   }
 
-  renderTamilSections(container) {
+    renderTamilSections(container) {
     const allTamilList = this.catalog.filter(m => m.language === "Tamil");
     // Sort Tamil movies by year (latest 2026/2025 first) then rating
     const sortedTamil = [...allTamilList].sort((a, b) => {
@@ -1170,8 +1294,8 @@ class MovieshubApp {
     });
 
     const tamilHeroMovies = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
-      ? this.dashboardData.tamil_2026.filter(m => (m.backdrop || m.poster)).slice(0, 5)
-      : sortedTamil.slice(0, 5);
+      ? this.dashboardData.tamil_2026.filter(m => (m.backdrop || m.poster)).slice(0, 10)
+      : sortedTamil.slice(0, 10);
     const latestTamil = sortedTamil.slice(0, 6);
 
     const tamil2026 = (this.dashboardData && this.dashboardData.tamil_2026 && this.dashboardData.tamil_2026.length > 0)
@@ -1192,7 +1316,25 @@ class MovieshubApp {
       <!-- Dedicated Tamil Hero Carousel -->
       ${this.setupHeroCarousel(tamilHeroMovies)}
 
-      <div class="category-header-wrap" style="padding: 24px 4% 0;">
+      <!-- Cinecat Top 10 Section (Screenshot 2) -->
+      <section class="top10-section">
+        <div class="top10-header-row">
+          <div class="top10-title-wrap">
+            <h2 class="top10-heading">Top 10</h2>
+            <div class="top10-filter-pills" id="top10-tamil-pills">
+              <button class="top10-pill active" data-tab="movies">Movies</button>
+              <button class="top10-pill" data-tab="theatre">Theatrical</button>
+              <button class="top10-pill" data-tab="picks">Editor Picks</button>
+            </div>
+          </div>
+          <a href="#tamil" class="top10-view-more">View more <span class="view-more-arrow">→</span></a>
+        </div>
+        <div class="cards-carousel top10-carousel" id="top10-tamil-carousel">
+          ${sortedTamil.slice(0, 10).map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>
+
+      <div class="category-header-wrap" style="padding: 16px 4% 0;">
         <h1 style="font-size: 28px; font-weight: 800; color: #fff; margin-bottom: 6px;">Tamil Cinema (தமிழ்)</h1>
         <p style="color: #9ca3af; font-size: 14px; margin: 0;">Stream & Download Latest 2026, 2025, and 2024 Tamil Blockbusters in 1080p Ultra HD</p>
       </div>
@@ -1283,7 +1425,7 @@ class MovieshubApp {
     } else if (this.dashboardData?.latest_six && Array.isArray(this.dashboardData.latest_six) && this.dashboardData.latest_six.length > 0) {
       heroCandidates = this.dashboardData.latest_six.filter(m => (m.backdrop || m.poster));
     }
-    if (heroCandidates.length < 5) {
+    if (heroCandidates.length < 10) {
       heroCandidates = [...heroCandidates, ...sortedCatalog];
     }
     const cleanHeroList = [];
@@ -1293,7 +1435,7 @@ class MovieshubApp {
       if (!seenHeroIds.has(key)) {
         seenHeroIds.add(key);
         cleanHeroList.push(hm);
-        if (cleanHeroList.length >= 5) break;
+        if (cleanHeroList.length >= 10) break;
       }
     }
     const top5Imdb = cleanHeroList;
@@ -1338,8 +1480,26 @@ class MovieshubApp {
     const malayalamMovies = sortByLatest(this.catalog.filter(m => m.language === "Malayalam"));
 
     container.innerHTML = `
-      <!-- Hero Billboard Carousel (Netflix & Hotstar Auto-Rotating) -->
+      <!-- Hero Billboard Carousel (Cinecat Style - Screenshot 2) -->
       ${this.setupHeroCarousel(top5Imdb)}
+
+      <!-- Cinecat Top 10 Section (Screenshot 2) -->
+      <section class="top10-section">
+        <div class="top10-header-row">
+          <div class="top10-title-wrap">
+            <h2 class="top10-heading">Top 10</h2>
+            <div class="top10-filter-pills" id="top10-main-pills">
+              <button class="top10-pill active" data-tab="movies">Movies</button>
+              <button class="top10-pill" data-tab="tv">TV Shows</button>
+              <button class="top10-pill" data-tab="picks">Editor Picks</button>
+            </div>
+          </div>
+          <a href="#movies" class="top10-view-more">View more <span class="view-more-arrow">→</span></a>
+        </div>
+        <div class="cards-carousel top10-carousel" id="top10-main-carousel">
+          ${top10.map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>
 
       <!-- 1. TOP 6 LATEST RELEASES (IMDb / TMDB Real-Time Sync) -->
       ${latestSix.length > 0 ? `
@@ -1481,7 +1641,17 @@ class MovieshubApp {
   }
 
   renderMovieCard(movie) {
-    if (movie) this.registerMovie(movie);
+    if (movie) {
+      this.registerMovie(movie);
+      const cleanK = (movie.title || "").toLowerCase().trim();
+      if (KNOWN_VERIFIED_POSTERS[cleanK]) {
+        if (!movie.poster || movie.poster.includes("moviezda") || movie.poster.includes("moviesda") || movie.poster.includes("/api/poster")) {
+          movie.poster = KNOWN_VERIFIED_POSTERS[cleanK].poster;
+          movie.backdrop = KNOWN_VERIFIED_POSTERS[cleanK].backdrop;
+          if (KNOWN_VERIFIED_POSTERS[cleanK].tmdbId && (!movie.tmdbId || movie.tmdbId < 10000)) movie.tmdbId = KNOWN_VERIFIED_POSTERS[cleanK].tmdbId;
+        }
+      }
+    }
     const isSaved = this.myList.includes(movie.id);
     const posterSrc = movie.poster || `${(typeof window !== "undefined" && window.API_PREFIX) || ""}/api/poster?title=${encodeURIComponent(movie.title)}&year=${movie.year || 2026}`;
     const cleanTitle = (movie.title || "Movie").replace(/[<>"']/g, "");
@@ -1981,6 +2151,80 @@ class MovieshubApp {
         const dlModal = document.getElementById("download-modal");
         if (dlModal) dlModal.classList.add("hidden");
         if (this.player) this.player.close();
+      }
+    });
+
+    // Cinecat Header Controls
+    const browseBtn = document.getElementById("cine-header-browse");
+    if (browseBtn) {
+      browseBtn.addEventListener("click", () => {
+        const lBar = document.getElementById("language-filter-bar");
+        if (lBar) lBar.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+
+    const appsBtn = document.getElementById("cine-header-apps");
+    if (appsBtn) {
+      appsBtn.addEventListener("click", () => this.switchView("livetv"));
+    }
+
+    const bellBtn = document.getElementById("cine-header-bell");
+    if (bellBtn) {
+      bellBtn.addEventListener("click", () => {
+        this.showToast("⚡ 10 Fresh 2026 Blockbusters Synced Live & Updated Daily");
+      });
+    }
+
+    // Cinecat Floating Bottom Navigation Controls
+    const findNav = document.getElementById("cine-nav-find");
+    if (findNav) {
+      findNav.addEventListener("click", (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        const sInput = document.getElementById("live-search-input");
+        if (sInput) {
+          sInput.focus();
+          sInput.select();
+        }
+      });
+    }
+
+    const discoverNav = document.getElementById("cine-nav-discover");
+    if (discoverNav) {
+      discoverNav.addEventListener("click", (e) => {
+        e.preventDefault();
+        this.switchView("movies");
+        const lBar = document.getElementById("language-filter-bar");
+        if (lBar) lBar.scrollIntoView({ behavior: "smooth" });
+      });
+    }
+
+    // Top 10 Category Tabs Delegation
+    document.addEventListener("click", (e) => {
+      const pill = e.target.closest(".top10-pill");
+      if (!pill) return;
+      const parentPills = pill.closest(".top10-filter-pills");
+      if (parentPills) {
+        parentPills.querySelectorAll(".top10-pill").forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+      }
+      const tab = pill.dataset.tab;
+      const carousel = document.getElementById("top10-main-carousel") || document.getElementById("top10-tamil-carousel");
+      if (!carousel) return;
+
+      let list = [];
+      if (tab === "tv") {
+        list = this.catalog.filter(m => m.mediaType === "tv").slice(0, 10);
+      } else if (tab === "theatre") {
+        list = this.catalog.filter(m => m.isTheatrePrint || (m.year && m.year >= 2026)).slice(0, 10);
+      } else if (tab === "picks") {
+        list = [...this.catalog].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 10);
+      } else {
+        list = [...this.catalog].filter(m => m.trendingRank || m.rating >= 8.0).slice(0, 10);
+      }
+      if (list.length > 0) {
+        carousel.innerHTML = list.map(m => this.renderMovieCard(m)).join("");
+        this.bindCardEvents();
       }
     });
   }
