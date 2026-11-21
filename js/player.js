@@ -1443,7 +1443,7 @@ class MovieshubPlayer {
       const episode = movie?.episode || 1;
 
       // MULTI-SERVER STREAMING NETWORK (js/player.js)
-      // Standard 9 Servers available for all movies
+      // Standard 9 Verified Active Servers available for all movies
       const servers = [
         {
           id: "s1",
@@ -1498,16 +1498,16 @@ class MovieshubPlayer {
           name: "Server 7",
           badge: "Mirror HD (VidSrc PM)",
           url: mtype === "tv"
-            ? `https://vidsrc.pm/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsrc.pm/embed/movie/${resolvedTmdbId}`
+            ? `https://vidprime.top/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidprime.top/movie/${resolvedTmdbId}`
         },
         {
           id: "s8",
           name: "Server 8",
           badge: "Ultra CDN (VidSrc Net)",
           url: mtype === "tv"
-            ? `https://vidsrc.to/embed/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidsrc.to/embed/movie/${resolvedTmdbId}`
+            ? `https://play2.123embed.net/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://play2.123embed.net/movie/${resolvedTmdbId}`
         },
         {
           id: "s9",
@@ -1567,7 +1567,7 @@ class MovieshubPlayer {
               <button id="bottomPlayerBackBtn" class="bottom-back-btn" title="Back to Movieshub" style="display:none;"></button>
               <div class="player-server-pills" id="playerModalServerPills" style="white-space:nowrap;">
                 ${servers.map((s, idx) => `
-                  <button class="srv-pill-btn ${idx === 0 ? "active" : ""}" data-idx="${idx}">
+                  <button class="srv-pill-btn ${idx === this.currentServerIdx ? "active" : ""}" data-idx="${idx}">
                     <span>${s.name}</span>
                     <span class="srv-pill-badge">${s.badge}</span>
                   </button>
@@ -1691,7 +1691,7 @@ class MovieshubPlayer {
 
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
             const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-            const timeoutId = controller ? setTimeout(() => controller.abort(), 2000) : null;
+            const timeoutId = controller ? setTimeout(() => controller.abort(), 4500) : null;
 
             fetch(srv.url, controller ? { signal: controller.signal } : {})
               .then(res => {
