@@ -2047,6 +2047,18 @@ module.exports = async (req, res) => {
     }));
   }
 
+  // 2c. TimStreams Live Sports Sync & Stream Aggregator
+  if (pathname === '/api/sports') {
+    const forceRefresh = u.searchParams.get('refresh') === '1';
+    const data = await syncTimStreams(forceRefresh);
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=180',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(JSON.stringify(data || { status: 'ok', matches: [] }));
+  }
+
   // 3. Search
   if (pathname === '/api/search') {
     const q = u.searchParams.get('q') || '';
@@ -2468,7 +2480,141 @@ if (typeof setInterval !== 'undefined') {
 }
 
 
+
+let cachedSportsData = null;
+let lastSportsSyncTime = 0;
+const SPORTS_CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache
+
+const TIM_GENRE_MAP = {
+  1: { name: "Football", logo: "⚽", gradient: "linear-gradient(135deg, #170d2b 0%, #3b0764 100%)" },
+  2: { name: "Motorsport", logo: "🏎️", gradient: "linear-gradient(135deg, #2b0b00 0%, #4a1500 100%)" },
+  3: { name: "Combat", logo: "🥊", gradient: "linear-gradient(135deg, #3f0909 0%, #831843 100%)" },
+  6: { name: "Wrestling", logo: "🤼", gradient: "linear-gradient(135deg, #1b0000 0%, #450a0a 100%)" },
+  7: { name: "Basketball", logo: "🏀", gradient: "linear-gradient(135deg, #2d1800 0%, #4f2d00 100%)" },
+  8: { name: "American Football", logo: "🏈", gradient: "linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%)" },
+  9: { name: "Baseball", logo: "⚾", gradient: "linear-gradient(135deg, #0c2340 0%, #1d3557 100%)" },
+  10: { name: "Tennis", logo: "🎾", gradient: "linear-gradient(135deg, #134e4a 0%, #042f2e 100%)" },
+  11: { name: "Hockey", logo: "🏒", gradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" },
+  13: { name: "Cricket", logo: "🏏", gradient: "linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%)" },
+  15: { name: "Rugby", logo: "🏉", gradient: "linear-gradient(135deg, #3d0000 0%, #1f0000 100%)" },
+  16: { name: "Rugby", logo: "🏉", gradient: "linear-gradient(135deg, #3d0000 0%, #1f0000 100%)" },
+  18: { name: "Other Sports", logo: "🏆", gradient: "linear-gradient(135deg, #1f2937 0%, #111827 100%)" }
+};
+
+async function syncTimStreams(force = false) {
+  const now = Date.now();
+  if (!force && cachedSportsData && (now - lastSportsSyncTime < SPORTS_CACHE_TTL)) {
+    return cachedSportsData;
+  }
+
+  try {
+    const [liveRes, chanRes] = await Promise.all([
+      fetchJson("https://tim-streams.com/api/live-upcoming", { timeout: 6000 }).catch(() => null),
+      fetchJson("https://tim-streams.com/api/channels", { timeout: 6000 }).catch(() => null)
+    ]);
+
+    const liveEvents = (liveRes && Array.isArray(liveRes.events)) ? liveRes.events : [];
+    const allChannels = (chanRes && Array.isArray(chanRes.channels)) ? chanRes.channels : [];
+
+    const matches = [];
+
+    // 1. Process Live & Upcoming Events
+    for (const ev of liveEvents) {
+      if (!ev.name || !ev.streams || ev.streams.length === 0) continue;
+      const gInfo = TIM_GENRE_MAP[ev.genre] || { name: "Sports", logo: "🏆", gradient: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)" };
+      const stream1 = ev.streams[0]?.url || "";
+      const stream2 = ev.streams[1]?.url || stream1;
+      const stream3 = ev.streams[2]?.url || "";
+
+      matches.push({
+        id: `tim-event-${ev.url || Math.random().toString(36).slice(2, 8)}`,
+        title: ev.name,
+        sport: gInfo.name,
+        subtitle: `${ev.time ? ev.time.replace("T", " ") + " • " : ""}${ev.streams[0]?.name || "Live Stream"} • TimStreams`,
+        badge: ev.streams[0]?.name || "TimStreams HD",
+        quality: "1080p Ultra",
+        viewers: ev.viewers || (1200 + Math.floor(Math.random() * 2500)),
+        status: "LIVE",
+        logo: gInfo.logo,
+        bgGradient: gInfo.gradient,
+        streamUrl: stream1,
+        streamUrl2: stream2,
+        streamUrl3: stream3,
+        isEmbed: true,
+        source: "tim-streams",
+        isEvent: true
+      });
+    }
+
+    // 2. Process High-Profile Sports Channels
+    const sportsKeywords = ["sport", "espn", "tnt", "willow", "fox", "cbs", "nbc", "golf", "tennis", "nfl", "nba", "mlb", "nhl", "f1", "racing", "wwe", "fight"];
+    for (const ch of allChannels) {
+      const nameLow = (ch.name || "").toLowerCase();
+      const isSports = sportsKeywords.some(k => nameLow.includes(k));
+      if (!isSports || !ch.streams || ch.streams.length === 0) continue;
+
+      let sportCat = "Other Sports";
+      let sLogo = "🏆";
+      let sGrad = "linear-gradient(135deg, #111827 0%, #1f2937 100%)";
+
+      if (nameLow.includes("cricket") || nameLow.includes("willow")) {
+        sportCat = "Cricket"; sLogo = "🏏"; sGrad = "linear-gradient(135deg, #091e3a 0%, #1e3a8a 100%)";
+      } else if (nameLow.includes("football") || nameLow.includes("soccer") || nameLow.includes("bein") || nameLow.includes("premier")) {
+        sportCat = "Football"; sLogo = "⚽"; sGrad = "linear-gradient(135deg, #170d2b 0%, #3b0764 100%)";
+      } else if (nameLow.includes("f1") || nameLow.includes("racing") || nameLow.includes("moto")) {
+        sportCat = "Motorsport"; sLogo = "🏎️"; sGrad = "linear-gradient(135deg, #2b0b00 0%, #4a1500 100%)";
+      } else if (nameLow.includes("basketball") || nameLow.includes("nba")) {
+        sportCat = "Basketball"; sLogo = "🏀"; sGrad = "linear-gradient(135deg, #2d1800 0%, #4f2d00 100%)";
+      } else if (nameLow.includes("golf")) {
+        sportCat = "Golf"; sLogo = "⛳"; sGrad = "linear-gradient(135deg, #062b14 0%, #0f4a26 100%)";
+      } else if (nameLow.includes("tennis")) {
+        sportCat = "Tennis"; sLogo = "🎾"; sGrad = "linear-gradient(135deg, #134e4a 0%, #042f2e 100%)";
+      } else if (nameLow.includes("wwe") || nameLow.includes("fight") || nameLow.includes("combat")) {
+        sportCat = "Combat"; sLogo = "🥊"; sGrad = "linear-gradient(135deg, #3f0909 0%, #831843 100%)";
+      } else if (nameLow.includes("nfl") || nameLow.includes("american football")) {
+        sportCat = "American Football"; sLogo = "🏈"; sGrad = "linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%)";
+      }
+
+      matches.push({
+        id: `tim-channel-${ch.url || Math.random().toString(36).slice(2, 8)}`,
+        title: `${ch.name} HD`,
+        sport: sportCat,
+        subtitle: `24/7 Live Network • ${ch.name} • TimStreams`,
+        badge: ch.name,
+        quality: "1080p",
+        viewers: 900 + Math.floor(Math.random() * 1500),
+        status: "LIVE",
+        logo: sLogo,
+        bgGradient: sGrad,
+        streamUrl: ch.streams[0]?.url || "",
+        streamUrl2: ch.streams[1]?.url || ch.streams[0]?.url || "",
+        isEmbed: true,
+        source: "tim-streams",
+        isChannel: true
+      });
+    }
+
+    if (matches.length > 0) {
+      cachedSportsData = {
+        status: "ok",
+        lastUpdated: new Date().toISOString(),
+        total: matches.length,
+        eventsCount: liveEvents.length,
+        channelsCount: matches.length - liveEvents.length,
+        matches
+      };
+      lastSportsSyncTime = now;
+      console.log(`[TimStreams Sync] Successfully synced ${matches.length} live matches & sports channels.`);
+    }
+  } catch (err) {
+    console.warn('[TimStreams Sync Error]', err.message);
+  }
+
+  return cachedSportsData;
+}
+
 module.exports.syncDashboardCatalog = syncDashboardCatalog;
+module.exports.syncTimStreams = syncTimStreams;
 module.exports.getActiveMoviesdaDomain = getActiveMoviesdaDomain;
 module.exports.getMoviesdaFolders = getMoviesdaFolders;
 module.exports.resolveMoviesdaLive = resolveMoviesdaLive;

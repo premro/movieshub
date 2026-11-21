@@ -509,6 +509,26 @@ assert(stylesCssFinal.includes(".search-input-wrapper:focus-within") && stylesCs
 assert(stylesCssFinal.includes(".cine-header-btn {\n    display: none !important;") || stylesCssFinal.includes(".cine-header-btn {\n    display: none !important"), "Mobile header unclutters duplicate buttons giving full width to search input");
 assert(stylesCssFinal.includes("@media (max-width: 600px)") && stylesCssFinal.includes(".brand-text {\n    display: none !important;"), "Ultra-compact mobile viewport collapses brand text for maximum search bar prominence");
 
+// 26. Testing TimStreams Live Sports Sync, 24/7 Channels & Anti-Redirect Playback
+console.log("\n26. Testing TimStreams Live Sports Sync, 24/7 Channels & Anti-Redirect Playback...");
+const apiJsText = fs.readFileSync(path.join(__dirname, "../api/index.js"), "utf8");
+const funcJsText = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
+const sportsJsText = fs.readFileSync(path.join(__dirname, "../js/sports.js"), "utf8");
+
+assert(apiJsText.includes("syncTimStreams") && apiJsText.includes("TIM_GENRE_MAP"), "TimStreams sync engine implemented in api/index.js with genre mapping");
+assert(funcJsText.includes("syncTimStreams") && funcJsText.includes("TIM_GENRE_MAP"), "TimStreams sync engine mirrored in functions/movieshub_api/index.js");
+assert(apiJsText.includes("pathname === '/api/sports'"), "Dedicated /api/sports route registered in API");
+
+assert(sportsJsText.includes("fetchLiveMatches") && sportsJsText.includes("/api/sports"), "Sports client fetches live feeds from /api/sports");
+assert(sportsJsText.includes("sportsRefreshBtn") && sportsJsText.includes("sportsLiveCountBadge"), "Sports UI includes live sync refresh button and stream count badge");
+assert(sportsJsText.includes("🔴 Live Now") && sportsJsText.includes("📅 Upcoming") && sportsJsText.includes("📺 24/7 Channels"), "Sports UI supports Live, Upcoming, and 24/7 Channel tabs");
+assert(sportsJsText.includes("sportsIframeEl") && !sportsJsText.includes("sandbox="), "Sports iframe loader for embed streams does not use sandbox attribute, preventing block screens");
+assert(sportsJsText.includes("window.isStreamPlaying = true;"), "Sports player activates window.isStreamPlaying to arm Anti-Framebusting and Anti-Redirect Shield");
+assert(sportsJsText.includes("window.isStreamPlaying = false;"), "Sports modal cleanup resets window.isStreamPlaying on close or destroy");
+assert(sportsJsText.includes("setInterval") && (sportsJsText.includes("180000") || sportsJsText.includes("3 * 60 * 1000")), "Sports engine features periodic live stream auto-refresh");
+
+assert(stylesCssFinal.includes(".sports-refresh-btn") && stylesCssFinal.includes(".sports-categories"), "Sports live controls and category pills styled in styles.css");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

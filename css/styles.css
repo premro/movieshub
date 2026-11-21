@@ -3244,6 +3244,125 @@ body {
   box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
 }
 
+/* Sports Live Sync & Header Controls */
+.sports-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.sports-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sports-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 20px;
+  color: #d8b4fe;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.sports-refresh-btn:hover {
+  background: rgba(168, 85, 247, 0.3);
+  border-color: #a855f7;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+}
+
+.sports-refresh-btn.spinning svg {
+  animation: sportsSpin 1s linear infinite;
+}
+
+@keyframes sportsSpin {
+  100% { transform: rotate(360deg); }
+}
+
+.sports-search-box {
+  flex: 1;
+  max-width: 320px;
+  min-width: 200px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.sports-search-box svg {
+  position: absolute;
+  left: 14px;
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.sports-search-box input {
+  width: 100%;
+  height: 38px;
+  padding: 6px 14px 6px 40px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  color: #fff;
+  font-size: 13.5px;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.sports-search-box input:focus {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: #e50914;
+  box-shadow: 0 0 14px rgba(229, 9, 20, 0.35);
+}
+
+.sports-categories {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+.sports-cat-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 16px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.sports-cat-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.sports-cat-btn.active {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 12px rgba(229, 9, 20, 0.4);
+}
+
 .sports-filter-row {
   display: flex;
   align-items: center;
