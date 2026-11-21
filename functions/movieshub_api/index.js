@@ -2059,6 +2059,50 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify(data || { status: 'ok', matches: [] }));
   }
 
+  // 2d. Clean Sports Stream Proxy (Strips sandbox blockers & rogue ad scripts)
+  if (pathname === "/stream/sports") {
+    const targetUrl = u.searchParams.get("url");
+    if (!targetUrl || !targetUrl.startsWith("http")) {
+      res.writeHead(400, { "Content-Type": "text/plain" });
+      return res.end("Invalid stream URL");
+    }
+
+    try {
+      const { buffer, finalUrl } = await fetchBuffer(targetUrl, {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "Referer": "https://tim-streams.com/"
+        },
+        timeout: 8000
+      });
+
+      let cleanHtml = buffer ? buffer.toString("utf8") : "";
+      const parsedOrigin = new URL(finalUrl || targetUrl).origin;
+
+      // Neutralize anti-sandbox check
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?Remove sandbox attributes on the iframe tag[\s\S]*?<\/script>/gi, "<script>/* Sandbox checks stripped */</script>");
+
+      // Neutralize ad popunders & devtool disabler
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?popundersPerIP[\s\S]*?<\/script>/gi, "<script>/* Ad scripts stripped */</script>");
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?disable-devtool[\s\S]*?<\/script>/gi, "");
+
+      // Inject <base> tag to correctly resolve relative assets (/plum.js, etc.)
+      if (!cleanHtml.includes("<base")) {
+        cleanHtml = cleanHtml.replace(/<head>/i, `<head>\n<base href="${parsedOrigin}/">`);
+      }
+
+      res.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "frame-ancestors *;",
+        "Access-Control-Allow-Origin": "*"
+      });
+      return res.end(cleanHtml);
+    } catch (err) {
+      res.writeHead(302, { "Location": targetUrl });
+      return res.end();
+    }
+  }
+
   // 3. Search
   if (pathname === '/api/search') {
     const q = u.searchParams.get('q') || '';
@@ -2482,6 +2526,15 @@ if (typeof setInterval !== 'undefined') {
 
 
 let cachedSportsData = null;
+try {
+  const localSportsFile = path.join(__dirname, "../data/sports_cache.json");
+  const tmpSportsFile = "/tmp/sports_cache.json";
+  if (fs.existsSync(tmpSportsFile)) {
+    cachedSportsData = JSON.parse(fs.readFileSync(tmpSportsFile, "utf8"));
+  } else if (fs.existsSync(localSportsFile)) {
+    cachedSportsData = JSON.parse(fs.readFileSync(localSportsFile, "utf8"));
+  }
+} catch (e) {}
 let lastSportsSyncTime = 0;
 const SPORTS_CACHE_TTL = 3 * 60 * 1000; // 3 minutes cache
 
@@ -2595,7 +2648,17 @@ async function syncTimStreams(force = false) {
     }
 
     if (matches.length > 0) {
-      cachedSportsData = {
+      try {
+      fs.writeFileSync("/tmp/sports_cache.json", JSON.stringify({
+        status: "ok",
+        lastUpdated: new Date().toISOString(),
+        total: matches.length,
+        eventsCount: liveEvents.length,
+        channelsCount: matches.length - liveEvents.length,
+        matches
+      }));
+    } catch (e) {}
+    cachedSportsData = {
         status: "ok",
         lastUpdated: new Date().toISOString(),
         total: matches.length,

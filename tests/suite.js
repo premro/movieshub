@@ -529,6 +529,12 @@ assert(sportsJsText.includes("setInterval") && (sportsJsText.includes("180000") 
 
 assert(stylesCssFinal.includes(".sports-refresh-btn") && stylesCssFinal.includes(".sports-categories"), "Sports live controls and category pills styled in styles.css");
 
+assert(apiJsText.includes("pathname === \"/stream/sports\""), "Dedicated /stream/sports proxy route registered in api/index.js");
+assert(funcJsText.includes("pathname === \"/stream/sports\""), "Dedicated /stream/sports proxy route registered in functions/movieshub_api/index.js");
+assert(sportsJsText.includes("/stream/sports?url="), "Sports iframe loader routes through /stream/sports to eliminate sandbox and popunder issues");
+assert(sportsJsText.includes("this.defaultMatches = [];"), "Old static/misrouted channel entries removed from sports.js");
+assert(apiJsText.includes("Remove sandbox attributes on the iframe tag"), "API stream proxy specifically strips anti-sandbox checks");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
