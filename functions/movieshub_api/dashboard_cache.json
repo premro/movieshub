@@ -4,6 +4,48 @@
   "last_synced_date": "2026-11-20",
   "hero": [
     {
+      "id": "om-operation-mole-tamil-2026",
+      "tmdbId": 1384528,
+      "title": "OM: Operation Mole",
+      "nativeTitle": "O.M: Operation Mole",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "releaseDate": "2026-11-20",
+      "rating": 8.9,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 52m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      "mediaType": "movie",
+      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      "cast": [
+        "Dhanush",
+        "Mammootty",
+        "Sai Pallavi",
+        "Sreeleela",
+        "Naseeruddin Shah"
+      ],
+      "director": "Rajkumar Periasamy",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "103723"
+    },
+    {
       "id": "tmdb-1368337",
       "tmdbId": 1368337,
       "title": "The Odyssey",
@@ -295,39 +337,6 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true
-    },
-    {
-      "id": "tmdb-1518204",
-      "tmdbId": 1518204,
-      "title": "Allen",
-      "nativeTitle": "Allen",
-      "language": "English",
-      "languageBadge": "English",
-      "year": 2026,
-      "releaseDate": "2026-11-12",
-      "rating": 6.9,
-      "match": "79%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Sci-Fi",
-        "Adventure",
-        "Comedy"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/alhhrpj1PSAn5bfz4Os1k7Bweoj.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/51fGmBW7WjyJouP9TjIcxRpCUNk.jpg",
-      "mediaType": "movie",
-      "overview": "20 years after his encounter with an alien, Petey never moved on. Now his old friend has returned, and the reason why is complicated — and unexpected.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": true
     }
   ],
   "latest_six": [
@@ -365,6 +374,48 @@
       "isTrending": false,
       "moviesdaFileId": "103361",
       "isTheatrePrint": true
+    },
+    {
+      "id": "om-operation-mole-tamil-2026",
+      "tmdbId": 1384528,
+      "title": "OM: Operation Mole",
+      "nativeTitle": "O.M: Operation Mole",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "releaseDate": "2026-11-20",
+      "rating": 8.9,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 52m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      "mediaType": "movie",
+      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      "cast": [
+        "Dhanush",
+        "Mammootty",
+        "Sai Pallavi",
+        "Sreeleela",
+        "Naseeruddin Shah"
+      ],
+      "director": "Rajkumar Periasamy",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "103723"
     },
     {
       "id": "tmdb-1263337",
@@ -495,39 +546,6 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": true
-    },
-    {
-      "id": "tmdb-1813355",
-      "tmdbId": 1813355,
-      "title": "A Story of Derry",
-      "nativeTitle": "A Story of Derry",
-      "language": "English",
-      "languageBadge": "English",
-      "year": 2026,
-      "releaseDate": "2026-10-31",
-      "rating": 6.7,
-      "match": "77%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Drama",
-        "Horror",
-        "Cinema"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/4PtzGcegF5Po1NmDAW9IklyvAUh.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/z26LxXDMmAIzKr06FPDudCJyvsM.jpg",
-      "mediaType": "movie",
-      "overview": "Hundreds of years before Pennywise, three youngsters venture into the Western Wood...where they encounter a terrifying ancient spirit.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": true
     }
   ],
   "tamil_2026": [
@@ -565,6 +583,48 @@
       "isTrending": false,
       "moviesdaFileId": "103361",
       "isTheatrePrint": true
+    },
+    {
+      "id": "om-operation-mole-tamil-2026",
+      "tmdbId": 1384528,
+      "title": "OM: Operation Mole",
+      "nativeTitle": "O.M: Operation Mole",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "releaseDate": "2026-11-20",
+      "rating": 8.9,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 52m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      "mediaType": "movie",
+      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      "cast": [
+        "Dhanush",
+        "Mammootty",
+        "Sai Pallavi",
+        "Sreeleela",
+        "Naseeruddin Shah"
+      ],
+      "director": "Rajkumar Periasamy",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "103723"
     },
     {
       "id": "tmdb-1234139",
@@ -880,39 +940,6 @@
       "backdrop": "https://image.tmdb.org/t/p/w1280/xO0YZ1zKFSSpM7dIsvssWKabp6J.jpg",
       "mediaType": "movie",
       "overview": "A fishing captain applies his maritime knowledge in a traditional boat race along Tamil Nadu's coast during a festival, leading a six-person team against other crews.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false
-    },
-    {
-      "id": "tmdb-1384528",
-      "tmdbId": 1384528,
-      "title": "O.M: Operation Mole",
-      "nativeTitle": "ஓ.ம்: Operation Mole",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "releaseDate": "2026-11-20",
-      "rating": "NEW",
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Crime",
-        "Action",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/r0CliRoVddOLJ5zVT2Zd8ldbLuu.jpg",
-      "mediaType": "movie",
-      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
@@ -11066,6 +11093,48 @@
   },
   "all": [
     {
+      "id": "om-operation-mole-tamil-2026",
+      "tmdbId": 1384528,
+      "title": "OM: Operation Mole",
+      "nativeTitle": "O.M: Operation Mole",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "releaseDate": "2026-11-20",
+      "rating": 8.9,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 52m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      "mediaType": "movie",
+      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      "cast": [
+        "Dhanush",
+        "Mammootty",
+        "Sai Pallavi",
+        "Sreeleela",
+        "Naseeruddin Shah"
+      ],
+      "director": "Rajkumar Periasamy",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "103723"
+    },
+    {
       "id": "tmdb-1368337",
       "tmdbId": 1368337,
       "title": "The Odyssey",
@@ -12498,39 +12567,6 @@
       "backdrop": "https://image.tmdb.org/t/p/w1280/xO0YZ1zKFSSpM7dIsvssWKabp6J.jpg",
       "mediaType": "movie",
       "overview": "A fishing captain applies his maritime knowledge in a traditional boat race along Tamil Nadu's coast during a festival, leading a six-person team against other crews.",
-      "cast": [],
-      "director": "Cinematic Director",
-      "isTrending": false
-    },
-    {
-      "id": "tmdb-1384528",
-      "tmdbId": 1384528,
-      "title": "O.M: Operation Mole",
-      "nativeTitle": "ஓ.ம்: Operation Mole",
-      "language": "Tamil",
-      "languageBadge": "Tamil",
-      "year": 2026,
-      "releaseDate": "2026-11-20",
-      "rating": "NEW",
-      "match": "98%",
-      "maturity": "U/A 16+",
-      "duration": "2h 30m",
-      "genres": [
-        "Crime",
-        "Action",
-        "Thriller"
-      ],
-      "qualities": [
-        "4K",
-        "1080p"
-      ],
-      "platform": "Direct",
-      "platformBadge": "MOVIESHUB",
-      "platformColor": "#E50914",
-      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
-      "backdrop": "https://image.tmdb.org/t/p/w1280/r0CliRoVddOLJ5zVT2Zd8ldbLuu.jpg",
-      "mediaType": "movie",
-      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
@@ -21000,6 +21036,343 @@
       "cast": [],
       "director": "Cinematic Director",
       "isTrending": false
+    }
+  ],
+  "hero_slides": [
+    {
+      "id": "om-operation-mole-tamil-2026",
+      "tmdbId": 1384528,
+      "title": "OM: Operation Mole",
+      "nativeTitle": "O.M: Operation Mole",
+      "language": "Tamil",
+      "languageBadge": "Tamil",
+      "year": 2026,
+      "releaseDate": "2026-11-20",
+      "rating": 8.9,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 52m",
+      "genres": [
+        "Action",
+        "Thriller",
+        "Crime"
+      ],
+      "qualities": [
+        "1080p HD",
+        "720p HD",
+        "Dolby Atmos"
+      ],
+      "platform": "Direct",
+      "platformBadge": "THEATRICAL RELEASE",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      "mediaType": "movie",
+      "overview": "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      "cast": [
+        "Dhanush",
+        "Mammootty",
+        "Sai Pallavi",
+        "Sreeleela",
+        "Naseeruddin Shah"
+      ],
+      "director": "Rajkumar Periasamy",
+      "isTrending": true,
+      "isTheatrePrint": true,
+      "moviesdaFileId": "103723"
+    },
+    {
+      "id": "tmdb-1368337",
+      "tmdbId": 1368337,
+      "title": "The Odyssey",
+      "nativeTitle": "The Odyssey",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-07-15",
+      "rating": 8,
+      "match": "90%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Adventure",
+        "Action",
+        "Cinema"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/mIi99BK2mDpLp2lGsa8jCBDFit4.jpg",
+      "mediaType": "movie",
+      "overview": "Odysseus, the legendary King of Ithaca, embarks on a long and perilous journey home following the Trojan War. Throughout his voyage, he is forced to confront the whims of gods, mythological monsters, and trials that stretch both his cunning and his humanity to the breaking point.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1185344",
+      "tmdbId": 1185344,
+      "title": "The Beast",
+      "nativeTitle": "The Beast",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-10-08",
+      "rating": 5.4,
+      "match": "70%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Action",
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/ocg5JfJP19fodcv5uQUApkmZMdI.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/v5Wb9NoE0s1mGmC5wVeQR1OK22V.jpg",
+      "mediaType": "movie",
+      "overview": "When a militia of unidentified hostiles coordinates a coup against the United States, the president must fight back by utilizing the highly classified offensive capabilities of his armored limousine, nicknamed The Beast.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1003596",
+      "tmdbId": 1003596,
+      "title": "Avengers: Doomsday",
+      "nativeTitle": "Avengers: Doomsday",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-12-16",
+      "rating": "NEW",
+      "match": "98%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Sci-Fi",
+        "Action",
+        "Adventure"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/1zqWkLwC1zLBBBtIWzmkmWeMWnT.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/rObL4of4eFA8yWaN9pRFo9aOVNi.jpg",
+      "mediaType": "movie",
+      "overview": "Beloved heroes from three distinct universes are set on a deadly collision course and face an existential threat unlike anything they've ever encountered.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1300968",
+      "tmdbId": 1300968,
+      "title": "The Hunger Games: Sunrise on the Reaping",
+      "nativeTitle": "The Hunger Games: Sunrise on the Reaping",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-11-18",
+      "rating": 9.4,
+      "match": "99%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Sci-Fi",
+        "Action",
+        "Adventure"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/jNcZH8yplxttRlf0wwqfGGMKHxX.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/aqFZcr2dxSZ2UwWSo1WC6C0rwDf.jpg",
+      "mediaType": "movie",
+      "overview": "Return to the world of Panem 24 years before the events of The Hunger Games, starting on the morning of the reaping of the 50th Hunger Games, also known as the Second Quarter Quell.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1400837",
+      "tmdbId": 1400837,
+      "title": "Other Mommy",
+      "nativeTitle": "Other Mommy",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-10-07",
+      "rating": 6.3,
+      "match": "73%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Horror",
+        "Cinema"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/fGRNCssTRrhYZxNzykGGCoMsAVq.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/smZ8BT4Vzw4iCEppTLCnN8jNYtn.jpg",
+      "mediaType": "movie",
+      "overview": "7-year-old Bela forms a relationship with a sinister entity in her home that looks uncannily like her own mother, drawing her into a terrifying and increasingly dark world.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1381071",
+      "tmdbId": 1381071,
+      "title": "Godzilla Minus Zero",
+      "nativeTitle": "ゴジラ-0.0",
+      "language": "Japanese",
+      "languageBadge": "Japanese",
+      "year": 2026,
+      "releaseDate": "2026-11-03",
+      "rating": 7.7,
+      "match": "87%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Sci-Fi",
+        "Horror",
+        "Action"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/hSmIJluOJmTWvJs4d7kHRxjc8s8.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/oqrYIDH4tvfEzPe1yqT4jzmAWHQ.jpg",
+      "mediaType": "movie",
+      "overview": "War reduced Japan to zero, and Godzilla plunged it into minus. Two years have passed since then, and the country has faced agonizing struggles to achieve recovery and finally reclaim its daily life. Just as humanity managed to cling to a hard-won peace, a new threat strikes, crushing hope in an instant. There is no third time. Everything ends here.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1567605",
+      "tmdbId": 1567605,
+      "title": "Ebenezer",
+      "nativeTitle": "Ebenezer",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-11-11",
+      "rating": 7.7,
+      "match": "87%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Cinema",
+        "Comedy"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/6H2N59jJW1hZEzn2ZdrMvJw5vNI.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/fdOVxyNNL95SuI8BGaN6vudEuYX.jpg",
+      "mediaType": "movie",
+      "overview": "An elderly miser embarks on a supernatural journey after visits from the ghost of his former business partner and the Spirits of Christmas Past, Present, and Yet to Come force him to confront his past and fight for a second chance at happiness.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1423191",
+      "tmdbId": 1423191,
+      "title": "Resident Evil",
+      "nativeTitle": "Resident Evil",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-09-16",
+      "rating": 7.5,
+      "match": "85%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Horror",
+        "Sci-Fi",
+        "Adventure"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/gAgWJhUSQWCgtKR8170nMkYlBda.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/8R79AZjX1Bt4219Ub3CrRMsPQsW.jpg",
+      "mediaType": "movie",
+      "overview": "Medical courier Bryan unwittingly finds himself fighting for survival as one fateful, horrifying night collapses around him in chaos.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
+    },
+    {
+      "id": "tmdb-1263337",
+      "tmdbId": 1263337,
+      "title": "Heart of the Beast",
+      "nativeTitle": "Heart of the Beast",
+      "language": "English",
+      "languageBadge": "English",
+      "year": 2026,
+      "releaseDate": "2026-09-19",
+      "rating": 7.6,
+      "match": "86%",
+      "maturity": "U/A 16+",
+      "duration": "2h 30m",
+      "genres": [
+        "Adventure",
+        "Thriller"
+      ],
+      "qualities": [
+        "4K",
+        "1080p"
+      ],
+      "platform": "Direct",
+      "platformBadge": "MOVIESHUB",
+      "platformColor": "#E50914",
+      "poster": "https://image.tmdb.org/t/p/w500/6sYemVUn79UPKz1ZsSG6kPU4RVy.jpg",
+      "backdrop": "https://image.tmdb.org/t/p/w1280/yE766yhgg98tKwTKd8CyNvAtmn6.jpg",
+      "mediaType": "movie",
+      "overview": "After a harrowing plane crash, Special Forces officer James Belmont and his combat dog, Odin, find themselves stranded deep in the Alaskan wilderness. Together, they are forced into a brutal fight for survival against the elements.",
+      "cast": [],
+      "director": "Cinematic Director",
+      "isTrending": true
     }
   ]
 }

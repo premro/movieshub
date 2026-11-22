@@ -100,6 +100,11 @@
 
   <script>
     const MOVIESDA_VERIFIED_MAP = {
+      "om operation mole": "103723",
+      "om: operation mole": "103723",
+      "o.m: operation mole": "103723",
+      "operation mole": "103723",
+      "om": "103723",
       "anakapalli": "103147",
       "cold call": "103140",
       "baththa": "102943",
@@ -235,10 +240,40 @@
       });
     }
 
+    let lastSeekTime = 0;
+    function skip10(forward = true) {
+      const now = Date.now();
+      if (now - lastSeekTime < 350) return;
+      lastSeekTime = now;
+      const step = forward ? 10 : -10;
+      if (nativeLoaded && nativeVideo && typeof nativeVideo.currentTime === "number") {
+        nativeVideo.currentTime = Math.max(0, Math.min(nativeVideo.duration || Infinity, nativeVideo.currentTime + step));
+      } else if (embedFrame && embedFrame.contentWindow) {
+        try {
+          embedFrame.contentWindow.postMessage({ type: "movieshub:forward", seconds: step }, "*");
+          embedFrame.contentWindow.postMessage({ action: forward ? "forward" : "rewind", seconds: step }, "*");
+        } catch (e) {}
+      }
+    }
+
     window.addEventListener("message", (e) => {
-      if (e.data === "stop" || e.data === "pause") {
+      if (e.data === "stop" || e.data === "pause" || e.data?.action === "pause") {
         if (nativeVideo) nativeVideo.pause();
         embedFrame.src = "about:blank";
+      } else if (e.data?.type === "movieshub:forward" || e.data?.action === "forward") {
+        skip10(true);
+      } else if (e.data?.type === "movieshub:rewind" || e.data?.action === "rewind") {
+        skip10(false);
+      }
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        skip10(true);
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        skip10(false);
       }
     });
   </script>

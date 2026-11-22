@@ -535,6 +535,42 @@ assert(sportsJsText.includes("/stream/sports?url="), "Sports iframe loader route
 assert(sportsJsText.includes("this.defaultMatches = [];"), "Old static/misrouted channel entries removed from sports.js");
 assert(apiJsText.includes("Remove sandbox attributes on the iframe tag"), "API stream proxy specifically strips anti-sandbox checks");
 
+// 27. Testing OM: Operation Mole (TMDB 1384528), Atlantic Server & Strict 10s Forward/Rewind
+console.log("\n27. Testing OM: Operation Mole (TMDB 1384528), Atlantic Server & Strict 10s Forward/Rewind...");
+const curCatalog = fs.readFileSync(path.join(__dirname, "../js/catalog.js"), "utf8");
+const curPlayer = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
+const curApi = fs.readFileSync(path.join(__dirname, "../api/index.js"), "utf8");
+const curFunc = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
+const curDashCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../dashboard_cache.json"), "utf8"));
+const curFnCache = JSON.parse(fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/dashboard_cache.json"), "utf8"));
+const curMoviesdaHtml = fs.readFileSync(path.join(__dirname, "../moviesda.html"), "utf8");
+
+assert(curCatalog.includes('id: "om-operation-mole-tamil-2026"') && curCatalog.includes('tmdbId: 1384528'), "OM: Operation Mole exists in local MOVIE_CATALOG with TMDB 1384528");
+assert(curCatalog.includes('moviesdaFileId: "103723"'), "OM: Operation Mole catalog entry has verified Moviesda file ID 103723");
+assert(curPlayer.includes('1384528: "103723"'), "OM: Operation Mole TMDB 1384528 mapped to 103723 in player MOVIESDA_TMDB_MAP");
+assert(curApi.includes('1384528: "103723"'), "OM: Operation Mole TMDB 1384528 mapped to 103723 in api MOVIESDA_TMDB_MAP");
+assert(curPlayer.includes('"om operation mole": "103723"') && curPlayer.includes('"operation mole": "103723"'), "OM: Operation Mole aliases verified in player MOVIESDA_VERIFIED_MAP");
+assert(curApi.includes('"om operation mole": "103723"'), "OM: Operation Mole verified in api MOVIESDA_VERIFIED_MAP");
+assert(curMoviesdaHtml.includes('"om operation mole": "103723"'), "OM: Operation Mole mapped in moviesda.html MOVIESDA_VERIFIED_MAP");
+assert(curApi.includes("https://moviesda36.com"), "Active working domain mirror moviesda36.com added to DEFAULT_MOVIESDA_DOMAINS in api");
+assert(curFunc.includes("https://moviesda36.com"), "Active working domain mirror moviesda36.com added to DEFAULT_MOVIESDA_DOMAINS in functions");
+assert(curApi.includes("cleanQ === 'om' || cleanQ.includes('operation mole')"), "API searchMovies prioritizes OM: Operation Mole for instant search");
+assert(curDashCache.hero_slides && curDashCache.hero_slides.some(m => m.tmdbId === 1384528), "OM: Operation Mole present in hero_slides billboard cache");
+assert(curDashCache.latest_six && curDashCache.latest_six.some(m => m.tmdbId === 1384528), "OM: Operation Mole present in latest_six dashboard cache");
+assert(curDashCache.tamil_2026 && curDashCache.tamil_2026.some(m => m.tmdbId === 1384528), "OM: Operation Mole present in tamil_2026 dashboard cache");
+assert(curFnCache.hero_slides && curFnCache.hero_slides.some(m => m.tmdbId === 1384528), "OM: Operation Mole synced in serverless functions hero_slides cache");
+
+assert(curPlayer.includes("Server 10") && curPlayer.includes("Atlantic HD") && curPlayer.includes("atlantic.bz/watch"), "Server 10 (Atlantic HD) integrated in multi-server network");
+assert(curPlayer.includes("https://atlantic.bz/watch/${resolvedTmdbId}"), "Player uses Atlantic.bz as clean instant stream fallback");
+assert(curApi.includes("https://atlantic.bz/watch/"), "API netmirror embed uses Atlantic.bz as verified clean fallback");
+assert(curApi.includes("fallbackCleanEmbed"), "API netmirror embed returns seamless full-viewport player instead of broken UI");
+
+assert(curPlayer.includes('id="streamForward10Btn"') && curPlayer.includes('id="streamRewind10Btn"'), "On-screen 10s forward and rewind buttons present in player server bar");
+assert(curPlayer.includes('id="srcdocForwardBtn"') && curPlayer.includes('id="srcdocRewindBtn"'), "On-screen 10s forward and rewind buttons present in Moviesda player");
+assert(curPlayer.includes("var exactSecs = secs > 0 ? 10 : -10;"), "Moviesda doSkip strictly enforces 10-second seek increment");
+assert(curMoviesdaHtml.includes("skip10(true)"), "moviesda.html supports 10s forward skip");
+assert(stylesCssFinal.includes(".stream-seek-btn"), "Styles for on-screen stream seek buttons implemented");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

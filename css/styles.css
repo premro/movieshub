@@ -2527,6 +2527,29 @@ body {
   color: #9ca3af;
 }
 
+
+.stream-seek-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.stream-seek-btn:hover {
+  background: #e50914;
+  border-color: #e50914;
+  color: #fff;
+}
+
 .reload-server-btn {
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);

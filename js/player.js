@@ -7,6 +7,11 @@
 
 
 const MOVIESDA_VERIFIED_MAP = {
+  "om operation mole": "103723",
+  "om: operation mole": "103723",
+  "o.m: operation mole": "103723",
+  "operation mole": "103723",
+  "om": "103723",
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
   "jailer 2": "103358",
   "jailer 2 original": "103358",
@@ -99,6 +104,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1384528: "103723",  // OM: Operation Mole (2026) Moviesda 1080p PreDVD (v2)
   280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
   1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
@@ -245,6 +251,12 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       <button class="corner-btn dolby-corner-btn" id="srcdocDolbyBtn" onclick="toggleLocalDolby()" title="Toggle Dolby Atmos 3D Audio">
         <span class="atmos-dot"></span>
         <span id="srcdocDolbyText">Dolby Atmos: 3D ON</span>
+      </button>
+      <button class="corner-btn" id="srcdocRewindBtn" onclick="doSkip(-10)" title="Rewind 10 Seconds (←)">
+        <span>⏪ 10s</span>
+      </button>
+      <button class="corner-btn" id="srcdocForwardBtn" onclick="doSkip(10)" title="Forward 10 Seconds (→)">
+        <span>⏩ 10s</span>
       </button>
       <button class="corner-btn" id="srcdocFsBtn" onclick="toggleLocalFs()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
@@ -509,14 +521,22 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       var now = Date.now();
       if (now - lastSeekTs < 350) return;
       lastSeekTs = now;
+      var exactSecs = secs > 0 ? 10 : -10;
       var nv = document.getElementById("nativeVideo");
       if (nv && typeof nv.currentTime === "number" && !isNaN(nv.currentTime)) {
-        var target = secs > 0 
-          ? Math.min((nv.duration || Infinity), nv.currentTime + secs)
-          : Math.max(0, nv.currentTime + secs);
+        var target = exactSecs > 0 
+          ? Math.min((nv.duration || Infinity), nv.currentTime + exactSecs)
+          : Math.max(0, nv.currentTime + exactSecs);
         nv.currentTime = target;
         try {
-          window.parent.postMessage({ type: "player:toast", message: (secs > 0 ? "⏩ +" : "⏪ -") + Math.abs(secs) + "s" }, "*");
+          window.parent.postMessage({ type: "player:toast", message: (exactSecs > 0 ? "⏩ +" : "⏪ -") + Math.abs(exactSecs) + "s" }, "*");
+        } catch (e) {}
+      }
+      var ef = document.getElementById("embedFrame");
+      if (ef && ef.contentWindow) {
+        try {
+          ef.contentWindow.postMessage({ type: "movieshub:forward", seconds: exactSecs }, "*");
+          ef.contentWindow.postMessage({ action: exactSecs > 0 ? "forward" : "rewind", seconds: exactSecs }, "*");
         } catch (e) {}
       }
     }
@@ -1299,6 +1319,11 @@ class MovieshubPlayer {
 
       // Verified 100% accurate TMDB ID database for blockbusters
       const KNOWN_TMDB_MAP = {
+        "om: operation mole": 1384528,
+        "o.m: operation mole": 1384528,
+        "om operation mole": 1384528,
+        "operation mole": 1384528,
+        "om": 1384528,
         "meesaya murukku": 424336,
         "meesaya murukku 2": 1538457,
         "immortal": 1505305,
@@ -1516,6 +1541,14 @@ class MovieshubPlayer {
           url: (movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
             ? `https://play.onestream.today/stream/page/${movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
             : `https://moviezda.co/tamil-${movie?.year || 2026}-movies/`
+        },
+        {
+          id: "s10",
+          name: "Server 10",
+          badge: "Atlantic HD",
+          url: mtype === "tv"
+            ? `https://atlantic.bz/watch/${resolvedTmdbId}/${season}/${episode}`
+            : `https://atlantic.bz/watch/${resolvedTmdbId}`
         }
       ];
 
@@ -1575,6 +1608,12 @@ class MovieshubPlayer {
               </div>
             </div>
             <div class="player-server-right">
+              <button id="streamRewind10Btn" class="stream-seek-btn" title="Rewind 10s across all servers (←)">
+                <span>⏪ 10s</span>
+              </button>
+              <button id="streamForward10Btn" class="stream-seek-btn" title="Forward 10s across all servers (→)">
+                <span>⏩ 10s</span>
+              </button>
               <button id="quickTamilAudioBtn" class="quick-tamil-btn" title="Play Tamil Dubbed Audio">
                 <span>🔊 Tamil Dubbed</span>
               </button>
@@ -1700,7 +1739,7 @@ class MovieshubPlayer {
                 return res.text();
               })
               .then(html => {
-                if (html && html.includes("<") && !html.includes("Stream Proxy error")) {
+                if (html && html.includes("<") && !html.includes("Stream Proxy error") && !html.includes("Not Found") && !html.includes("Unauthorised") && (html.includes("artplayer") || html.includes("<video") || html.includes("<iframe"))) {
                   curIframe.removeAttribute("src");
                   curIframe.srcdoc = html;
                   hidePreloader();
@@ -1711,8 +1750,8 @@ class MovieshubPlayer {
               .catch(err => {
                 console.warn("[Movieshub] Server 1 fetch failed, falling back to clean upstream:", err);
                 const instantStreamUrl = mtype === "tv"
-                  ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true`
-                  : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&autoplay=true`;
+                  ? `https://atlantic.bz/watch/${resolvedTmdbId}/${season}/${episode}`
+                  : `https://atlantic.bz/watch/${resolvedTmdbId}`;
                 curIframe.removeAttribute("srcdoc");
                 curIframe.src = instantStreamUrl;
                 hidePreloader();
@@ -1815,6 +1854,12 @@ class MovieshubPlayer {
           }
         });
       }
+
+      // On-Screen 10s Seek Controls (Active across all servers)
+      const sRewindBtn = document.getElementById("streamRewind10Btn");
+      if (sRewindBtn) sRewindBtn.addEventListener("click", () => skipRewind10());
+      const sForwardBtn = document.getElementById("streamForward10Btn");
+      if (sForwardBtn) sForwardBtn.addEventListener("click", () => skipForward10());
 
       // Reload Server Stream button
       const reloadBtn = document.getElementById("reloadServerBtn");
@@ -2081,7 +2126,7 @@ class MovieshubPlayer {
             `;
           }
 
-          const apiPfx = (typeof window !== "undefined" && window.location.pathname.includes("/server/movieshub_api")) ? "/server/movieshub_api" : "";
+          const apiPfx = (typeof window !== "undefined" && window.location?.pathname && window.location.pathname.includes("/server/movieshub_api")) ? "/server/movieshub_api" : "";
           const fetchUrl = `${apiPfx}/api/trailer?tmdb_id=${encodeURIComponent(tmdbStr)}&title=${encodeURIComponent(curMovie.title || '')}&year=${encodeURIComponent(curMovie.year || '')}&media_type=${encodeURIComponent(curMovie.mediaType || 'movie')}`;
 
           if (typeof fetch !== "undefined") {

@@ -563,6 +563,36 @@ async function syncDashboardCatalog(force = false) {
 
 
     // Guarantee Scene, Jailer 2, Mookuthi Amman 2, and Yezhu Kadal Yezhu Malai are prioritized with verified 1080p HD Moviesda prints
+    const omMovieObj = updated.all.find(m => m.tmdbId === 1384528) || {
+      id: "om-operation-mole-tamil-2026",
+      tmdbId: 1384528,
+      title: "OM: Operation Mole",
+      nativeTitle: "O.M: Operation Mole",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.9,
+      match: "99%",
+      maturity: "U/A 16+",
+      duration: "2h 52m",
+      genres: ["Action", "Thriller", "Crime"],
+      qualities: ["1080p HD", "720p HD", "Dolby Atmos"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      mediaType: "movie",
+      overview: "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      cast: ["Dhanush", "Mammootty", "Sai Pallavi", "Sreeleela", "Naseeruddin Shah"],
+      director: "Rajkumar Periasamy",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "103723"
+    };
+    omMovieObj.moviesdaFileId = "103723";
+    omMovieObj.isTheatrePrint = true;
+
     const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
       id: "scene-tamil-2026",
       tmdbId: 1402181,
@@ -695,6 +725,7 @@ async function syncDashboardCatalog(force = false) {
     // Assemble latest_six (True freshest releases across all languages + Now Playing)
     const freshCandidates = [
       sceneMovieObj,
+      omMovieObj,
       ...npList,
       ...updated.latest,
       ...updated.tamil_2026.slice(1, 4),
@@ -770,6 +801,37 @@ async function searchMovies(query, lang = null) {
   const seenIds = new Set();
 
   const cleanQ = (query || '').toLowerCase().trim();
+  if (cleanQ === 'om' || cleanQ.includes('operation mole') || cleanQ.includes('om operation mole')) {
+    const omSearchItem = {
+      id: "om-operation-mole-tamil-2026",
+      tmdbId: 1384528,
+      title: "OM: Operation Mole",
+      nativeTitle: "O.M: Operation Mole",
+      language: "Tamil",
+      languageBadge: "Tamil",
+      year: 2026,
+      rating: 8.9,
+      match: "99%",
+      maturity: "U/A 16+",
+      duration: "2h 52m",
+      genres: ["Action", "Thriller", "Crime"],
+      qualities: ["1080p HD", "720p HD", "Dolby Atmos"],
+      platform: "Direct",
+      platformBadge: "THEATRICAL RELEASE",
+      platformColor: "#E50914",
+      poster: "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg",
+      backdrop: "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg",
+      mediaType: "movie",
+      overview: "Set across the temple corridors of Tirupati and Tiruvannamalai, an elite undercover operative infiltrates a sprawling transnational red sanders syndicate. As criminal politics escalate, a covert task force launches Operation Mole to dismantle the cartel from within.",
+      cast: ["Dhanush", "Mammootty", "Sai Pallavi", "Sreeleela", "Naseeruddin Shah"],
+      director: "Rajkumar Periasamy",
+      isTrending: true,
+      isTheatrePrint: true,
+      moviesdaFileId: "103723"
+    };
+    results.unshift(omSearchItem);
+    seenIds.add(omSearchItem.id);
+  }
   if (cleanQ === 'scene' || cleanQ.includes('scene')) {
     const sceneItem = {
       id: "scene-tamil-2026",
@@ -1266,6 +1328,9 @@ function generate1TamilMVHtml(tmId, mtype, title, lang, year, prefix = "") {
 
 
 const KNOWN_VERIFIED_POSTERS = {
+  "om operation mole": { poster: "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg", tmdbId: 1384528 },
+  "om: operation mole": { poster: "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg", tmdbId: 1384528 },
+  "operation mole": { poster: "https://image.tmdb.org/t/p/w500/vFnFLqXjf7RQfkNxrrys43BZKxJ.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/gJqVeWZF537IUfjHlA7apBAJBBR.jpg", tmdbId: 1384528 },
   "john doe": { poster: "https://image.tmdb.org/t/p/w500/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/nt7ErINVZAJ3PIprfSYJJshaFJc.jpg", tmdbId: 1655020 },
   "aakhri sawal": { poster: "https://image.tmdb.org/t/p/w500/9CXBZH6sRJpFTMSaY3wj1jx98F4.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/akZ9jTTzvBOx3CeTVCo9WyhxL5q.jpg", tmdbId: 1600771 },
   "aazam": { poster: "https://image.tmdb.org/t/p/w500/9IdjgWe7XzSHflYWfIVTiZyDDYT.jpg", backdrop: "https://image.tmdb.org/t/p/w1280/3Nqk8XuPe5PHYHWkD33BR0Aszus.jpg", tmdbId: 1038487 },
@@ -1291,6 +1356,11 @@ const KNOWN_VERIFIED_POSTERS = {
 };
 
 const MOVIESDA_VERIFIED_MAP = {
+  "om operation mole": "103723",
+  "om: operation mole": "103723",
+  "o.m: operation mole": "103723",
+  "operation mole": "103723",
+  "om": "103723",
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
   "jailer 2": "103358",
   "jailer 2 original": "103358",
@@ -1380,6 +1450,7 @@ const MOVIESDA_VERIFIED_MAP = {
 };
 
 const MOVIESDA_TMDB_MAP = {
+  1384528: "103723",  // OM: Operation Mole (2026) Moviesda 1080p PreDVD (v2)
   280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
   1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
@@ -1419,6 +1490,8 @@ const MOVIESDA_TMDB_MAP = {
 };
 
 const DEFAULT_MOVIESDA_DOMAINS = [
+  process.env.MOVIESDA_BASE_URL,
+  "https://moviesda36.com",
   process.env.MOVIESDA_BASE_URL,
   "https://moviezda.co",
   "https://moviezda.me",
@@ -2434,15 +2507,28 @@ module.exports = async (req, res) => {
     const sig = crypto.createHmac('sha256', NETMIRROR_SECRET).update(`${tmId}:${ts}`).digest('hex');
     const targetUrl = `https://webvp.watch21.shop/play/watchcinemo.php?tm_id=${encodeURIComponent(tmId)}&nid=${encodeURIComponent(safeNid)}&year=${safeYear}&se=${safeSe}&ep=${safeEp}&ts=${ts}&sig=${sig}&hasExt=true`;
 
+    const isTv = safeSe !== '0' && safeEp !== '0';
+    const fallbackStreamUrl = isTv 
+      ? `https://atlantic.bz/watch/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}`
+      : `https://atlantic.bz/watch/${encodeURIComponent(tmId)}`;
+    const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe></body></html>`;
+
     try {
-      const { buffer } = await fetchBuffer(targetUrl, {
+      const { buffer, statusCode } = await fetchBuffer(targetUrl, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
           'Referer': 'https://netmirror.plus/'
         },
         timeout: 3000
       });
-      let htmlStr = buffer.toString('utf8');
+      let htmlStr = buffer ? buffer.toString('utf8') : '';
+
+      // Validate upstream is alive and contains functional player components (preventing broken UI)
+      if (!htmlStr || statusCode >= 400 || htmlStr.includes('Not Found') || htmlStr.includes('Unauthorised') || (!htmlStr.includes('artplayer') && !htmlStr.includes('<video') && !htmlStr.includes('<iframe'))) {
+        res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+        return res.end(fallbackCleanEmbed);
+      }
+
       const baseTag = '<base href="https://webvp.watch21.shop/play/">';
       const customStyles = `
         <style>
@@ -2483,12 +2569,8 @@ module.exports = async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(htmlStr);
     } catch (err) {
-      const isTv = safeSe !== '0' && safeEp !== '0';
-      const fallbackUrl = isTv 
-        ? `https://vidlink.pro/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}?primaryColor=e50914&autoplay=true`
-        : `https://vidlink.pro/movie/${encodeURIComponent(tmId)}?primaryColor=e50914&autoplay=true`;
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-      return res.end(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%;height:100%;margin:0;padding:0;border:0;background:#000;overflow:hidden;}</style></head><body><iframe src="${fallbackUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe></body></html>`);
+      return res.end(fallbackCleanEmbed);
     }
   }
 
