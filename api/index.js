@@ -1360,7 +1360,6 @@ const MOVIESDA_VERIFIED_MAP = {
   "om: operation mole": "103723",
   "o.m: operation mole": "103723",
   "operation mole": "103723",
-  "om": "103723",
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
   "jailer 2": "103358",
   "jailer 2 original": "103358",
@@ -1743,8 +1742,10 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
     return MOVIESDA_VERIFIED_MAP[raw];
   }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || (clean.length > 2 && (clean.includes(k) || k.includes(clean)))) return v;
-    if (raw === k || raw.includes(k) || k.includes(raw)) return v;
+    if (clean === k || raw === k) return v;
+    if (k.length >= 4) {
+      if (clean.includes(k) || raw.includes(k)) return v;
+    }
   }
   return null;
 }
@@ -2579,14 +2580,22 @@ module.exports = async (req, res) => {
     const rawId = u.searchParams.get("id") || "";
     const title = u.searchParams.get("title") || "";
     const quality = u.searchParams.get("quality") || "";
+    const directFid = u.searchParams.get("file_id") || "";
     const safeTmId = /^[0-9a-zA-Z_-]+$/.test(rawId) ? rawId : "1505305";
     
-    if (quality === "moviesda" || (title && resolveMoviesdaFileId(title) !== "103147")) {
-      const fileId = resolveMoviesdaFileId(title);
+    // Resolve verified Moviesda file ID: prefer directFid, then tmdbId/title resolution
+    let fileId = (directFid && directFid !== "null" && directFid !== "undefined") ? directFid : null;
+    if (!fileId) {
+      fileId = resolveMoviesdaFileId(title, null, safeTmId);
+    }
+    
+    if (fileId && fileId !== "null" && fileId !== "undefined") {
       const moviesdaDl = `https://download.moviespage.xyz/download/file/${encodeURIComponent(fileId)}`;
       res.writeHead(302, { "Location": moviesdaDl });
       return res.end();
     }
+    
+    // Fallback for Hollywood, Bollywood, or titles without direct Moviesda print
     const fallbackUrl = `https://vidlink.pro/movie/${encodeURIComponent(safeTmId)}`;
     res.writeHead(302, { "Location": fallbackUrl });
     return res.end();

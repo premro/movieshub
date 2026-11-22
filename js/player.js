@@ -11,7 +11,6 @@ const MOVIESDA_VERIFIED_MAP = {
   "om: operation mole": "103723",
   "o.m: operation mole": "103723",
   "operation mole": "103723",
-  "om": "103723",
   // Tamil 2026 Theatrical Releases (moviezda.me/tamil-2026-movies)
   "jailer 2": "103358",
   "jailer 2 original": "103358",
@@ -163,8 +162,10 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
     return MOVIESDA_VERIFIED_MAP[raw];
   }
   for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || (clean.length > 2 && (clean.includes(k) || k.includes(clean)))) return v;
-    if (raw === k || raw.includes(k) || k.includes(raw)) return v;
+    if (clean === k || raw === k) return v;
+    if (k.length >= 4) {
+      if (clean.includes(k) || raw.includes(k)) return v;
+    }
   }
   return null;
 }

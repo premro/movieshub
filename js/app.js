@@ -597,7 +597,9 @@ class MovieshubApp {
         btn.disabled = true;
 
         const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
-        const downloadUrl = `${pfx}/api/download?id=${movie.tmdbId || movie.id}&quality=${quality}&title=${encodeURIComponent(movie.title)}`;
+        const rawTmId = movie.tmdbId || String(movie.id || "").replace(/^(tmdb|netmirror)-/, "");
+        const fidParam = movie.moviesdaFileId ? `&file_id=${encodeURIComponent(movie.moviesdaFileId)}` : "";
+        const downloadUrl = `${pfx}/api/download?id=${encodeURIComponent(rawTmId)}&quality=${encodeURIComponent(quality)}&title=${encodeURIComponent(movie.title || "")}${fidParam}`;
         const a = document.createElement("a");
         a.href = downloadUrl;
         a.setAttribute("download", `${movie.title} (${movie.year || 2026}) - ${quality} Movieshub.mp4`);

@@ -571,6 +571,24 @@ assert(curPlayer.includes("var exactSecs = secs > 0 ? 10 : -10;"), "Moviesda doS
 assert(curMoviesdaHtml.includes("skip10(true)"), "moviesda.html supports 10s forward skip");
 assert(stylesCssFinal.includes(".stream-seek-btn"), "Styles for on-screen stream seek buttons implemented");
 
+// Verify /api/download logic in backend
+const testHandler = require("../api/index.js");
+let redirectedLocation = "";
+const mockRes = {
+  setHeader() {},
+  writeHead(st, hd) { redirectedLocation = hd?.Location || ""; },
+  end() {}
+};
+
+testHandler({ url: "/api/download?id=1384528&quality=1080p&title=OM%3A%20Operation%20Mole", headers: { host: "localhost" } }, mockRes);
+assert(redirectedLocation === "https://download.moviespage.xyz/download/file/103723", "OM Operation Mole download routes to verified file 103723");
+
+testHandler({ url: "/api/download?id=414906&quality=1080p&title=The%20Batman", headers: { host: "localhost" } }, mockRes);
+assert(redirectedLocation === "https://vidlink.pro/movie/414906", "Non-Moviesda title safely falls back to VidLink instead of null file");
+
+assert(!curApi.includes("/download/file/null") && curApi.includes('fileId !== "null"'), "/api/download explicitly blocks /download/file/null redirects");
+assert(fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8").includes("fidParam"), "app.js download modal passes verified file_id parameter");
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);
