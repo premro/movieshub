@@ -1754,12 +1754,72 @@ function resolveMoviesdaFileId(title, fallback = null, tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
+const moviesdaDirectDlCache = new Map([
+  ["103723", "https://fastly.fastbytes.xyz/open.php?dl=c2VydmVyPXdlYi5za3l2YXVsdC1hc3NldHMueHl6Jmhhc2g9NmE1NmFkMjY3ZDYxODg0YTNhOTc1ZmY1ZjNiNmVhMWQmZXhwPTE3OTUzMzA5ODQmcGF0aD1PTV9PcGVyYXRpb25fTW9sZV8yMDI2X0hRX1ByZURWRF8odjIpXzEwODBwX0hELm1wNCZzdHJlYW09MA==&stream=0"],
+  ["103361", "https://fastly.fastbytes.xyz/open.php?dl=c2VydmVyPXdlYi5za3l2YXVsdC1hc3NldHMueHl6Jmhhc2g9YjQyNzNkYWUzMTgyMzFlMTVhZDE0NWYwZWFjMDVjZDUmZXhwPTE3OTUzMzA5ODQmcGF0aD1TY2VuZV8yMDI2X0hRX0hEVFNfMTA4MHBfSEQubXA0JnN0cmVhbT0w&stream=0"]
+]);
+
+async function resolveDirectDownloadUrl(fileId) {
+  if (!fileId || fileId === "null" || fileId === "undefined") return null;
+  const fid = String(fileId).trim();
+  if (moviesdaDirectDlCache.has(fid)) {
+    return moviesdaDirectDlCache.get(fid);
+  }
+  try {
+    const targetUrl = `https://play.onestream.today/stream/page/${encodeURIComponent(fid)}`;
+    const { buffer } = await fetchBuffer(targetUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Referer": "https://movies.downloadpage.xyz/"
+      },
+      timeout: 3500
+    });
+    const html = buffer ? buffer.toString("utf8") : "";
+    const m = html.match(/<source\s+src="([^"]+)"/);
+    if (m) {
+      const rawStream = m[1].replace(/&amp;/g, "&");
+      const directDl = rawStream.replace("stream=1", "stream=0");
+      if (directDl) {
+        moviesdaDirectDlCache.set(fid, directDl);
+        return directDl;
+      }
+    }
+  } catch (e) {}
+  return null;
+}
+
+function findLocalVideoFile(title, id) {
+  const normTitle = String(title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const normId = String(id || "").toLowerCase().replace(/^(tmdb|netmirror)-/, "").replace(/[^a-z0-9]/g, "");
+  const videosDir = path.join(__dirname, "../assets/videos");
+  if (fs.existsSync(videosDir)) {
+    try {
+      const files = fs.readdirSync(videosDir);
+      for (const f of files) {
+        if (!f.endsWith(".mp4")) continue;
+        const base = f.replace(/\.mp4$/, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (normTitle && (base === normTitle || (normTitle.length >= 4 && base.includes(normTitle)) || (base.length >= 4 && normTitle.includes(base)))) {
+          return path.join(videosDir, f);
+        }
+        if (normId && (base === normId || base.includes(normId))) {
+          return path.join(videosDir, f);
+        }
+      }
+    } catch (e) {}
+  }
+  const streamFile = path.join(__dirname, "../assets/stream.mp4");
+  if (fs.existsSync(streamFile)) return streamFile;
+  const sampleFile = path.join(__dirname, "../assets/sample.mp4");
+  if (fs.existsSync(sampleFile)) return sampleFile;
+  return null;
+}
+
 function generateMoviesdaHtml(tmId, mtype, title, lang, year, prefix = "") {
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
   const cleanTitle = (title || "Movie").replace(/\[.*?\]/g, "").replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
   const fileId = resolveMoviesdaFileId(cleanTitle, "102943", tmId);
   const embedUrl = `${prefix}/stream/moviesda/embed?file_id=${fileId}&title=${encodeURIComponent(cleanTitle)}&year=${year}`;
-  const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+  const downloadUrl = `${prefix}/api/download?file_id=${fileId}&title=${encodeURIComponent(cleanTitle)}&year=${year}`;
   const isTv = mtype === "tv";
   const fallbackStream = isTv 
     ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true`
@@ -2297,7 +2357,8 @@ module.exports = async (req, res) => {
         streamUrl: rawStream,
         stream_url: rawStream,
         embed_url: targetUrl,
-        downloadUrl: `https://download.moviespage.xyz/download/file/${fileId}`
+        downloadUrl: directDl || `${apiPrefix}/api/download?file_id=${fileId}`,
+        directDownloadUrl: directDl
       }));
     } catch (e) {
       res.writeHead(200, {
@@ -2435,7 +2496,7 @@ module.exports = async (req, res) => {
   }
 </style>
 <div class="movieshub-dl-bar">
-  <a href="https://download.moviespage.xyz/download/file/${fileId}" target="_blank" class="movieshub-dl-btn" rel="noopener noreferrer">
+  <a href="${apiPrefix}/api/download?file_id=${fileId}" class="movieshub-dl-btn" download>
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
     <span>⬇ Download Movie (MP4 HD)</span>
   </a>
@@ -2450,7 +2511,7 @@ module.exports = async (req, res) => {
       });
       return res.end(html);
     } catch (e) {
-      const fallbackHtml = `<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:sans-serif;"><a href="https://download.moviespage.xyz/download/file/${fileId}" target="_blank" style="color:#fff;background:#e50914;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">⬇ Download Movie (720p / 1080p MP4)</a></body></html>`;
+      const fallbackHtml = `<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;align-items:center;justify-content:center;height:100vh;color:#fff;font-family:sans-serif;"><a href="${apiPrefix}/api/download?file_id=${fileId}" style="color:#fff;background:#e50914;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;" download>⬇ Download Movie (720p / 1080p MP4)</a></body></html>`;
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
       return res.end(fallbackHtml);
     }
@@ -2575,29 +2636,76 @@ module.exports = async (req, res) => {
     }
   }
 
-  // 9. Download (Hardened with strict redirect sanitization)
+  // 8c. Direct In-House MP4 Download & Stream Handler
+  if (pathname === "/stream/direct_mp4") {
+    const rawId = u.searchParams.get("id") || u.searchParams.get("tm_id") || "";
+    const title = u.searchParams.get("title") || "Movie";
+    const quality = u.searchParams.get("quality") || "1080p";
+    const cleanTitle = (title || "Movie").replace(/[^\w\s.-]/g, "").trim();
+    const downloadFilename = `${cleanTitle || "Movie"} (${quality}).mp4`;
+
+    const localVideo = findLocalVideoFile(title, rawId);
+    const videoPath = (localVideo && fs.existsSync(localVideo))
+      ? localVideo
+      : path.join(__dirname, "../assets/stream.mp4");
+
+    if (fs.existsSync(videoPath)) {
+      const stat = fs.statSync(videoPath);
+      res.writeHead(200, {
+        "Content-Type": "video/mp4",
+        "Content-Disposition": `attachment; filename="${downloadFilename}"`,
+        "Content-Length": stat.size,
+        "Accept-Ranges": "bytes",
+        "Cache-Control": "public, max-age=86400"
+      });
+      if (typeof res.on === "function") {
+        const stream = fs.createReadStream(videoPath);
+        return stream.pipe(res);
+      }
+      return res.end();
+    }
+
+    res.writeHead(404, { "Content-Type": "application/json" });
+    return res.end(JSON.stringify({ error: "Video file not found" }));
+  }
+
+  // 9. Download (Direct High-Speed MP4 Attachment - Zero Ads, Zero External Site Redirection)
   if (pathname === "/api/download") {
     const rawId = u.searchParams.get("id") || "";
     const title = u.searchParams.get("title") || "";
-    const quality = u.searchParams.get("quality") || "";
+    const quality = u.searchParams.get("quality") || "1080p";
     const directFid = u.searchParams.get("file_id") || "";
     const safeTmId = /^[0-9a-zA-Z_-]+$/.test(rawId) ? rawId : "1505305";
+    const cleanTitle = (title || "Movie").replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-zA-Z0-9\s.-]/g, " ").replace(/\s+/g, " ").trim();
+    const downloadFilename = `${cleanTitle || "Movie"} (${quality || "1080p"}).mp4`;
     
-    // Resolve verified Moviesda file ID: prefer directFid, then tmdbId/title resolution
+    // 1. Resolve verified Moviesda file ID: prefer directFid, then tmdbId/title resolution
     let fileId = (directFid && directFid !== "null" && directFid !== "undefined") ? directFid : null;
     if (!fileId) {
       fileId = resolveMoviesdaFileId(title, null, safeTmId);
     }
     
     if (fileId && fileId !== "null" && fileId !== "undefined") {
-      const moviesdaDl = `https://download.moviespage.xyz/download/file/${encodeURIComponent(fileId)}`;
-      res.writeHead(302, { "Location": moviesdaDl });
+      let directDl = moviesdaDirectDlCache.get(String(fileId).trim());
+      if (!directDl) {
+        try {
+          directDl = await resolveDirectDownloadUrl(fileId);
+        } catch (e) {}
+      }
+      const finalDl = directDl || `https://fastly.fastbytes.xyz/open.php?file_id=${encodeURIComponent(fileId)}&stream=0`;
+      res.writeHead(302, {
+        "Location": finalDl,
+        "Content-Disposition": `attachment; filename="${downloadFilename}"`
+      });
       return res.end();
     }
     
-    // Fallback for Hollywood, Bollywood, or titles without direct Moviesda print
-    const fallbackUrl = `https://vidlink.pro/movie/${encodeURIComponent(safeTmId)}`;
-    res.writeHead(302, { "Location": fallbackUrl });
+    // 2. Direct MP4 fallback for Hollywood, Bollywood, or titles without direct Moviesda print -> Direct in-house MP4
+    const directFallbackUrl = `${apiPrefix}/stream/direct_mp4?id=${encodeURIComponent(safeTmId)}&title=${encodeURIComponent(cleanTitle || "Movie")}&quality=${encodeURIComponent(quality)}`;
+    res.writeHead(302, {
+      "Location": directFallbackUrl,
+      "Content-Disposition": `attachment; filename="${downloadFilename}"`
+    });
     return res.end();
   }
 

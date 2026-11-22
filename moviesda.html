@@ -166,7 +166,7 @@
     const fileId = params.get("file_id") || resolveFileId(title, "103147");
 
     document.getElementById("dispTitle").textContent = `${title} (${year})`;
-    const downloadUrl = `https://download.moviespage.xyz/download/file/${fileId}`;
+    const downloadUrl = `/api/download?file_id=${fileId}&title=${encodeURIComponent(title)}&year=${year}`;
     const topDlBtn = document.getElementById("topDlBtn");
     topDlBtn.href = downloadUrl;
 

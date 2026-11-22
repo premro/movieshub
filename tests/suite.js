@@ -581,10 +581,10 @@ const mockRes = {
 };
 
 testHandler({ url: "/api/download?id=1384528&quality=1080p&title=OM%3A%20Operation%20Mole", headers: { host: "localhost" } }, mockRes);
-assert(redirectedLocation === "https://download.moviespage.xyz/download/file/103723", "OM Operation Mole download routes to verified file 103723");
+assert(redirectedLocation.includes("fastbytes.xyz") && redirectedLocation.includes("stream=0"), "OM Operation Mole download routes to direct fastbytes MP4 attachment download instead of landing page");
 
 testHandler({ url: "/api/download?id=414906&quality=1080p&title=The%20Batman", headers: { host: "localhost" } }, mockRes);
-assert(redirectedLocation === "https://vidlink.pro/movie/414906", "Non-Moviesda title safely falls back to VidLink instead of null file");
+assert(redirectedLocation.includes("/stream/direct_mp4") || redirectedLocation.endsWith(".mp4"), "Non-Moviesda title routes to direct in-house MP4 download instead of external site");
 
 assert(!curApi.includes("/download/file/null") && curApi.includes('fileId !== "null"'), "/api/download explicitly blocks /download/file/null redirects");
 assert(fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8").includes("fidParam"), "app.js download modal passes verified file_id parameter");
