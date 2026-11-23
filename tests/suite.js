@@ -589,6 +589,40 @@ assert(redirectedLocation.includes("/stream/direct_mp4") || redirectedLocation.e
 assert(!curApi.includes("/download/file/null") && curApi.includes('fileId !== "null"'), "/api/download explicitly blocks /download/file/null redirects");
 assert(fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8").includes("fidParam"), "app.js download modal passes verified file_id parameter");
 
+// 28. Testing Singam & Blockbuster Accurate TMDB Resolution Engine...
+console.log("\n28. Testing Singam & Blockbuster Accurate TMDB Resolution Engine...");
+const apiMod = require("../api/index.js");
+const playerFileCode = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf8");
+const moviesdaHtmlCode = fs.readFileSync(path.join(__dirname, "../moviesda.html"), "utf8");
+const serverPyCode = fs.readFileSync(path.join(__dirname, "../server.py"), "utf8");
+
+assert(apiMod.KNOWN_TMDB_MAP["singam"] === 62756, "Singam mapped to TMDB 62756 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["singam 2"] === 191735, "Singam 2 mapped to TMDB 191735 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["singam 3"] === 376440 || apiMod.KNOWN_TMDB_MAP["si 3"] === 376440, "Singam 3 mapped to TMDB 376440 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["singham"] === 70590, "Singham (Hindi) mapped to TMDB 70590 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["singham again"] === 1014214, "Singham Again mapped to TMDB 1014214 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["anniyan"] === 19978, "Anniyan mapped to TMDB 19978 in api KNOWN_TMDB_MAP");
+assert(apiMod.KNOWN_TMDB_MAP["kadaikutty singam"] === 498821, "Kadaikutty Singam mapped to TMDB 498821 in api KNOWN_TMDB_MAP");
+
+assert(apiMod.findKnownTmdbId("Singam") === 62756, "findKnownTmdbId resolves Singam to 62756");
+assert(apiMod.findKnownTmdbId("Singam [Tamil]") === 62756, "findKnownTmdbId resolves Singam [Tamil] to 62756");
+assert(apiMod.findKnownTmdbId("Singam 2 [Hindi]") === 191735, "findKnownTmdbId resolves Singam 2 to 191735");
+assert(apiMod.findKnownTmdbId("Si 3") === 376440, "findKnownTmdbId resolves Si 3 to 376440");
+assert(apiMod.findKnownTmdbId("Singham") === 70590, "findKnownTmdbId resolves Singham to 70590");
+assert(apiMod.findKnownTmdbId("Kadaikutty Singam") === 498821, "findKnownTmdbId resolves Kadaikutty Singam to 498821");
+
+assert(playerFileCode.includes('"singam": 62756'), "Singam mapped to 62756 in player.js KNOWN_TMDB_MAP");
+assert(playerFileCode.includes('"singam 2": 191735'), "Singam 2 mapped to 191735 in player.js KNOWN_TMDB_MAP");
+assert(playerFileCode.includes('"anniyan": 19978'), "Anniyan mapped to 19978 in player.js KNOWN_TMDB_MAP");
+assert(playerFileCode.includes("const isNetmirrorInternalId = movie?.netmirrorId && String(movie.tmdbId) === String(movie.netmirrorId)"), "Player explicitly blocks raw Netmirror internal IDs from being used as TMDB IDs");
+assert(playerFileCode.includes("movie?.netmirrorId") && playerFileCode.includes(".startsWith(\"netmirror-\")"), "Player extracts netId from netmirrorId or netmirror- ID prefix for Server 1");
+
+assert(serverPyCode.includes('"singam": 62756'), "Singam mapped to 62756 in server.py KNOWN_TMDB_MAP");
+assert(serverPyCode.includes("find_known_tmdb_id"), "server.py implements find_known_tmdb_id helper");
+
+assert(moviesdaHtmlCode.includes("if (MOVIESDA_VERIFIED_MAP[clean]) return MOVIESDA_VERIFIED_MAP[clean];") && moviesdaHtmlCode.includes("paddedKey"), "moviesda.html uses word boundary matching to prevent false positive substring matching");
+
+
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);
 console.log(`========================================\n`);

@@ -230,45 +230,207 @@ function normalizeMovie(item) {
 }
 
 const KNOWN_TMDB_MAP = {
-  'jailer 2': 1234139,
-  'jailer 2 original': 1234139,
-  'mookuthi amman 2': 1327835,
-  'mookuthi amman 2 hq hdts': 1327835,
-  'yezhu kadal yezhu malai': 954445,
-  'scene': 1402181,
-  'scene 2026': 1402181,
-  'leo': 949229,
-  'leo: bloody sweet': 949229,
-  'jailer': 937020,
-  'vikram': 743563,
-  'master': 626392,
-  'goat': 1129608,
-  'the greatest of all time': 1129608,
-  'amaran': 927342,
-  'maharaja': 1118224,
-  'ponniyin selvan': 660046,
-  'kalki 2898 ad': 801688,
-  'kalki': 801688,
-  'aavesham': 1084812,
-  'manjummel boys': 1069945,
-  'bramayugam': 1166133,
-  'stree 2': 1112426,
-  '12th fail': 1163258,
-  'jawan': 872906,
-  'animal': 781732,
-  'salaar': 770906,
-  'rrr': 579974,
-  'deadpool & wolverine': 533535,
-  'dune: part two': 693134,
-  'oppenheimer': 872585,
-  'interstellar': 157336,
-  'game of thrones': 1399,
-  'got': 1399,
-  'house of the dragon': 94997,
-  'severance': 95396,
-  'stranger things': 66732,
-  'the boys': 76479
+  // The Singam Franchise (Tamil & Hindi)
+  "singam": 62756,
+  "singam 1": 62756,
+  "singam original": 62756,
+  "singam tamil": 62756,
+  "singam 2": 191735,
+  "singam ii": 191735,
+  "singam 2 original": 191735,
+  "singam 3": 376440,
+  "si 3": 376440,
+  "si3": 376440,
+  "s3": 376440,
+  "singham": 70590,
+  "singham returns": 285803,
+  "singham again": 1014214,
+  "kadaikutty singam": 498821,
+
+  // Legendary Tamil & Indian Blockbusters
+  "anniyan": 19978,
+  "ghajini": 19975,
+  "ghajini tamil": 19975,
+  "ghajini hindi": 14070,
+  "sivaji": 24049,
+  "sivaji: the boss": 24049,
+  "sivaji the boss": 24049,
+  "mankatha": 76788,
+  "theri": 370076,
+  "mersal": 456287,
+  "bigil": 563309,
+  "kaththi": 263475,
+  "thuppakki": 143010,
+  "enthiran": 148284,
+  "robot": 148284,
+  "2.0": 345915,
+  "kabali": 354859,
+  "kaala": 457837,
+  "petta": 554230,
+  "darbar": 592834,
+  "baahubali": 256040,
+  "baahubali: the beginning": 256040,
+  "baahubali the beginning": 256040,
+  "baahubali 2": 350312,
+  "baahubali 2: the conclusion": 350312,
+  "baahubali 2 the conclusion": 350312,
+  "k.g.f: chapter 1": 564147,
+  "kgf": 564147,
+  "kgf chapter 1": 564147,
+  "kgf 1": 564147,
+  "k.g.f: chapter 2": 587412,
+  "kgf chapter 2": 587412,
+  "kgf 2": 587412,
+  "kantara": 858485,
+  "pushpa": 690957,
+  "pushpa: the rise": 690957,
+  "pushpa the rise": 690957,
+  "pushpa 2": 1011985,
+  "pushpa 2: the rule": 1011985,
+  "pushpa 2 the rule": 1011985,
+  "varisu": 835017,
+  "beast": 849509,
+  "vettaiyan": 1093966,
+  "raayan": 1136418,
+  "demonte colony 2": 979250,
+  "lubber pandhu": 1182047,
+  "meiyazhagan": 1171178,
+  "madha gaja raja": 280951,
+  "soorarai pottru": 653594,
+  "jai bhim": 870932,
+  "asuran": 598442,
+  "kaithi": 630566,
+  "doctor": 671039,
+  "don": 791977,
+  "ayalaan": 533514,
+  "captain miller": 1000676,
+  "vaathi": 915822,
+  "siruthai": 60938,
+  "ayan": 19973,
+  "paiyaa": 38686,
+  "ko": 62837,
+  "aaranya kaandam": 64303,
+  "super deluxe": 570775,
+  "pariyerum perumal": 538858,
+  "karnan": 672647,
+  "viduthalai": 859348,
+  "viduthalai part 1": 859348,
+  "jigarthanda doublex": 1058694,
+  "chithha": 1171541,
+  "irugapatru": 1182333,
+  "por thozhil": 1124578,
+  "good night": 1121965,
+  "dada": 1073866,
+  "love today": 1039690,
+  "om: operation mole": 1384528,
+  "o.m: operation mole": 1384528,
+  "om operation mole": 1384528,
+  "operation mole": 1384528,
+  "meesaya murukku": 424336,
+  "meesaya murukku 2": 1538457,
+  "immortal": 1505305,
+  "cold call": 126743,
+  "anakapalli": 123090,
+  "baththa": 1515692,
+  "the dark heaven": 1618200,
+  "dorothy": 1578079,
+  "jailer 2": 1234139,
+  "jailer 2 original": 1234139,
+  "mookuthi amman 2": 1327835,
+  "mookuthi amman 2 hq hdts": 1327835,
+  "yezhu kadal yezhu malai": 954445,
+  "scene": 1402181,
+  "scene 2026": 1402181,
+  "leo": 949229,
+  "leo: bloody sweet": 949229,
+  "jailer": 937020,
+  "vikram": 743563,
+  "master": 626392,
+  "goat": 1129608,
+  "the greatest of all time": 1129608,
+  "amaran": 927342,
+  "maharaja": 1118224,
+  "ponniyin selvan": 660046,
+  "kalki 2898 ad": 801688,
+  "kalki": 801688,
+  "aavesham": 1084812,
+  "manjummel boys": 1069945,
+  "bramayugam": 1166133,
+  "stree 2": 1112426,
+  "12th fail": 1163258,
+  "jawan": 872906,
+  "animal": 781732,
+  "salaar": 770906,
+  "rrr": 579974,
+  "deadpool & wolverine": 533535,
+  "dune: part two": 693134,
+  "oppenheimer": 872585,
+  "interstellar": 157336,
+  "game of thrones": 1399,
+  "got": 1399,
+  "house of the dragon": 94997,
+  "severance": 95396,
+  "stranger things": 66732,
+  "the boys": 76479
 };
+
+function findKnownTmdbId(title) {
+  if (!title) return null;
+  const norm = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (KNOWN_TMDB_MAP[norm]) return KNOWN_TMDB_MAP[norm];
+  
+  const padded = " " + norm + " ";
+  const sortedKeys = Object.keys(KNOWN_TMDB_MAP).sort((a, b) => b.length - a.length);
+  for (const k of sortedKeys) {
+    if (k.length < 3) continue;
+    const paddedKey = " " + k.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
+    if (padded.includes(paddedKey)) {
+      return KNOWN_TMDB_MAP[k];
+    }
+  }
+  return null;
+}
+
+const NETMIRROR_TO_TMDB_CACHE = new Map();
+
+async function resolveTmdbForNetmirrorItem(rawTitle, relYear) {
+  const clean = String(rawTitle || "").replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  if (!clean) return null;
+  
+  const known = findKnownTmdbId(clean);
+  if (known) return String(known);
+
+  const yr = parseInt(relYear, 10);
+  const cacheKey = clean.toLowerCase() + "_" + (yr || "");
+  if (NETMIRROR_TO_TMDB_CACHE.has(cacheKey)) {
+    return NETMIRROR_TO_TMDB_CACHE.get(cacheKey);
+  }
+
+  try {
+    const params = { query: clean, include_adult: "false" };
+    if (yr && yr > 1920 && yr < 2030) {
+      params.primary_release_year = yr;
+    }
+    let data = await fetchTmdbApi("/search/movie", params);
+    if ((!data || !data.results || data.results.length === 0) && params.primary_release_year) {
+      delete params.primary_release_year;
+      data = await fetchTmdbApi("/search/movie", params);
+    }
+    if (!data || !data.results || data.results.length === 0) {
+      data = await fetchTmdbApi("/search/multi", { query: clean, include_adult: "false" });
+    }
+    if (data && data.results && data.results.length > 0) {
+      const match = data.results[0];
+      const tmId = String(match.id);
+      NETMIRROR_TO_TMDB_CACHE.set(cacheKey, tmId);
+      return tmId;
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  return null;
+}
 
 // Sync states declared above
 
@@ -898,15 +1060,10 @@ async function searchMovies(query, lang = null) {
       let voteAvg = 6.5;
       try { voteAvg = Math.round((parseFloat(r.vote_average) || 6.5) * 10) / 10; } catch (e) {}
 
-      const cleanTitleKey = rawTitle.toLowerCase().replace(/\[.*?\]/g, '').trim();
-      let matchedTmdb = KNOWN_TMDB_MAP[cleanTitleKey];
+      const cleanTitleKey = rawTitle.toLowerCase().replace(/\[.*?\]/g, "").trim();
+      let matchedTmdb = findKnownTmdbId(cleanTitleKey);
       if (!matchedTmdb) {
-        for (const [k, v] of Object.entries(KNOWN_TMDB_MAP)) {
-          if (cleanTitleKey.includes(k) || k.includes(cleanTitleKey)) {
-            matchedTmdb = v;
-            break;
-          }
-        }
+        matchedTmdb = await resolveTmdbForNetmirrorItem(rawTitle, relYear);
       }
       const realTmdbId = matchedTmdb ? String(matchedTmdb) : mid;
       const isTvShow = [
@@ -917,6 +1074,8 @@ async function searchMovies(query, lang = null) {
       results.push({
         id: uid,
         netmirrorId: mid,
+        netId: mid,
+        nid: mid,
         tmdbId: realTmdbId,
         title: rawTitle,
         language: itemLang,
@@ -948,7 +1107,20 @@ async function searchMovies(query, lang = null) {
     const tmdbData = await fetchTmdbApi('/search/multi', { query, include_adult: 'false' });
     for (const item of (tmdbData.results || [])) {
       const m = normalizeMovie(item);
-      if (!seenIds.has(m.id) && !results.some(r => r.title.toLowerCase() === m.title.toLowerCase())) {
+      const cleanNormTitle = m.title.toLowerCase().replace(/[^a-z0-9]/g, ' ').trim();
+      const existing = results.find(r => {
+        const rNorm = r.title.toLowerCase().replace(/\[.*?\]|\(.*?\)/g, '').replace(/[^a-z0-9]/g, ' ').trim();
+        return rNorm === cleanNormTitle;
+      });
+      if (existing) {
+        if (existing.netmirrorId && (!existing.tmdbId || String(existing.tmdbId) === String(existing.netmirrorId))) {
+          existing.tmdbId = String(m.id);
+        }
+        if (!existing.poster || existing.poster.includes('/api/poster')) {
+          existing.poster = m.poster;
+          existing.backdrop = m.backdrop;
+        }
+      } else if (!seenIds.has(m.id)) {
         seenIds.add(m.id);
         results.push(m);
       }
@@ -1741,10 +1913,13 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
   if (raw && MOVIESDA_VERIFIED_MAP[raw]) {
     return MOVIESDA_VERIFIED_MAP[raw];
   }
-  for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || raw === k) return v;
-    if (k.length >= 4) {
-      if (clean.includes(k) || raw.includes(k)) return v;
+  const padded = " " + clean + " ";
+  const sortedKeys = Object.keys(MOVIESDA_VERIFIED_MAP).sort((a, b) => b.length - a.length);
+  for (const k of sortedKeys) {
+    if (k.length < 3) continue;
+    const paddedKey = " " + k.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
+    if (padded.includes(paddedKey)) {
+      return MOVIESDA_VERIFIED_MAP[k];
     }
   }
   return null;
@@ -2882,3 +3057,7 @@ module.exports.getMoviesdaFolders = getMoviesdaFolders;
 module.exports.resolveMoviesdaLive = resolveMoviesdaLive;
 module.exports.resolveTrailer = resolveTrailer;
 module.exports.VERIFIED_TRAILERS = VERIFIED_TRAILERS;
+module.exports.searchMovies = searchMovies;
+module.exports.KNOWN_TMDB_MAP = KNOWN_TMDB_MAP;
+module.exports.findKnownTmdbId = findKnownTmdbId;
+module.exports.getVerifiedMoviesdaFileId = getVerifiedMoviesdaFileId;

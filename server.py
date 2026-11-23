@@ -39,6 +39,167 @@ LANG_CODE_MAP = {
     "tamil": "ta", "english": "en", "hindi": "hi", "telugu": "te", "malayalam": "ml"
 }
 
+KNOWN_TMDB_MAP = {
+    "singam": 62756,
+    "singam 1": 62756,
+    "singam original": 62756,
+    "singam tamil": 62756,
+    "singam 2": 191735,
+    "singam ii": 191735,
+    "singam 2 original": 191735,
+    "singam 3": 376440,
+    "si 3": 376440,
+    "si3": 376440,
+    "s3": 376440,
+    "singham": 70590,
+    "singham returns": 285803,
+    "singham again": 1014214,
+    "kadaikutty singam": 498821,
+    "anniyan": 19978,
+    "ghajini": 19975,
+    "ghajini tamil": 19975,
+    "ghajini hindi": 14070,
+    "sivaji": 24049,
+    "sivaji: the boss": 24049,
+    "sivaji the boss": 24049,
+    "mankatha": 76788,
+    "theri": 370076,
+    "mersal": 456287,
+    "bigil": 563309,
+    "kaththi": 263475,
+    "thuppakki": 143010,
+    "enthiran": 148284,
+    "robot": 148284,
+    "2.0": 345915,
+    "kabali": 354859,
+    "kaala": 457837,
+    "petta": 554230,
+    "darbar": 592834,
+    "baahubali": 256040,
+    "baahubali: the beginning": 256040,
+    "baahubali the beginning": 256040,
+    "baahubali 2": 350312,
+    "baahubali 2: the conclusion": 350312,
+    "baahubali 2 the conclusion": 350312,
+    "k.g.f: chapter 1": 564147,
+    "kgf": 564147,
+    "kgf chapter 1": 564147,
+    "kgf 1": 564147,
+    "k.g.f: chapter 2": 587412,
+    "kgf chapter 2": 587412,
+    "kgf 2": 587412,
+    "kantara": 858485,
+    "pushpa": 690957,
+    "pushpa: the rise": 690957,
+    "pushpa the rise": 690957,
+    "pushpa 2": 1011985,
+    "pushpa 2: the rule": 1011985,
+    "pushpa 2 the rule": 1011985,
+    "varisu": 835017,
+    "beast": 849509,
+    "vettaiyan": 1093966,
+    "raayan": 1136418,
+    "demonte colony 2": 979250,
+    "lubber pandhu": 1182047,
+    "meiyazhagan": 1171178,
+    "madha gaja raja": 280951,
+    "soorarai pottru": 653594,
+    "jai bhim": 870932,
+    "asuran": 598442,
+    "kaithi": 630566,
+    "doctor": 671039,
+    "don": 791977,
+    "ayalaan": 533514,
+    "captain miller": 1000676,
+    "vaathi": 915822,
+    "siruthai": 60938,
+    "ayan": 19973,
+    "paiyaa": 38686,
+    "ko": 62837,
+    "aaranya kaandam": 64303,
+    "super deluxe": 570775,
+    "pariyerum perumal": 538858,
+    "karnan": 672647,
+    "viduthalai": 859348,
+    "viduthalai part 1": 859348,
+    "jigarthanda doublex": 1058694,
+    "chithha": 1171541,
+    "irugapatru": 1182333,
+    "por thozhil": 1124578,
+    "good night": 1121965,
+    "dada": 1073866,
+    "love today": 1039690,
+    "om: operation mole": 1384528,
+    "o.m: operation mole": 1384528,
+    "om operation mole": 1384528,
+    "operation mole": 1384528,
+    "meesaya murukku": 424336,
+    "meesaya murukku 2": 1538457,
+    "immortal": 1505305,
+    "cold call": 126743,
+    "anakapalli": 123090,
+    "baththa": 1515692,
+    "the dark heaven": 1618200,
+    "dorothy": 1578079,
+    "jailer 2": 1234139,
+    "jailer 2 original": 1234139,
+    "mookuthi amman 2": 1327835,
+    "mookuthi amman 2 hq hdts": 1327835,
+    "yezhu kadal yezhu malai": 954445,
+    "scene": 1402181,
+    "scene 2026": 1402181,
+    "leo": 949229,
+    "leo: bloody sweet": 949229,
+    "jailer": 937020,
+    "vikram": 743563,
+    "master": 626392,
+    "goat": 1129608,
+    "the greatest of all time": 1129608,
+    "amaran": 927342,
+    "maharaja": 1118224,
+    "ponniyin selvan": 660046,
+    "kalki 2898 ad": 801688,
+    "kalki": 801688,
+    "aavesham": 1084812,
+    "manjummel boys": 1069945,
+    "bramayugam": 1166133,
+    "stree 2": 1112426,
+    "12th fail": 1163258,
+    "jawan": 872906,
+    "animal": 781732,
+    "salaar": 770906,
+    "rrr": 579974,
+    "deadpool & wolverine": 533535,
+    "dune: part two": 693134,
+    "oppenheimer": 872585,
+    "interstellar": 157336,
+    "game of thrones": 1399,
+    "got": 1399,
+    "house of the dragon": 94997,
+    "severance": 95396,
+    "stranger things": 66732,
+    "the boys": 76479
+}
+
+def find_known_tmdb_id(title):
+    if not title:
+        return None
+    norm = re.sub(r"\[.*?\]|\(.*?\)", "", str(title)).lower()
+    norm = re.sub(r"[^a-z0-9\s]", " ", norm)
+    norm = re.sub(r"\s+", " ", norm).strip()
+    if norm in KNOWN_TMDB_MAP:
+        return KNOWN_TMDB_MAP[norm]
+    
+    padded = f" {norm} "
+    sorted_keys = sorted(KNOWN_TMDB_MAP.keys(), key=len, reverse=True)
+    for k in sorted_keys:
+        if len(k) < 3:
+            continue
+        padded_key = f" {re.sub(r'[^a-z0-9\s]', ' ', k).strip()} "
+        if padded_key in padded:
+            return KNOWN_TMDB_MAP[k]
+    return None
+
 def fetch_tmdb_api(endpoint, params=None):
     """Fetch data from TMDB proxy with automatic fallback between keys."""
     if params is None:
@@ -318,10 +479,15 @@ def search_movies(query, lang=None):
                 except Exception:
                     vote_avg = 6.5
 
+                clean_title_key = re.sub(r"\[.*?\]", "", raw_title).strip()
+                matched_tmdb = find_known_tmdb_id(clean_title_key)
+                real_tmdb_id = str(matched_tmdb) if matched_tmdb else mid
                 results.append({
                     "id": uid,
                     "netmirrorId": mid,
-                    "tmdbId": mid,
+                    "netId": mid,
+                    "nid": mid,
+                    "tmdbId": real_tmdb_id,
                     "title": raw_title,
                     "language": item_lang,
                     "languageBadge": badge_text,

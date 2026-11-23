@@ -161,10 +161,13 @@ function getVerifiedMoviesdaFileId(title, tmdbId) {
   if (raw && MOVIESDA_VERIFIED_MAP[raw]) {
     return MOVIESDA_VERIFIED_MAP[raw];
   }
-  for (const [k, v] of Object.entries(MOVIESDA_VERIFIED_MAP)) {
-    if (clean === k || raw === k) return v;
-    if (k.length >= 4) {
-      if (clean.includes(k) || raw.includes(k)) return v;
+  const padded = " " + clean + " ";
+  const sortedKeys = Object.keys(MOVIESDA_VERIFIED_MAP).sort((a, b) => b.length - a.length);
+  for (const k of sortedKeys) {
+    if (k.length < 3) continue;
+    const paddedKey = " " + k.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
+    if (padded.includes(paddedKey)) {
+      return MOVIESDA_VERIFIED_MAP[k];
     }
   }
   return null;
@@ -1320,6 +1323,98 @@ class MovieshubPlayer {
 
       // Verified 100% accurate TMDB ID database for blockbusters
       const KNOWN_TMDB_MAP = {
+        // The Singam Franchise (Tamil & Hindi)
+        "singam": 62756,
+        "singam 1": 62756,
+        "singam original": 62756,
+        "singam tamil": 62756,
+        "singam 2": 191735,
+        "singam ii": 191735,
+        "singam 2 original": 191735,
+        "singam 3": 376440,
+        "si 3": 376440,
+        "si3": 376440,
+        "s3": 376440,
+        "singham": 70590,
+        "singham returns": 285803,
+        "singham again": 1014214,
+        "kadaikutty singam": 498821,
+
+        // Legendary Tamil & Indian Blockbusters
+        "anniyan": 19978,
+        "ghajini": 19975,
+        "ghajini tamil": 19975,
+        "ghajini hindi": 14070,
+        "sivaji": 24049,
+        "sivaji: the boss": 24049,
+        "sivaji the boss": 24049,
+        "mankatha": 76788,
+        "theri": 370076,
+        "mersal": 456287,
+        "bigil": 563309,
+        "kaththi": 263475,
+        "thuppakki": 143010,
+        "enthiran": 148284,
+        "robot": 148284,
+        "2.0": 345915,
+        "kabali": 354859,
+        "kaala": 457837,
+        "petta": 554230,
+        "darbar": 592834,
+        "baahubali": 256040,
+        "baahubali: the beginning": 256040,
+        "baahubali the beginning": 256040,
+        "baahubali 2": 350312,
+        "baahubali 2: the conclusion": 350312,
+        "baahubali 2 the conclusion": 350312,
+        "k.g.f: chapter 1": 564147,
+        "kgf": 564147,
+        "kgf chapter 1": 564147,
+        "kgf 1": 564147,
+        "k.g.f: chapter 2": 587412,
+        "kgf chapter 2": 587412,
+        "kgf 2": 587412,
+        "kantara": 858485,
+        "pushpa": 690957,
+        "pushpa: the rise": 690957,
+        "pushpa the rise": 690957,
+        "pushpa 2": 1011985,
+        "pushpa 2: the rule": 1011985,
+        "pushpa 2 the rule": 1011985,
+        "varisu": 835017,
+        "beast": 849509,
+        "vettaiyan": 1093966,
+        "raayan": 1136418,
+        "demonte colony 2": 979250,
+        "lubber pandhu": 1182047,
+        "meiyazhagan": 1171178,
+        "madha gaja raja": 280951,
+        "soorarai pottru": 653594,
+        "jai bhim": 870932,
+        "asuran": 598442,
+        "kaithi": 630566,
+        "doctor": 671039,
+        "don": 791977,
+        "ayalaan": 533514,
+        "captain miller": 1000676,
+        "vaathi": 915822,
+        "siruthai": 60938,
+        "ayan": 19973,
+        "paiyaa": 38686,
+        "ko": 62837,
+        "aaranya kaandam": 64303,
+        "super deluxe": 570775,
+        "pariyerum perumal": 538858,
+        "karnan": 672647,
+        "viduthalai": 859348,
+        "viduthalai part 1": 859348,
+        "jigarthanda doublex": 1058694,
+        "chithha": 1171541,
+        "irugapatru": 1182333,
+        "por thozhil": 1124578,
+        "good night": 1121965,
+        "dada": 1073866,
+        "love today": 1039690,
         "om: operation mole": 1384528,
         "o.m: operation mole": 1384528,
         "om operation mole": 1384528,
@@ -1382,34 +1477,38 @@ class MovieshubPlayer {
 
       let cleanTitle = (movie?.title || "").toLowerCase().replace(/\[.*?\]/g, "").trim();
 
-      // 1. Prioritize explicit numeric tmdbId from movie object
-      let resolvedTmdbId = null;
-      // If title is known, prioritize real TMDB ID over any 6-digit Moviesda upload ID
-      if (cleanTitle === "meesaya murukku 2" || cleanTitle.includes("meesaya murukku 2")) {
-        resolvedTmdbId = "1538457";
-      } else if (cleanTitle === "meesaya murukku" || cleanTitle === "meesaya murukku 1") {
-        resolvedTmdbId = "424336";
-      } else if (cleanTitle === "immortal" || cleanTitle.includes("immortal")) {
-        resolvedTmdbId = "1505305";
-      } else if (cleanTitle === "cold call") {
-        resolvedTmdbId = "126743";
-      } else if (cleanTitle === "anakapalli") {
-        resolvedTmdbId = "123090";
-      } else if (movie?.tmdbId && !isNaN(parseInt(movie.tmdbId, 10)) && parseInt(movie.tmdbId, 10) > 0 && movie.tmdbId !== 102966 && movie.tmdbId !== 103140 && movie.tmdbId !== 103147) {
-        resolvedTmdbId = String(movie.tmdbId);
+      function findKnownTmdbId(title) {
+        if (!title) return null;
+        const norm = String(title).toLowerCase().replace(/\[.*?\]|\(.*?\)/g, "").replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+        if (KNOWN_TMDB_MAP[norm]) return KNOWN_TMDB_MAP[norm];
+        
+        const padded = " " + norm + " ";
+        const sortedKeys = Object.keys(KNOWN_TMDB_MAP).sort((a, b) => b.length - a.length);
+        for (const k of sortedKeys) {
+          if (k.length < 3) continue;
+          const paddedKey = " " + k.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim() + " ";
+          if (padded.includes(paddedKey)) {
+            return KNOWN_TMDB_MAP[k];
+          }
+        }
+        return null;
       }
 
-      // 2. If tmdbId not present, resolve from title via verified map
-      if (!resolvedTmdbId) {
-        if (KNOWN_TMDB_MAP[cleanTitle]) {
-          resolvedTmdbId = String(KNOWN_TMDB_MAP[cleanTitle]);
-        } else {
-          for (const [k, v] of Object.entries(KNOWN_TMDB_MAP)) {
-            if (cleanTitle === k || cleanTitle.startsWith(k + " ") || cleanTitle.endsWith(" " + k) || cleanTitle.includes(" " + k + " ")) {
-              resolvedTmdbId = String(v);
-              break;
-            }
-          }
+      // 1. Resolve from verified KNOWN_TMDB_MAP first (prevents wrong movie playback when unverified/internal Netmirror or Moviesda IDs are passed)
+      let resolvedTmdbId = null;
+      const knownMatch = findKnownTmdbId(cleanTitle);
+      if (knownMatch) {
+        resolvedTmdbId = String(knownMatch);
+      }
+
+      // 2. Prioritize explicit numeric tmdbId if not known title, verifying it is not an internal Netmirror or Moviesda upload ID
+      const isNetmirrorInternalId = movie?.netmirrorId && String(movie.tmdbId) === String(movie.netmirrorId);
+      const isNetmirrorPrefixed = String(movie?.id || "").startsWith("netmirror-") && String(movie?.tmdbId) === String(movie?.id || "").replace("netmirror-", "");
+      const isKnownMoviesdaUploadId = movie?.tmdbId === 102966 || movie?.tmdbId === 103140 || movie?.tmdbId === 103147 || movie?.tmdbId === 103234;
+
+      if (!resolvedTmdbId && movie?.tmdbId && !isNetmirrorInternalId && !isNetmirrorPrefixed && !isKnownMoviesdaUploadId) {
+        if (!isNaN(parseInt(movie.tmdbId, 10)) && parseInt(movie.tmdbId, 10) > 0) {
+          resolvedTmdbId = String(movie.tmdbId);
         }
       }
 
@@ -1464,7 +1563,7 @@ class MovieshubPlayer {
         ? window.API_PREFIX
         : "/server/movieshub_api";
 
-      const netId = movie?.netId || movie?.nid || "";
+      const netId = movie?.netId || movie?.nid || movie?.netmirrorId || (String(movie?.id || "").startsWith("netmirror-") ? String(movie.id).replace("netmirror-", "") : "");
       const season = movie?.season || 1;
       const episode = movie?.episode || 1;
 
