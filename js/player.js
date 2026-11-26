@@ -15,9 +15,10 @@ const MOVIESDA_VERIFIED_MAP = {
   "jailer 2": "103358",
   "jailer 2 original": "103358",
   "jailer 2 1080p": "103358",
-  "mookuthi amman 2": "103371",
-  "mookuthi amman 2 hq hdts": "103371",
-  "mookuthi amman 2 1080p": "103371",
+  "mookuthi amman 2": "103807",
+  "mookuthi amman 2 original": "103807",
+  "mookuthi amman 2 hq hdts": "103807",
+  "mookuthi amman 2 1080p": "103807",
   "yezhu kadal yezhu malai": "103376",
   "yezhu kadal yezhu malai original": "103376",
   "yezhu kadal yezhu malai 1080p": "103376",
@@ -106,7 +107,7 @@ const MOVIESDA_TMDB_MAP = {
   1384528: "103723",  // OM: Operation Mole (2026) Moviesda 1080p PreDVD (v2)
   280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
-  1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
+  1327835: "103807",  // Mookuthi Amman 2 (2026) Moviesda 1080p Original HD Print
   954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
   1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
@@ -177,10 +178,14 @@ function resolveMoviesdaFileId(title, fallback = null, tmdbId = null) {
   return getVerifiedMoviesdaFileId(title, tmdbId) || fallback;
 }
 
-function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFileId = null) {
+function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFileId = null, season = 1, episode = 1) {
   const fileId = customFileId || getVerifiedMoviesdaFileId(title, tmId);
   const safeTitle = (title || "Movie").replace(/"/g, "&quot;").replace(/</g, "&lt;");
-  const embedUrl = fileId ? `https://play.onestream.today/stream/page/${fileId}` : "";
+  const hostPfx = (typeof window !== "undefined" && window.API_PREFIX) ? window.API_PREFIX : "";
+  const embedUrl = fileId ? `${hostPfx}/stream/moviesda/embed?file_id=${encodeURIComponent(fileId)}` : "";
+  const fallbackEmbedUrl = mtype === "tv"
+    ? `https://vidlink.pro/tv/${encodeURIComponent(tmId || "1399")}/${season || 1}/${episode || 1}?multiLang=true&primaryColor=e50914&autoplay=true`
+    : `https://vidlink.pro/movie/${encodeURIComponent(tmId || "1402181")}?multiLang=true&primaryColor=e50914&autoplay=true`;
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -511,9 +516,10 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
       var ew = document.getElementById("embedWrap");
       if (ef && ew) {
         if (!fid || (fid === "103234" && "${tmId}" !== "656908") || fid === "1402181" || String(fid).length >= 7) {
-          ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+          ef.src = "${fallbackEmbedUrl}";
         } else {
-          ef.src = "https://play.onestream.today/stream/page/" + fid;
+          var apiPfxLocal = (window.API_PREFIX) || (window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "");
+          ef.src = apiPfxLocal + "/stream/moviesda/embed?file_id=" + encodeURIComponent(fid);
         }
         ew.style.display = "block";
       }
@@ -585,7 +591,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
     });
 
     (function() {
-      var apiPfx = window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "";
+      var apiPfx = "${hostPfx}" || (window.location.pathname.includes("/server/movieshub_api") ? "/server/movieshub_api" : "");
       var initialFileId = "${fileId || ""}";
 
       function handleFileId(fid) {
@@ -618,7 +624,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
               var ef = document.getElementById("embedFrame");
               var ew = document.getElementById("embedWrap");
               if (ef && ew) {
-                ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+                ef.src = "${fallbackEmbedUrl}";
                 ew.style.display = "block";
               }
               var loader = document.getElementById("mLoader");
@@ -629,7 +635,7 @@ function generateMoviesdaPlayerSrcdoc(tmId, mtype, title, lang, year, customFile
             var ef = document.getElementById("embedFrame");
             var ew = document.getElementById("embedWrap");
             if (ef && ew) {
-              ef.src = "https://vidlink.pro/movie/" + encodeURIComponent("${tmId || '1402181'}") + "?multiLang=true";
+              ef.src = "${fallbackEmbedUrl}";
               ew.style.display = "block";
             }
             var loader = document.getElementById("mLoader");
@@ -1589,10 +1595,10 @@ class MovieshubPlayer {
         {
           id: "s3",
           name: "Server 3",
-          badge: "Fast Forward (AutoEmbed)",
+          badge: "Fast Forward (VidSrc SU)",
           url: mtype === "tv"
-            ? `https://autoembed.co/tv/tmdb/${resolvedTmdbId}/${season}/${episode}${safeLang.toLowerCase() === "tamil" ? "?audio=ta&lang=ta" : ""}`
-            : `https://autoembed.co/movie/tmdb/${resolvedTmdbId}${safeLang.toLowerCase() === "tamil" ? "?audio=ta&lang=ta" : ""}`
+            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s4",
@@ -1613,42 +1619,42 @@ class MovieshubPlayer {
         {
           id: "s6",
           name: "Server 6",
-          badge: "Cinema 4K (2Embed)",
+          badge: "Cinema 4K (CinemaOS)",
           url: mtype === "tv"
-            ? `https://www.2embed.cc/embedtv/${resolvedTmdbId}&s=${season}&e=${episode}`
-            : `https://www.2embed.cc/embed/${resolvedTmdbId}`
+            ? `https://cinemaos.tech/player/${resolvedTmdbId}/${season}/${episode}`
+            : `https://cinemaos.tech/player/${resolvedTmdbId}`
         },
         {
           id: "s7",
           name: "Server 7",
-          badge: "Mirror HD (VidSrc PM)",
+          badge: "Mirror HD (VidNest)",
           url: mtype === "tv"
-            ? `https://vidprime.top/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://vidprime.top/movie/${resolvedTmdbId}`
+            ? `https://vidnest.fun/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://vidnest.fun/movie/${resolvedTmdbId}`
         },
         {
           id: "s8",
           name: "Server 8",
-          badge: "Ultra CDN (VidSrc Net)",
+          badge: "Ultra CDN (VidMario)",
           url: mtype === "tv"
-            ? `https://play2.123embed.net/tv/${resolvedTmdbId}/${season}/${episode}`
-            : `https://play2.123embed.net/movie/${resolvedTmdbId}`
+            ? `https://player.vidmario.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            : `https://player.vidmario.net/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s9",
           name: "Server 9",
           badge: "Moviesda Tamil HD",
-          url: (movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle))
-            ? `https://play.onestream.today/stream/page/${movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title) || getVerifiedMoviesdaFileId(cleanTitle)}`
-            : `https://moviezda.co/tamil-${movie?.year || 2026}-movies/`
+          url: (movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId))
+            ? `${pfx}/stream/moviesda/embed?file_id=${encodeURIComponent(movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId))}`
+            : `${pfx}/moviesda.html?id=${encodeURIComponent(resolvedTmdbId)}&type=${encodeURIComponent(mtype)}&title=${encodeURIComponent(cleanTitle)}&year=${encodeURIComponent(movie?.year || 2026)}`
         },
         {
           id: "s10",
           name: "Server 10",
-          badge: "Atlantic HD",
+          badge: "Multi-Lang 4K (VidLink)",
           url: mtype === "tv"
-            ? `https://atlantic.bz/watch/${resolvedTmdbId}/${season}/${episode}`
-            : `https://atlantic.bz/watch/${resolvedTmdbId}`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?multiLang=true&primaryColor=e50914&autoplay=true`
+            : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=true&primaryColor=e50914&autoplay=true`
         }
       ];
 
@@ -1818,7 +1824,7 @@ class MovieshubPlayer {
 
           if (srv.id === "s9") {
             curIframe.removeAttribute("src");
-            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026, mFileId);
+            curIframe.srcdoc = generateMoviesdaPlayerSrcdoc(resolvedTmdbId, mtype, movie?.title || "", safeLang, movie?.year || 2026, mFileId, season, episode);
             hidePreloader();
             return;
           }
@@ -1830,7 +1836,7 @@ class MovieshubPlayer {
 
             // Fetch stream HTML via AJAX to completely bypass Zoho Catalyst X-Frame-Options: DENY
             const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
-            const timeoutId = controller ? setTimeout(() => controller.abort(), 4500) : null;
+            const timeoutId = controller ? setTimeout(() => controller.abort(), 7000) : null;
 
             fetch(srv.url, controller ? { signal: controller.signal } : {})
               .then(res => {
@@ -1850,8 +1856,8 @@ class MovieshubPlayer {
               .catch(err => {
                 console.warn("[Movieshub] Server 1 fetch failed, falling back to clean upstream:", err);
                 const instantStreamUrl = mtype === "tv"
-                  ? `https://atlantic.bz/watch/${resolvedTmdbId}/${season}/${episode}`
-                  : `https://atlantic.bz/watch/${resolvedTmdbId}`;
+                  ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&autoplay=true`
+                  : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&autoplay=true`;
                 curIframe.removeAttribute("srcdoc");
                 curIframe.src = instantStreamUrl;
                 hidePreloader();
@@ -1904,7 +1910,7 @@ class MovieshubPlayer {
       const quickTamilBtn = document.getElementById("quickTamilAudioBtn");
       if (quickTamilBtn) {
         quickTamilBtn.addEventListener("click", () => {
-          const mFileId = getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId);
+          const mFileId = movie?.moviesdaFileId || getVerifiedMoviesdaFileId(movie?.title, resolvedTmdbId) || getVerifiedMoviesdaFileId(cleanTitle, resolvedTmdbId);
           if (mFileId) {
             const s9Idx = servers.findIndex(s => s.id === "s9");
             if (s9Idx !== -1) {
@@ -2259,6 +2265,7 @@ class MovieshubPlayer {
 
   open(movie, initialMode = "movie") {
     if (!movie) return;
+    this.isUserExiting = false;
     this.currentMovie = movie;
     window.isStreamPlaying = true;
     window.userIntentionalNavigation = false;

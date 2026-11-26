@@ -310,7 +310,7 @@ class MovieshubSports {
                 Stream ${idx + 1} ${idx === 0 ? '(HD)' : idx === 1 ? '(Fast)' : '(Mirror)'}
               </button>
             `).join('')}
-            <a href="${streams[0] || match.streamUrl}" target="_blank" rel="noopener noreferrer" class="sports-srv-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Open live stream directly">
+            <a href="${(window.API_PREFIX || "")}/stream/sports?url=${encodeURIComponent(streams[0] || match.streamUrl)}" target="_blank" rel="noopener noreferrer" class="sports-srv-btn" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px;" title="Open ad-free live stream">
               <span>↗ Direct</span>
             </a>
           </div>

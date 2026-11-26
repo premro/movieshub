@@ -134,7 +134,7 @@ for (const m of global.MOVIE_CATALOG) {
   const streamEl = getMockEl("player-stream-iframe");
   const iframeSrc = streamEl.src || "";
   const iframeSrcdoc = streamEl.srcdoc || "";
-  const validStream = (iframeSrc && (iframeSrc.includes("vidsrc.su") || iframeSrc.includes("vidsrc.pm") || iframeSrc.includes("vidlink.pro") || iframeSrc.includes("2embed") || iframeSrc.includes("autoembed"))) || (iframeSrcdoc && (iframeSrcdoc.includes("onestream.today") || iframeSrcdoc.includes("vidsrc")));
+  const validStream = (iframeSrc && (iframeSrc.includes("vidsrc.su") || iframeSrc.includes("vidlink.pro") || iframeSrc.includes("cinemaos.tech") || iframeSrc.includes("vidnest.fun") || iframeSrc.includes("vidmario.net"))) || (iframeSrcdoc && (iframeSrcdoc.includes("/stream/moviesda/embed") || iframeSrcdoc.includes("vidlink.pro") || iframeSrcdoc.includes("vidsrc")));
   if (!validStream) {
     playerStreamsOk = false;
   }
@@ -219,7 +219,8 @@ const playerCode = fs.readFileSync(path.join(__dirname, "../js/player.js"), "utf
 assert(!playerCode.includes("autoembed.pro"), "Server 1 never points to parked autoembed.pro");
 assert(playerCode.includes("Movieshub Cloud"), "Server 1 is Movieshub Cloud internal stream proxy");
 assert(playerCode.includes("vidlink.pro"), "Server 2 is Primary HD (VidLink)");
-assert(playerCode.includes("autoembed.co"), "Server 3 is Fast Forward (AutoEmbed)");
+assert(playerCode.includes("vidsrc.su/embed"), "Server 3 is Fast Forward (VidSrc SU)");
+assert(!playerCode.includes("autoembed.co"), "Ad-ridden autoembed.co completely removed from player");
 assert(playerCode.includes("quickTamilAudioBtn"), "Quick Tamil Dubbed button present in player");
 assert(playerCode.includes("data-val=\"Tamil\""), "Tamil Dubbed / Regional audio option present in popover");
 
@@ -246,12 +247,12 @@ assert(!playerCode.includes("badge: \"Moviesda Mirror 1\""), "Standard multi-ser
 // Verify Servers 1 to 8 remain completely intact per specification
 assert(playerCode.includes("Server 1") && playerCode.includes("Movieshub Cloud"), "Server 1 (Movieshub Cloud) is intact");
 assert(playerCode.includes("Server 2") && playerCode.includes("VidLink"), "Server 2 (VidLink) is intact");
-assert(playerCode.includes("Server 3") && playerCode.includes("AutoEmbed"), "Server 3 (AutoEmbed) is intact");
+assert(playerCode.includes("Server 3") && playerCode.includes("VidSrc SU"), "Server 3 (VidSrc SU) is active and ad-free");
 assert(playerCode.includes("Server 4") && playerCode.includes("0vidads"), "Server 4 (0vidads) is intact");
 assert(playerCode.includes("Server 5") && playerCode.includes("VidSync"), "Server 5 (VidSync) is intact");
-assert(playerCode.includes("Server 6") && playerCode.includes("2Embed"), "Server 6 (2Embed) is intact");
-assert(playerCode.includes("Server 7") && playerCode.includes("VidSrc PM"), "Server 7 (VidSrc PM) is intact");
-assert(playerCode.includes("Server 8") && playerCode.includes("VidSrc Net"), "Server 8 (VidSrc Net) is intact");
+assert(playerCode.includes("Server 6") && playerCode.includes("CinemaOS"), "Server 6 (CinemaOS) is active and ad-free");
+assert(playerCode.includes("Server 7") && playerCode.includes("VidNest"), "Server 7 (VidNest) is active and ad-free");
+assert(playerCode.includes("Server 8") && playerCode.includes("VidMario"), "Server 8 (VidMario) is active and ad-free");
 
 const indexApiCode = fs.readFileSync(path.join(__dirname, "../functions/movieshub_api/index.js"), "utf8");
 assert(indexApiCode.includes("pathname === \"/stream/moviesda\""), "Moviesda route present in backend");
@@ -381,19 +382,19 @@ assert(updatedCatalog.includes('id: "mookuthi-amman-2-tamil-2026"') && updatedCa
 assert(updatedCatalog.includes('id: "yezhu-kadal-yezhu-malai-tamil-2026"') && updatedCatalog.includes('tmdbId: 954445'), "Yezhu Kadal Yezhu Malai (2026) exists in local MOVIE_CATALOG with TMDB ID 954445");
 
 assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 1234139 && m.moviesdaFileId === "103358"), "Jailer 2 (103358) verified in dashboard cache tamil_2026");
-assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 1327835 && m.moviesdaFileId === "103371"), "Mookuthi Amman 2 (103371) verified in dashboard cache tamil_2026");
+assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 1327835 && m.moviesdaFileId === "103807"), "Mookuthi Amman 2 upgraded to Original 1080p HD (103807) in dashboard cache tamil_2026");
 assert(updatedDashCache.tamil_2026.some(m => m.tmdbId === 954445 && m.moviesdaFileId === "103376"), "Yezhu Kadal Yezhu Malai (103376) verified in dashboard cache tamil_2026");
 
 assert(updatedPlayer.includes('1234139: "103358"'), "Jailer 2 mapped to 103358 in player MOVIESDA_TMDB_MAP");
-assert(updatedPlayer.includes('1327835: "103371"'), "Mookuthi Amman 2 mapped to 103371 in player MOVIESDA_TMDB_MAP");
+assert(updatedPlayer.includes('1327835: "103807"'), "Mookuthi Amman 2 mapped to 103807 Original HD in player MOVIESDA_TMDB_MAP");
 assert(updatedPlayer.includes('954445: "103376"'), "Yezhu Kadal Yezhu Malai mapped to 103376 in player MOVIESDA_TMDB_MAP");
 
 assert(updatedApi.includes('1234139: "103358"'), "Jailer 2 mapped to 103358 in api MOVIESDA_TMDB_MAP");
-assert(updatedApi.includes('1327835: "103371"'), "Mookuthi Amman 2 mapped to 103371 in api MOVIESDA_TMDB_MAP");
+assert(updatedApi.includes('1327835: "103807"'), "Mookuthi Amman 2 mapped to 103807 Original HD in api MOVIESDA_TMDB_MAP");
 assert(updatedApi.includes('954445: "103376"'), "Yezhu Kadal Yezhu Malai mapped to 103376 in api MOVIESDA_TMDB_MAP");
 
 assert(updatedPlayer.includes('"jailer 2": "103358"'), "Jailer 2 verified in player MOVIESDA_VERIFIED_MAP");
-assert(updatedPlayer.includes('"mookuthi amman 2": "103371"'), "Mookuthi Amman 2 verified in player MOVIESDA_VERIFIED_MAP");
+assert(updatedPlayer.includes('"mookuthi amman 2": "103807"'), "Mookuthi Amman 2 verified in player MOVIESDA_VERIFIED_MAP with 103807");
 assert(updatedPlayer.includes('"yezhu kadal yezhu malai": "103376"'), "Yezhu Kadal Yezhu Malai verified in player MOVIESDA_VERIFIED_MAP");
 
 // 21. Testing Madha Gaja Raja (2025) & Moviesda Audio Passthrough
@@ -560,9 +561,9 @@ assert(curDashCache.latest_six && curDashCache.latest_six.some(m => m.tmdbId ===
 assert(curDashCache.tamil_2026 && curDashCache.tamil_2026.some(m => m.tmdbId === 1384528), "OM: Operation Mole present in tamil_2026 dashboard cache");
 assert(curFnCache.hero_slides && curFnCache.hero_slides.some(m => m.tmdbId === 1384528), "OM: Operation Mole synced in serverless functions hero_slides cache");
 
-assert(curPlayer.includes("Server 10") && curPlayer.includes("Atlantic HD") && curPlayer.includes("atlantic.bz/watch"), "Server 10 (Atlantic HD) integrated in multi-server network");
-assert(curPlayer.includes("https://atlantic.bz/watch/${resolvedTmdbId}"), "Player uses Atlantic.bz as clean instant stream fallback");
-assert(curApi.includes("https://atlantic.bz/watch/"), "API netmirror embed uses Atlantic.bz as verified clean fallback");
+assert(curPlayer.includes("Server 10") && curPlayer.includes("Multi-Lang 4K (VidLink)") && curPlayer.includes("multiLang=true"), "Server 10 (Multi-Lang 4K VidLink) integrated in multi-server network");
+assert(!curPlayer.includes("atlantic.bz") && !curPlayer.includes("2embed.cc") && !curPlayer.includes("vidprime.top") && !curPlayer.includes("123embed.net"), "All ad-ridden or dead servers removed from player.js");
+assert(curApi.includes("https://vidlink.pro/movie/"), "API netmirror embed uses clean VidLink fallback without ads");
 assert(curApi.includes("fallbackCleanEmbed"), "API netmirror embed returns seamless full-viewport player instead of broken UI");
 
 assert(curPlayer.includes('id="streamForward10Btn"') && curPlayer.includes('id="streamRewind10Btn"'), "On-screen 10s forward and rewind buttons present in player server bar");
@@ -622,6 +623,25 @@ assert(serverPyCode.includes("find_known_tmdb_id"), "server.py implements find_k
 
 assert(moviesdaHtmlCode.includes("if (MOVIESDA_VERIFIED_MAP[clean]) return MOVIESDA_VERIFIED_MAP[clean];") && moviesdaHtmlCode.includes("paddedKey"), "moviesda.html uses word boundary matching to prevent false positive substring matching");
 
+
+
+// 29. Testing Ad-Free S1-S10 Servers, Sports Sandbox/WASM Shield & 2-Hour Quality Auto-Sync
+console.log("\n29. Testing Ad-Free S1-S10 Servers, Sports Sandbox/WASM Shield & 2-Hour Quality Auto-Sync...");
+assert(curApi.includes("const { buffer, statusCode, finalUrl } = await fetchBuffer(domain"), "getActiveMoviesdaDomain destructures buffer cleanly without ReferenceError");
+assert(curApi.includes("const directDl = rawStream"), "/api/moviesda_stream defines directDl cleanly without ReferenceError");
+assert(!curApi.includes('moviesdaFileId: "1402181"'), "Scene search item no longer confuses TMDB ID 1402181 with moviesdaFileId");
+assert(typeof apiMod.scoreMoviesdaQuality === "function", "scoreMoviesdaQuality exported for quality-tiered resolution");
+assert(apiMod.scoreMoviesdaQuality("Garividi Lakshmi (Original 1080p HD)").score > apiMod.scoreMoviesdaQuality("Garividi Lakshmi (HQ PreDVD 720p)").score, "Quality scorer ranks Original 1080p above HQ PreDVD");
+assert(apiMod.scoreMoviesdaQuality("Movie (1080p HD)").score > apiMod.scoreMoviesdaQuality("Movie (360p HD)").score, "Quality scorer ranks 1080p above 360p");
+assert(apiMod.scoreMoviesdaQuality("Trailer Sample").score < 0, "Quality scorer filters out Sample/Trailer files");
+assert(curApi.includes("DASHBOARD_SYNC_VERSION") && curApi.includes("syncDashboardPromise"), "Dashboard sync deduplicates concurrent runs and supports versioned auto-sync");
+assert(curDashCache.sync_version === 2 && typeof curDashCache.moviesda_synced_at === "number", "Dashboard cache stamped with sync_version=2 and moviesda_synced_at");
+assert(curApi.includes("plum\\.js") && curApi.includes("_0x1b92") && curApi.includes("window.sandDetect"), "/stream/sports strips plum.js WASM, obfuscated sand_guard, and disables sandDetect");
+assert(curApi.includes("/stream/moviesda/embed?file_id=") && curMoviesdaHtml.includes("/stream/moviesda/embed?file_id="), "Moviesda embed routes through ad-stripped /stream/moviesda/embed proxy");
+assert(playerFileCode.includes("this.isUserExiting = false;"), "Player resets isUserExiting flag on open() so redirect protection persists across sessions");
+assert(!fs.readFileSync(path.join(__dirname, "../js/app.js"), "utf8").includes("this.handleSearch("), "app.js calls triggerLiveSearch instead of undefined handleSearch");
+assert(serverPyCode.includes("?dubLang={clean_lang}"), "server.py fixes vidsync.pro query delimiter (?dubLang)");
+assert(curApi === curFunc, "api/index.js and functions/movieshub_api/index.js remain 100% identical");
 
 console.log(`\n========================================`);
 console.log(`TOTAL TESTS: ${passed + failed} | PASSED: ${passed} | FAILED: ${failed}`);

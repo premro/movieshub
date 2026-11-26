@@ -211,8 +211,17 @@ class MovieshubApp {
   /* ================= 2-HOUR DASHBOARD SYNC ================= */
   async loadDashboardData(silent = false, force = false) {
     try {
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+      const lastSyncTs = parseInt(localStorage.getItem("movieshub_dash_last_sync") || "0", 10);
+      const lastSyncDay = localStorage.getItem("movieshub_last_sync_date");
+      const shouldForce = Boolean(
+        force ||
+        !lastSyncTs ||
+        (Date.now() - lastSyncTs >= TWO_HOURS) ||
+        (lastSyncDay !== new Date().toDateString())
+      );
       const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
-      const url = `${pfx}/api/dashboard?t=${Date.now()}${force ? "&refresh=1" : ""}`;
+      const url = `${pfx}/api/dashboard?t=${Date.now()}${shouldForce ? "&refresh=1" : ""}`;
       const res = await fetch(url, { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
@@ -239,8 +248,12 @@ class MovieshubApp {
             if (m.year && m.year > (existing.year || 0)) existing.year = m.year;
             if (m.match) existing.match = m.match;
             if (m.moviesdaFileId) existing.moviesdaFileId = m.moviesdaFileId;
-            if (m.isTheatrePrint) existing.isTheatrePrint = true;
-            if (m.backdrop && !existing.backdrop) existing.backdrop = m.backdrop;
+            if (Array.isArray(m.qualities) && m.qualities.length > 0) existing.qualities = m.qualities;
+            if (m.platformBadge) existing.platformBadge = m.platformBadge;
+            if (typeof m.isTheatrePrint === "boolean") existing.isTheatrePrint = m.isTheatrePrint;
+            if (m.overview && m.overview.length > (existing.overview || "").length) existing.overview = m.overview;
+            if (Array.isArray(m.genres) && m.genres.length > 0) existing.genres = m.genres;
+            if (m.backdrop && (!existing.backdrop || existing.backdrop.includes("/api/poster"))) existing.backdrop = m.backdrop;
             if (m.poster && (!existing.poster || existing.poster.includes("/api/poster"))) existing.poster = m.poster;
           }
         };
@@ -365,10 +378,10 @@ class MovieshubApp {
               movieObj.qualities = ["1080p HD", "720p HD", "Original HD Print"];
               movieObj.platformBadge = "ORIGINAL 1080P HD";
             } else if (item.id === 1327835 || tLower.includes("mookuthi amman 2")) {
-              movieObj.moviesdaFileId = "103371";
-              movieObj.isTheatrePrint = true;
-              movieObj.qualities = ["1080p HD", "720p HD", "HQ HDTS"];
-              movieObj.platformBadge = "1080P HQ HDTS";
+              movieObj.moviesdaFileId = "103807";
+              movieObj.isTheatrePrint = false;
+              movieObj.qualities = ["1080p HD", "720p HD", "Original HD Print"];
+              movieObj.platformBadge = "ORIGINAL 1080P HD";
             } else if (item.id === 954445 || tLower.includes("yezhu kadal")) {
               movieObj.moviesdaFileId = "103376";
               movieObj.isTheatrePrint = true;
@@ -491,6 +504,12 @@ class MovieshubApp {
       backdrop: movie.backdrop || movie.poster,
       year: movie.year || 2026,
       language: movie.language || "Cinema",
+      mediaType: movie.mediaType || "movie",
+      moviesdaFileId: movie.moviesdaFileId || null,
+      qualities: movie.qualities || ["1080p HD", "720p HD"],
+      platformBadge: movie.platformBadge || "MOVIESHUB",
+      isTheatrePrint: Boolean(movie.isTheatrePrint),
+      overview: movie.overview || "",
       progressPercent: progress,
       rating: movie.rating || 8.5,
       updatedAt: Date.now()
@@ -979,17 +998,9 @@ class MovieshubApp {
 
   setupTwoHourRefresh() {
     const TWO_HOURS = 2 * 60 * 60 * 1000;
-    const now = Date.now();
-    const last = Number(this.lastCacheSync) || 0;
-    if (!last || (now - last) >= TWO_HOURS) {
-      localStorage.setItem("movieshub_dash_last_sync", now);
-      console.log("[Movieshub] 2-Hour dynamic cache update verified at:", new Date(now).toLocaleTimeString());
-      this.loadDashboardData(true, true);
-    }
     setInterval(() => {
-      localStorage.setItem("movieshub_dash_last_sync", Date.now());
       this.loadDashboardData(true, true).then(() => {
-        if (this.activeView === "home" || this.activeView === "movies") {
+        if (!this.searchQuery && (this.activeView === "home" || this.activeView === "movies")) {
           this.renderMainContent();
         }
       });
@@ -1229,7 +1240,7 @@ class MovieshubApp {
           const sInput = document.getElementById("live-search-input");
           if (sInput) {
             sInput.value = g;
-            this.handleSearch(g);
+            this.triggerLiveSearch(g);
           }
         }
       }

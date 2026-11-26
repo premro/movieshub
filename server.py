@@ -195,7 +195,8 @@ def find_known_tmdb_id(title):
     for k in sorted_keys:
         if len(k) < 3:
             continue
-        padded_key = f" {re.sub(r'[^a-z0-9\s]', ' ', k).strip()} "
+        clean_key = re.sub(r'[^a-z0-9\s]', ' ', k).strip()
+        padded_key = f" {clean_key} "
         if padded_key in padded:
             return KNOWN_TMDB_MAP[k]
     return None
@@ -700,10 +701,10 @@ def resolve_netmirror_servers(tm_id, mtype="movie", season=1, episode=1, lang="H
 
     # Cloud fallback servers with true TMDB ID
     if mtype == "tv":
-        fallback_vidsync = f"https://vidsync.pro/embed/tv/{s_tm}/{season}/{episode}&dubLang={clean_lang}&subtitle=English"
+        fallback_vidsync = f"https://vidsync.pro/embed/tv/{s_tm}/{season}/{episode}?dubLang={clean_lang}&subtitle=English"
         fallback_vidlink = f"https://vidlink.pro/tv/{s_tm}/{season}/{episode}"
     else:
-        fallback_vidsync = f"https://vidsync.pro/embed/movie/{s_tm}&dubLang={clean_lang}&subtitle=English"
+        fallback_vidsync = f"https://vidsync.pro/embed/movie/{s_tm}?dubLang={clean_lang}&subtitle=English"
         fallback_vidlink = f"https://vidlink.pro/movie/{s_tm}"
 
     servers.append({"name": f"Server 3 ({clean_lang} Dub · Cloud)", "label": f"{clean_lang} Dub · Cloud", "url": fallback_vidsync})

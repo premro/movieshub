@@ -55,7 +55,9 @@ const LANG_COLORS = {
 
 let lastDashboardSyncTime = 0;
 let isSyncingDashboard = false;
+let syncDashboardPromise = null;
 let cachedDashboard = null;
+const DASHBOARD_SYNC_VERSION = 2;
 function getCacheFilePath() {
   const candidatePaths = [
     '/tmp/dashboard_cache.json',
@@ -439,19 +441,29 @@ const ONE_HOUR_MS = 60 * 60 * 1000;
 const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
 
 async function syncDashboardCatalog(force = false) {
-  if (isSyncingDashboard) return cachedDashboard;
+  if (isSyncingDashboard && syncDashboardPromise) return await syncDashboardPromise;
   const now = Date.now();
   const todayStr = new Date().toISOString().slice(0, 10);
   const isDayChanged = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayStr;
+  const isVersionOutdated = !cachedDashboard || cachedDashboard.sync_version !== DASHBOARD_SYNC_VERSION || !cachedDashboard.moviesda_synced_at;
   const isTwoHoursCrossed = !lastDashboardSyncTime || (now - lastDashboardSyncTime >= TWO_HOURS_MS);
 
-  if (!force && !isDayChanged && !isTwoHoursCrossed && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
+  if (!force && !isDayChanged && !isVersionOutdated && !isTwoHoursCrossed && cachedDashboard && cachedDashboard.latest_six && cachedDashboard.latest_six.length > 0) {
     return cachedDashboard;
   }
 
   isSyncingDashboard = true;
+  syncDashboardPromise = (async () => {
   try {
+    // Clear live resolver caches on 2-hour or forced sync so updated prints (e.g. PreDVD/HDTS -> Original) are picked up
+    moviesdaLiveCache.clear();
+    moviesdaDetailsCache.clear();
+    cachedFolderPaths = null;
+    cachedFoldersTimestamp = 0;
+
     const updated = {
+      sync_version: DASHBOARD_SYNC_VERSION,
+      moviesda_synced_at: now,
       last_synced: Math.floor(now / 1000),
       last_synced_human: new Date().toISOString().replace('T', ' ').slice(0, 19),
       last_synced_date: todayStr,
@@ -564,43 +576,143 @@ async function syncDashboardCatalog(force = false) {
       });
     }
 
-    // Enrich & Merge with Verified Moviesda 2026 Theatrical Prints
+    // Enrich & Merge with Live Moviesda 2026 Releases & Print Quality Upgrades
+    const freshMoviesdaItems = [];
+    const liveResolvedByTitle = new Map();
+    const liveResolvedByTmdb = new Map();
     try {
       const activeMoviesdaDomain = await getActiveMoviesdaDomain();
       const mzRes = await fetchBuffer(`${activeMoviesdaDomain}/tamil-2026-movies/`, {
-        headers: { "User-Agent": "Mozilla/5.0" }
+        headers: { "User-Agent": "Mozilla/5.0" },
+        timeout: 6000
       });
-      const mzHtml = mzRes.buffer.toString("utf8");
+      const mzHtml = mzRes && mzRes.buffer ? mzRes.buffer.toString("utf8") : "";
       const mzRegex = /<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">([^<]+)<\/a>/g;
+      const mzEntries = [];
       let mm;
       while ((mm = mzRegex.exec(mzHtml)) !== null) {
+        const href = mm[1].trim();
         const rawTitle = mm[2].trim();
-        const cleanTitle = rawTitle.replace(/\s*\(\d{4}\).*$/, "").trim();
-        const fid = getVerifiedMoviesdaFileId(cleanTitle);
-        let existing = updated.tamil_2026.find(m => m.title && (m.title.toLowerCase().includes(cleanTitle.toLowerCase()) || cleanTitle.toLowerCase().includes(m.title.toLowerCase())));
-        if (existing) {
-          if (fid) existing.moviesdaFileId = fid;
-          existing.isTheatrePrint = true;
-        } else if (fid) {
-          const tId = Number(Object.keys(MOVIESDA_TMDB_MAP).find(k => MOVIESDA_TMDB_MAP[k] === fid)) || Number(fid);
-          const mItem = {
-            id: `mz-${fid}`,
-            tmdbId: tId,
-            title: cleanTitle,
-            language: "Tamil",
-            languageBadge: "Tamil",
-            year: 2026,
-            rating: "NEW",
-            moviesdaFileId: fid,
-            isTheatrePrint: true,
-            poster: (KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()] && KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()].poster) || "https://image.tmdb.org/t/p/w500/kfc4w3OX8QsFm8f9MPUdmGheNl3.jpg",
-            backdrop: (KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()] && KNOWN_VERIFIED_POSTERS[cleanTitle.toLowerCase()].backdrop) || "https://image.tmdb.org/t/p/w1280/zYiUafcGC7JqK01GYbkimBYNaUR.jpg",
-            overview: `${cleanTitle} (2026) - Latest Kollywood theatrical release on Moviesda with multi-server streaming.`,
-            qualities: ["1080p HD", "720p HD", "Theatre Print"]
-          };
-          addMovie(mItem, updated.tamil_2026);
-          addMovie(mItem, updated.languages.tamil);
-        }
+        const cleanTitle = rawTitle.replace(/\s*\(\d{4}\).*$/, "").replace(/\s*(Original|HQ PreDVD|PreDVD|HQ HDTS|HDTS|Web-?DL|HDRip).*$/i, "").trim();
+        if (!cleanTitle) continue;
+        const fullUrl = new URL(href, activeMoviesdaDomain).toString();
+        mzEntries.push({ href, fullUrl, rawTitle, cleanTitle });
+      }
+
+      // Inspect top 20 latest entries concurrently in batches of 5 to capture new movies & print upgrades (e.g. PreDVD/HDTS -> Original 1080p HD)
+      const topEntries = mzEntries.slice(0, 20);
+      const orderedResolved = new Array(topEntries.length).fill(null);
+      for (let idx = 0; idx < topEntries.length; idx += 5) {
+        const batch = topEntries.slice(idx, idx + 5);
+        await Promise.allSettled(batch.map(async (entry, bIdx) => {
+          try {
+            const details = await resolveMoviesdaMovieDetails(entry.fullUrl, "2026");
+            const fallbackFid = getVerifiedMoviesdaFileId(entry.cleanTitle);
+            const resolvedFid = (details && details.fileId) || fallbackFid;
+            if (!resolvedFid) return;
+
+            const isOrig = details ? details.isOriginal : /original/i.test(entry.rawTitle);
+            const isTheatre = details ? details.isTheatrePrint : !isOrig;
+            const qualities = (details && Array.isArray(details.qualities) && details.qualities.length > 0)
+              ? details.qualities
+              : (isOrig ? ["1080p HD", "720p HD", "Original HD Print"] : ["1080p HD", "720p HD", "Theatre Print"]);
+            const badge = (details && details.qualityBadge) || (isOrig ? "ORIGINAL 1080P HD" : "THEATRICAL RELEASE");
+
+            const titleNorm = entry.cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, "");
+            const liveInfo = {
+              fileId: resolvedFid,
+              isOriginal: isOrig,
+              isTheatrePrint: isTheatre,
+              qualities,
+              platformBadge: badge,
+              sourceUrl: entry.fullUrl,
+              rawTitle: entry.rawTitle,
+              cleanTitle: entry.cleanTitle
+            };
+            liveResolvedByTitle.set(titleNorm, liveInfo);
+
+            const matchExisting = (m) => {
+              if (!m || !m.title) return false;
+              const mNorm = m.title.toLowerCase().replace(/[^a-z0-9]/g, "");
+              if (!mNorm) return false;
+              if (mNorm === titleNorm) return true;
+              const minLen = Math.min(mNorm.length, titleNorm.length);
+              const maxLen = Math.max(mNorm.length, titleNorm.length);
+              if (minLen >= 5 && (minLen / maxLen) >= 0.72 && (mNorm.includes(titleNorm) || titleNorm.includes(mNorm))) {
+                return true;
+              }
+              return false;
+            };
+            let existing = updated.tamil_2026.find(matchExisting) || updated.all.find(matchExisting);
+            if (existing) {
+              existing.moviesdaFileId = resolvedFid;
+              existing.qualities = qualities;
+              existing.isTheatrePrint = isTheatre;
+              existing.platformBadge = badge;
+              existing.moviesdaSourceUrl = entry.fullUrl;
+              existing.updatedAt = now;
+              if (existing.tmdbId) liveResolvedByTmdb.set(Number(existing.tmdbId), liveInfo);
+              orderedResolved[idx + bIdx] = existing;
+              if (!updated.tamil_2026.some(x => x.tmdbId === existing.tmdbId && x.id === existing.id)) {
+                updated.tamil_2026.unshift(existing);
+              }
+              return;
+            }
+
+            // Enrich newly discovered Moviesda movie with live TMDB metadata
+            let tmdbMeta = null;
+            try {
+              const isSeries = /web-series|season/i.test(entry.href) || /season/i.test(entry.rawTitle);
+              const tRes = await fetchTmdbApi(isSeries ? "/search/tv" : "/search/movie", { query: entry.cleanTitle, year: 2026 });
+              let hit = tRes && Array.isArray(tRes.results) && tRes.results[0];
+              if (!hit) {
+                const tResAny = await fetchTmdbApi(isSeries ? "/search/tv" : "/search/movie", { query: entry.cleanTitle });
+                hit = tResAny && Array.isArray(tResAny.results) && tResAny.results.find(r => {
+                  const rYear = parseInt(((r.release_date || r.first_air_date || "") + "").slice(0, 4), 10) || 0;
+                  return rYear >= 2025 || rYear === 0;
+                });
+              }
+              if (hit && (hit.poster_path || hit.backdrop_path)) {
+                tmdbMeta = normalizeMovie(hit, apiPrefix);
+              }
+            } catch (te) {}
+
+            const knownPoster = KNOWN_VERIFIED_POSTERS[entry.cleanTitle.toLowerCase()];
+            const mappedTId = Number(Object.keys(MOVIESDA_TMDB_MAP).find(k => MOVIESDA_TMDB_MAP[k] === resolvedFid));
+            const tId = (tmdbMeta && tmdbMeta.tmdbId) || (knownPoster && knownPoster.tmdbId) || mappedTId || Number(resolvedFid);
+            const mItem = {
+              id: tmdbMeta ? tmdbMeta.id : `mz-${resolvedFid}`,
+              tmdbId: tId,
+              title: entry.cleanTitle,
+              language: "Tamil",
+              languageBadge: "Tamil",
+              year: (tmdbMeta && tmdbMeta.year) || 2026,
+              releaseDate: (tmdbMeta && tmdbMeta.releaseDate) || todayStr,
+              rating: (tmdbMeta && tmdbMeta.rating && tmdbMeta.rating !== "N/A") ? tmdbMeta.rating : "NEW",
+              match: (tmdbMeta && tmdbMeta.match) || "96%",
+              genres: (tmdbMeta && tmdbMeta.genres) || ["Action", "Drama"],
+              moviesdaFileId: resolvedFid,
+              isTheatrePrint: isTheatre,
+              platform: "Direct",
+              platformBadge: badge,
+              platformColor: "#E50914",
+              mediaType: (tmdbMeta && tmdbMeta.mediaType) || (/web-series/i.test(entry.href) ? "tv" : "movie"),
+              poster: (tmdbMeta && tmdbMeta.poster) || (knownPoster && knownPoster.poster) || `/api/poster?title=${encodeURIComponent(entry.cleanTitle)}&year=2026&lang=Tamil`,
+              backdrop: (tmdbMeta && tmdbMeta.backdrop) || (knownPoster && knownPoster.backdrop) || (tmdbMeta && tmdbMeta.poster) || `/api/poster?title=${encodeURIComponent(entry.cleanTitle)}&year=2026&lang=Tamil`,
+              overview: (tmdbMeta && tmdbMeta.overview) || `${entry.cleanTitle} (2026) - Latest Kollywood ${isOrig ? "Original HD" : "Theatrical"} release on Moviesda.`,
+              qualities,
+              moviesdaSourceUrl: entry.fullUrl,
+              updatedAt: now
+            };
+            liveResolvedByTmdb.set(Number(tId), liveInfo);
+            orderedResolved[idx + bIdx] = mItem;
+            addMovie(mItem, updated.tamil_2026);
+            addMovie(mItem, updated.languages.tamil);
+          } catch (innerErr) {}
+        }));
+      }
+      for (const item of orderedResolved) {
+        if (item) freshMoviesdaItems.push(item);
       }
     } catch (err) {
       // Non-fatal
@@ -650,12 +762,31 @@ async function syncDashboardCatalog(force = false) {
       }
     });
 
-    // Retain catalog movies from previous cachedDashboard so nothing is lost
+    // Retain catalog movies from previous cachedDashboard so nothing is lost, and propagate live quality upgrades
     if (cachedDashboard && Array.isArray(cachedDashboard.all)) {
       cachedDashboard.all.forEach(m => {
-        if (!seenIds.has(m.tmdbId)) {
-          seenIds.add(m.tmdbId);
-          updated.all.push(m);
+        const mNorm = (m.title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+        const liveMatch = (m.tmdbId && liveResolvedByTmdb.get(Number(m.tmdbId))) || liveResolvedByTitle.get(mNorm);
+        const cloned = { ...m };
+        if (liveMatch) {
+          cloned.moviesdaFileId = liveMatch.fileId;
+          cloned.qualities = liveMatch.qualities;
+          cloned.isTheatrePrint = liveMatch.isTheatrePrint;
+          cloned.platformBadge = liveMatch.platformBadge;
+          cloned.moviesdaSourceUrl = liveMatch.sourceUrl;
+          cloned.updatedAt = now;
+        }
+        if (!seenIds.has(cloned.tmdbId)) {
+          seenIds.add(cloned.tmdbId);
+          updated.all.push(cloned);
+        } else if (liveMatch) {
+          const idx = updated.all.findIndex(x => x.tmdbId === cloned.tmdbId);
+          if (idx !== -1) {
+            updated.all[idx].moviesdaFileId = liveMatch.fileId;
+            updated.all[idx].qualities = liveMatch.qualities;
+            updated.all[idx].isTheatrePrint = liveMatch.isTheatrePrint;
+            updated.all[idx].platformBadge = liveMatch.platformBadge;
+          }
         }
       });
     }
@@ -752,8 +883,15 @@ async function syncDashboardCatalog(force = false) {
       isTheatrePrint: true,
       moviesdaFileId: "103723"
     };
-    omMovieObj.moviesdaFileId = "103723";
-    omMovieObj.isTheatrePrint = true;
+    const omLive = liveResolvedByTmdb.get(1384528) || liveResolvedByTitle.get("omoperationmole");
+    omMovieObj.moviesdaFileId = (omLive && omLive.fileId) || omMovieObj.moviesdaFileId || "103723";
+    if (omLive) {
+      omMovieObj.qualities = omLive.qualities;
+      omMovieObj.platformBadge = omLive.platformBadge;
+      omMovieObj.isTheatrePrint = omLive.isTheatrePrint;
+    } else {
+      omMovieObj.isTheatrePrint = true;
+    }
 
     const sceneMovieObj = updated.all.find(m => m.tmdbId === 1402181) || {
       id: "scene-tamil-2026",
@@ -783,8 +921,9 @@ async function syncDashboardCatalog(force = false) {
       isTheatrePrint: true,
       moviesdaFileId: "103361"
     };
-    sceneMovieObj.moviesdaFileId = "103361";
-    sceneMovieObj.isTheatrePrint = true;
+    const sceneLive = liveResolvedByTmdb.get(1402181) || liveResolvedByTitle.get("scene");
+    sceneMovieObj.moviesdaFileId = (sceneLive && sceneLive.fileId) || "103361";
+    sceneMovieObj.isTheatrePrint = sceneLive ? sceneLive.isTheatrePrint : true;
 
     const jailer2Obj = updated.all.find(m => m.tmdbId === 1234139) || {
       id: "jailer-2-tamil-2026",
@@ -813,8 +952,9 @@ async function syncDashboardCatalog(force = false) {
       isTheatrePrint: true,
       moviesdaFileId: "103358"
     };
-    jailer2Obj.moviesdaFileId = "103358";
-    jailer2Obj.isTheatrePrint = true;
+    const jailer2Live = liveResolvedByTmdb.get(1234139) || liveResolvedByTitle.get("jailer2");
+    jailer2Obj.moviesdaFileId = (jailer2Live && jailer2Live.fileId) || "103358";
+    jailer2Obj.isTheatrePrint = jailer2Live ? jailer2Live.isTheatrePrint : true;
 
     const mookuthiAmman2Obj = updated.all.find(m => m.tmdbId === 1327835) || {
       id: "mookuthi-amman-2-tamil-2026",
@@ -829,22 +969,25 @@ async function syncDashboardCatalog(force = false) {
       maturity: "U/A",
       duration: "2h 25m",
       genres: ["Fantasy", "Comedy", "Drama"],
-      qualities: ["1080p HD", "720p HD", "HQ HDTS"],
+      qualities: ["1080p HD", "720p HD", "Original HD Print"],
       platform: "Direct",
-      platformBadge: "THEATRICAL RELEASE",
+      platformBadge: "ORIGINAL 1080P HD",
       platformColor: "#E50914",
       poster: "https://image.tmdb.org/t/p/w500/dNNzsstJeQxnESyH0hZcLGblLMz.jpg",
       backdrop: "https://image.tmdb.org/t/p/w1280/mxrT9YpOPuLq2PpSehAuCGCqu8r.jpg",
       mediaType: "movie",
-      overview: "A queen sacrifices herself to protect her son from invading enemies. Mookuthi Amman returns to safeguard the realm. Verified 1080p HQ HDTS print available on Moviesda.",
+      overview: "A queen sacrifices herself to protect her son from invading enemies. Mookuthi Amman returns to safeguard the realm. Verified 1080p Original HD Print available on Moviesda.",
       cast: ["Nayanthara", "Urvashi", "Regena Cassandrra", "Yogi Babu", "Duniya Vijay"],
       director: "Sundar C",
       isTrending: true,
-      isTheatrePrint: true,
-      moviesdaFileId: "103371"
+      isTheatrePrint: false,
+      moviesdaFileId: "103807"
     };
-    mookuthiAmman2Obj.moviesdaFileId = "103371";
-    mookuthiAmman2Obj.isTheatrePrint = true;
+    const ma2Live = liveResolvedByTmdb.get(1327835) || liveResolvedByTitle.get("mookuthiamman2");
+    mookuthiAmman2Obj.moviesdaFileId = (ma2Live && ma2Live.fileId) || "103807";
+    mookuthiAmman2Obj.qualities = (ma2Live && ma2Live.qualities) || ["1080p HD", "720p HD", "Original HD Print"];
+    mookuthiAmman2Obj.platformBadge = (ma2Live && ma2Live.platformBadge) || "ORIGINAL 1080P HD";
+    mookuthiAmman2Obj.isTheatrePrint = ma2Live ? ma2Live.isTheatrePrint : false;
 
     const yezhuKadalObj = updated.all.find(m => m.tmdbId === 954445) || {
       id: "yezhu-kadal-yezhu-malai-tamil-2026",
@@ -873,8 +1016,9 @@ async function syncDashboardCatalog(force = false) {
       isTheatrePrint: true,
       moviesdaFileId: "103376"
     };
-    yezhuKadalObj.moviesdaFileId = "103376";
-    yezhuKadalObj.isTheatrePrint = true;
+    const ykLive = liveResolvedByTmdb.get(954445) || liveResolvedByTitle.get("yezhukadalyezhumalai");
+    yezhuKadalObj.moviesdaFileId = (ykLive && ykLive.fileId) || "103376";
+    yezhuKadalObj.isTheatrePrint = ykLive ? ykLive.isTheatrePrint : true;
 
     const top2026Tamil = [sceneMovieObj, jailer2Obj, mookuthiAmman2Obj, yezhuKadalObj];
     for (const m of top2026Tamil) {
@@ -888,6 +1032,8 @@ async function syncDashboardCatalog(force = false) {
     const freshCandidates = [
       sceneMovieObj,
       omMovieObj,
+      mookuthiAmman2Obj,
+      ...freshMoviesdaItems.filter(m => m && m.tmdbId !== 1402181 && m.tmdbId !== 1384528 && m.tmdbId !== 1327835),
       ...npList,
       ...updated.latest,
       ...updated.tamil_2026.slice(1, 4),
@@ -904,7 +1050,7 @@ async function syncDashboardCatalog(force = false) {
       }
     }
 
-    // Ensure hero always has 5 items (fallback to trending / latest if needed)
+    // Ensure hero always has 10 items (fallback to trending / latest if needed)
     if (updated.hero.length < 10) {
       const heroPool = [...updated.trending, ...updated.latest_six, ...updated.all];
       for (const hm of heroPool) {
@@ -914,6 +1060,7 @@ async function syncDashboardCatalog(force = false) {
         }
       }
     }
+    updated.hero_slides = [omMovieObj, ...updated.hero.filter(h => h.tmdbId !== 1384528)].slice(0, 10);
 
     updated.latest = updated.all.filter(m => (m.year || 0) >= 2025).sort((a, b) => {
       const da = a.releaseDate || `${a.year || 2025}-01-01`;
@@ -954,8 +1101,11 @@ async function syncDashboardCatalog(force = false) {
     console.error('[Dashboard Auto-Sync Error]', e);
   } finally {
     isSyncingDashboard = false;
+    syncDashboardPromise = null;
   }
   return cachedDashboard;
+  })();
+  return await syncDashboardPromise;
 }
 
 async function searchMovies(query, lang = null) {
@@ -1021,7 +1171,7 @@ async function searchMovies(query, lang = null) {
       music: "Sushin Shyam",
       isTrending: true,
       isTheatrePrint: true,
-      moviesdaFileId: "1402181"
+      moviesdaFileId: "103361"
     };
     seenIds.add(sceneItem.id);
     seenIds.add("tmdb-1402181");
@@ -1536,9 +1686,10 @@ const MOVIESDA_VERIFIED_MAP = {
   "jailer 2": "103358",
   "jailer 2 original": "103358",
   "jailer 2 1080p": "103358",
-  "mookuthi amman 2": "103371",
-  "mookuthi amman 2 hq hdts": "103371",
-  "mookuthi amman 2 1080p": "103371",
+  "mookuthi amman 2": "103807",
+  "mookuthi amman 2 original": "103807",
+  "mookuthi amman 2 hq hdts": "103807",
+  "mookuthi amman 2 1080p": "103807",
   "yezhu kadal yezhu malai": "103376",
   "yezhu kadal yezhu malai original": "103376",
   "yezhu kadal yezhu malai 1080p": "103376",
@@ -1624,7 +1775,7 @@ const MOVIESDA_TMDB_MAP = {
   1384528: "103723",  // OM: Operation Mole (2026) Moviesda 1080p PreDVD (v2)
   280951: "88685",   // Madha Gaja Raja (2025) Moviesda 1080p HD Print
   1234139: "103358",  // Jailer 2 (2026) Moviesda 1080p HD Original Print
-  1327835: "103371",  // Mookuthi Amman 2 (2026) Moviesda 1080p HD Print
+  1327835: "103807",  // Mookuthi Amman 2 (2026) Moviesda 1080p Original HD Print
   954445: "103376",   // Yezhu Kadal Yezhu Malai (2026) Moviesda 1080p HD Print
   1402181: "103361",  // Scene (2026) Moviesda 1080p HD Print
   656908: "103234",   // Ramayana
@@ -1663,7 +1814,6 @@ const MOVIESDA_TMDB_MAP = {
 const DEFAULT_MOVIESDA_DOMAINS = [
   process.env.MOVIESDA_BASE_URL,
   "https://moviesda36.com",
-  process.env.MOVIESDA_BASE_URL,
   "https://moviezda.co",
   "https://moviezda.me",
   "https://www.moviesda.pet",
@@ -1682,6 +1832,7 @@ let cachedFolderPaths = null;
 let cachedFoldersTimestamp = 0;
 const DOMAIN_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 const moviesdaLiveCache = new Map();
+const moviesdaDetailsCache = new Map();
 
 /**
  * Dynamic Active Domain Resolver
@@ -1705,7 +1856,7 @@ async function getActiveMoviesdaDomain() {
 
   for (const domain of candidates) {
     try {
-      const { statusCode, finalUrl } = await fetchBuffer(domain, {
+      const { buffer, statusCode, finalUrl } = await fetchBuffer(domain, {
         headers: { "User-Agent": "Mozilla/5.0" },
         timeout: 4000
       });
@@ -1772,47 +1923,164 @@ async function getMoviesdaFolders(origin) {
  * Normalizes domain to activeOrigin, extracts 4-digit year, tries slug guesses across years,
  * and crawls all discovered folders prioritizing targetYear.
  */
-async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
+function scoreMoviesdaQuality(label = "", href = "") {
+  const txt = `${label} ${href}`.toLowerCase();
+  if (/\b(sample|trailer|teaser|promo)\b/.test(txt)) {
+    return { score: -1000, isOriginal: false, isTheatrePrint: false, qualityBadge: "SAMPLE", resolution: "" };
+  }
+
+  let score = 0;
+  let isOriginal = false;
+  let isTheatrePrint = false;
+  let printName = "HD Print";
+
+  if (/\b(original|web-?dl|webrip|bluray|bdrip|hdrip|dvdrip)\b/.test(txt)) {
+    score += 500;
+    isOriginal = true;
+    printName = "Original HD Print";
+  } else if (/\bhq\s*predvd\b|\bhdcam\b|\bhq\s*dvdscr\b/.test(txt)) {
+    score += 300;
+    isTheatrePrint = true;
+    printName = "HQ PreDVD";
+  } else if (/\b(predvd|dvdscr)\b/.test(txt)) {
+    score += 220;
+    isTheatrePrint = true;
+    printName = "PreDVD";
+  } else if (/\bhq\s*hdts\b/.test(txt)) {
+    score += 170;
+    isTheatrePrint = true;
+    printName = "HQ HDTS";
+  } else if (/\b(hdts|cam)\b/.test(txt)) {
+    score += 120;
+    isTheatrePrint = true;
+    printName = "HDTS";
+  }
+
+  if (/\bv4\b|\(v4\)/.test(txt)) score += 40;
+  else if (/\bv3\b|\(v3\)/.test(txt)) score += 30;
+  else if (/\bv2\b|\(v2\)/.test(txt)) score += 20;
+
+  let resolution = "";
+  if (/2160p|4k/.test(txt)) { score += 90; resolution = "2160p 4K"; }
+  else if (/1080p/.test(txt)) { score += 70; resolution = "1080p HD"; }
+  else if (/720p/.test(txt)) { score += 50; resolution = "720p HD"; }
+  else if (/640x360|480p/.test(txt)) { score += 25; resolution = "480p"; }
+  else if (/360p/.test(txt)) { score += 10; resolution = "360p"; }
+
+  const qualityBadge = isOriginal
+    ? `ORIGINAL ${resolution || "1080P HD"}`.toUpperCase()
+    : (isTheatrePrint ? `${resolution ? resolution + " " : ""}${printName}`.toUpperCase() : (resolution || "HD"));
+
+  return { score, isOriginal, isTheatrePrint, qualityBadge, resolution, printName };
+}
+
+async function resolveMoviesdaDetailsFromPage(startUrl, depth = 0, meta = {}) {
+  if (!startUrl || depth >= 4) return null;
+  try {
+    const { buffer, finalUrl, statusCode } = await fetchBuffer(startUrl, {
+      headers: { "User-Agent": "Mozilla/5.0" },
+      timeout: 5000
+    });
+    if (!buffer || (statusCode && statusCode >= 400)) return null;
+    const pageUrl = finalUrl || startUrl;
+    const origin = new URL(pageUrl).origin;
+    const pageHtml = buffer.toString("utf8");
+
+    const pageSig = scoreMoviesdaQuality(pageUrl, pageHtml.slice(0, 600));
+    const curIsOrig = Boolean(meta.isOriginal || pageSig.isOriginal);
+    const curIsTheatre = curIsOrig ? false : Boolean(meta.isTheatrePrint || pageSig.isTheatrePrint);
+
+    const dlCandidates = [];
+    const dlRegex = /<a\b[^>]*\bhref="(\/download\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let dm;
+    while ((dm = dlRegex.exec(pageHtml)) !== null) {
+      const labelTxt = dm[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      const q = scoreMoviesdaQuality(labelTxt, dm[1]);
+      if (q.score >= 0) {
+        dlCandidates.push({ href: new URL(dm[1], origin).toString(), label: labelTxt, ...q });
+      }
+    }
+    dlCandidates.sort((a, b) => b.score - a.score);
+
+    for (const cand of dlCandidates.slice(0, 3)) {
+      try {
+        const dlRes = await fetchBuffer(cand.href, { headers: { "User-Agent": "Mozilla/5.0" }, timeout: 5000 });
+        if (dlRes && dlRes.buffer) {
+          const dlHtml = dlRes.buffer.toString("utf8");
+          const fid = dlHtml.match(/\/file\/(\d+)/);
+          if (fid) {
+            const bestIsOrig = curIsOrig || cand.isOriginal;
+            const bestIsTheatre = bestIsOrig ? false : (curIsTheatre || cand.isTheatrePrint);
+            const resTag = cand.resolution || meta.resolution || "1080p HD";
+            const badge = bestIsOrig
+              ? `ORIGINAL ${resTag}`.toUpperCase()
+              : (cand.qualityBadge || meta.qualityBadge || "THEATRICAL RELEASE");
+            return {
+              fileId: fid[1],
+              isOriginal: bestIsOrig,
+              isTheatrePrint: bestIsTheatre,
+              qualityBadge: badge,
+              resolution: resTag,
+              qualities: Array.from(new Set([resTag, "720p HD", bestIsOrig ? "Original HD Print" : (cand.printName || "Theatre Print")])),
+              sourceUrl: pageUrl
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    const subCandidates = [];
+    const subRegex = /<div class="f">\s*(?:<img[^>]+>\s*)?<a\b[^>]*\bhref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
+    let sm;
+    while ((sm = subRegex.exec(pageHtml)) !== null) {
+      const href = sm[1].trim();
+      const label = sm[2].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (!href || href.startsWith("#")) continue;
+      const q = scoreMoviesdaQuality(label, href);
+      if (q.score >= 0) {
+        subCandidates.push({ url: new URL(href, origin).toString(), label, ...q });
+      }
+    }
+    subCandidates.sort((a, b) => b.score - a.score);
+
+    for (const sub of subCandidates.slice(0, 2)) {
+      const nextMeta = {
+        isOriginal: curIsOrig || sub.isOriginal,
+        isTheatrePrint: (curIsOrig || sub.isOriginal) ? false : (curIsTheatre || sub.isTheatrePrint),
+        resolution: sub.resolution || meta.resolution,
+        qualityBadge: sub.score > 0 ? sub.qualityBadge : meta.qualityBadge
+      };
+      const resolved = await resolveMoviesdaDetailsFromPage(sub.url, depth + 1, nextMeta);
+      if (resolved && resolved.fileId) return resolved;
+    }
+  } catch (e) {}
+  return null;
+}
+
+async function resolveMoviesdaMovieDetails(titleOrUrl, yearHint = null) {
   if (!titleOrUrl) return null;
   const inputStr = String(titleOrUrl).trim();
   const activeOrigin = await getActiveMoviesdaDomain();
 
-  // 1. Direct URL resolution (normalizes stale domain to activeOrigin)
   if (inputStr.startsWith("http://") || inputStr.startsWith("https://")) {
+    const cachedDetail = moviesdaDetailsCache.get(inputStr);
+    if (cachedDetail && (Date.now() - cachedDetail.resolvedAt < TWO_HOURS_MS)) {
+      return cachedDetail;
+    }
     try {
       const parsed = new URL(inputStr);
       const normalizedUrl = `${activeOrigin}${parsed.pathname}${parsed.search}`;
-      const { buffer, finalUrl } = await fetchBuffer(normalizedUrl);
-      const origin = new URL(finalUrl || activeOrigin).origin;
-      let pageHtml = buffer ? buffer.toString("utf8") : "";
-
-      let depth = 0;
-      while (depth < 4) {
-        let dlPageMatch = pageHtml.match(/href="(\/download\/[^"]+)"/i);
-        if (dlPageMatch) {
-          const dlRes = await fetchBuffer(new URL(dlPageMatch[1], origin).toString());
-          if (dlRes && dlRes.buffer) {
-            const dlHtml = dlRes.buffer.toString("utf8");
-            let fid = dlHtml.match(/\/file\/(\d+)/);
-            if (fid) {
-              moviesdaLiveCache.set(inputStr, fid[1]);
-              return fid[1];
-            }
-          }
-          break;
-        }
-        let subMatch = pageHtml.match(/<div class="f">\s*<img[^>]+>\s*<a href="([^"]+)">/i);
-        if (subMatch) {
-          const pRes = await fetchBuffer(new URL(subMatch[1], origin).toString());
-          if (pRes && pRes.buffer) {
-            pageHtml = pRes.buffer.toString("utf8");
-            depth++;
-            continue;
-          }
-        }
-        break;
+      const details = await resolveMoviesdaDetailsFromPage(normalizedUrl, 0, {});
+      if (details && details.fileId) {
+        details.resolvedAt = Date.now();
+        moviesdaDetailsCache.set(inputStr, details);
+        moviesdaLiveCache.set(inputStr, details.fileId);
+        return details;
       }
-    } catch (e) {}
+      return null;
+    } catch (e) {
+      return null;
+    }
   }
 
   const extractedYearMatch = inputStr.match(/\b(19\d{2}|20\d{2})\b/);
@@ -1823,22 +2091,23 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
   if (!clean) return null;
 
   const cacheKey = `${clean}:${targetYear || "any"}`;
-  if (moviesdaLiveCache.has(cacheKey)) return moviesdaLiveCache.get(cacheKey);
-  if (moviesdaLiveCache.has(clean)) return moviesdaLiveCache.get(clean);
+  const existingCached = moviesdaDetailsCache.get(cacheKey) || moviesdaDetailsCache.get(clean);
+  if (existingCached && (Date.now() - existingCached.resolvedAt < TWO_HOURS_MS)) {
+    return existingCached;
+  }
 
-  // 2. Direct slug guesses across targetYear + recent years
   const slugBase = clean.replace(/\s+/g, "-");
   const yearsToTry = Array.from(new Set([targetYear, "2026", "2025", "2024", "2023"].filter(Boolean)));
   const slugGuesses = [
     ...yearsToTry.flatMap(y => [
+      `${activeOrigin}/${slugBase}-${y}-tamil-movie/`,
       `${activeOrigin}/${slugBase}-${y}-movie-1/`,
       `${activeOrigin}/${slugBase}-${y}-movie/`,
-      `${activeOrigin}/${slugBase}-${y}-tamil-movie/`,
       `${activeOrigin}/${slugBase}-${y}-tamil-dubbed-movie/`
     ]),
+    `${activeOrigin}/${slugBase}-tamil-movie/`,
     `${activeOrigin}/${slugBase}-movie-1/`,
     `${activeOrigin}/${slugBase}-movie/`,
-    `${activeOrigin}/${slugBase}-tamil-movie/`,
     `${activeOrigin}/${slugBase}-tamil-dubbed-movie/`
   ];
 
@@ -1846,17 +2115,19 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
     try {
       const directRes = await fetchBuffer(slugUrl, { timeout: 3500 });
       if (directRes && directRes.statusCode === 200) {
-        const fid = await resolveMoviesdaLive(directRes.finalUrl || slugUrl, targetYear);
-        if (fid) {
-          moviesdaLiveCache.set(cacheKey, fid);
-          moviesdaLiveCache.set(clean, fid);
-          return fid;
+        const details = await resolveMoviesdaDetailsFromPage(directRes.finalUrl || slugUrl, 0, {});
+        if (details && details.fileId) {
+          details.resolvedAt = Date.now();
+          moviesdaDetailsCache.set(cacheKey, details);
+          moviesdaDetailsCache.set(clean, details);
+          moviesdaLiveCache.set(cacheKey, details.fileId);
+          moviesdaLiveCache.set(clean, details.fileId);
+          return details;
         }
       }
     } catch (e) {}
   }
 
-  // 3. Crawl ALL discovered folders on activeOrigin (prioritizing targetYear first)
   let folders = await getMoviesdaFolders(activeOrigin);
   if (targetYear) {
     folders = [
@@ -1885,11 +2156,14 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
       }
 
       if (targetUrl) {
-        const fid = await resolveMoviesdaLive(targetUrl, targetYear);
-        if (fid) {
-          moviesdaLiveCache.set(cacheKey, fid);
-          moviesdaLiveCache.set(clean, fid);
-          return fid;
+        const details = await resolveMoviesdaDetailsFromPage(targetUrl, 0, {});
+        if (details && details.fileId) {
+          details.resolvedAt = Date.now();
+          moviesdaDetailsCache.set(cacheKey, details);
+          moviesdaDetailsCache.set(clean, details);
+          moviesdaLiveCache.set(cacheKey, details.fileId);
+          moviesdaLiveCache.set(clean, details.fileId);
+          return details;
         }
       }
     } catch (e) {
@@ -1898,6 +2172,11 @@ async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
   }
 
   return null;
+}
+
+async function resolveMoviesdaLive(titleOrUrl, yearHint = null) {
+  const details = await resolveMoviesdaMovieDetails(titleOrUrl, yearHint);
+  return details ? details.fileId : null;
 }
 
 function getVerifiedMoviesdaFileId(title, tmdbId) {
@@ -2331,14 +2610,15 @@ module.exports = async (req, res) => {
   if (pathname === '/api/dashboard') {
     const todayDate = new Date().toISOString().slice(0, 10);
     const isDayRollover = cachedDashboard && cachedDashboard.last_synced_date && cachedDashboard.last_synced_date !== todayDate;
-    const isStale = !cachedDashboard || isDayRollover || (Date.now() - lastDashboardSyncTime >= TWO_HOURS_MS);
+    const isVersionOutdated = !cachedDashboard || cachedDashboard.sync_version !== DASHBOARD_SYNC_VERSION || !cachedDashboard.moviesda_synced_at;
+    const isStale = !cachedDashboard || isDayRollover || isVersionOutdated || (Date.now() - lastDashboardSyncTime >= TWO_HOURS_MS);
     const forceRefresh = u.searchParams.get('refresh') === '1';
     if (forceRefresh || isStale) {
       await syncDashboardCatalog(forceRefresh || isStale);
     }
     res.writeHead(200, {
       'Content-Type': 'application/json',
-      'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
+      'Cache-Control': (forceRefresh || isStale) ? 'no-store, no-cache, must-revalidate' : 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
       'Access-Control-Allow-Origin': '*'
     });
     return res.end(JSON.stringify(cachedDashboard || { all: [], hero: [], latest_six: [], trending: [], languages: {} }));
@@ -2388,16 +2668,23 @@ module.exports = async (req, res) => {
       let cleanHtml = buffer ? buffer.toString("utf8") : "";
       const parsedOrigin = new URL(finalUrl || targetUrl).origin;
 
-      // Neutralize anti-sandbox check
+      // Neutralize anti-sandbox checks (plain & obfuscated sand_guard / _0x1b92 / plum.js WASM sandbox detector)
       cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?Remove sandbox attributes on the iframe tag[\s\S]*?<\/script>/gi, "<script>/* Sandbox checks stripped */</script>");
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:_0x1b92|sand_guard|\\x52\\x65\\x6d\\x6f\\x76\\x65|sandDetect)[\s\S]*?<\/script>/gi, "<script>/* Obfuscated sandbox guard stripped */</script>");
+      cleanHtml = cleanHtml.replace(/<script[^>]*\bsrc="[^"]*plum\.js[^"]*"[^>]*>[\s\S]*?<\/script>/gi, "");
 
-      // Neutralize ad popunders & devtool disabler
-      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?popundersPerIP[\s\S]*?<\/script>/gi, "<script>/* Ad scripts stripped */</script>");
+      // Neutralize ad popunders, trackers, & disable-devtool (both tag attr and body forms)
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:popundersPerIP|histats\.com|aclib|acscdn|monetag)[\s\S]*?<\/script>/gi, "<script>/* Ad scripts stripped */</script>");
+      cleanHtml = cleanHtml.replace(/<!--\s*Histats\.com[\s\S]*?Histats\.com\s*END\s*-->/gi, "").replace(/<noscript>[\s\S]*?histats\.com[\s\S]*?<\/noscript>/gi, "");
+      cleanHtml = cleanHtml.replace(/<script[^>]*disable-devtool[^>]*>[\s\S]*?<\/script>/gi, "");
       cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?disable-devtool[\s\S]*?<\/script>/gi, "");
 
-      // Inject <base> tag to correctly resolve relative assets (/plum.js, etc.)
-      if (!cleanHtml.includes("<base")) {
-        cleanHtml = cleanHtml.replace(/<head>/i, `<head>\n<base href="${parsedOrigin}/">`);
+      // Inject <base> + popup/sandbox-detector shield at start of <head>
+      const shieldHead = `<head>\n<base href="${parsedOrigin}/">\n<script>window.open=function(){return null;};window.sandDetect=function(){return false;};window.DisableDevtool=function(){};</script>`;
+      if (/<head>/i.test(cleanHtml)) {
+        cleanHtml = cleanHtml.replace(/<head>/i, shieldHead);
+      } else {
+        cleanHtml = shieldHead + cleanHtml;
       }
 
       res.writeHead(200, {
@@ -2407,8 +2694,8 @@ module.exports = async (req, res) => {
       });
       return res.end(cleanHtml);
     } catch (err) {
-      res.writeHead(302, { "Location": targetUrl });
-      return res.end();
+      res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Content-Security-Policy": "frame-ancestors *;" });
+      return res.end(`<!DOCTYPE html><html><body style="margin:0;background:#07070b;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;"><div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">Feed temporarily unavailable</div><div style="font-size:13px;color:#9ca3af;">Please switch to Stream 2 or another sports server.</div></div></body></html>`);
     }
   }
 
@@ -2520,6 +2807,7 @@ module.exports = async (req, res) => {
       const html = buffer.toString("utf8");
       const m = html.match(/<source\s+src="([^"]+)"/);
       const rawStream = m ? m[1].replace(/&amp;/g, "&") : "";
+      const directDl = rawStream ? rawStream.replace("stream=1", "stream=0") : "";
       res.writeHead(200, {
         "Content-Type": "application/json",
         "Access-Control-Allow-Origin": "*"
@@ -2531,7 +2819,7 @@ module.exports = async (req, res) => {
         file_id: fileId,
         streamUrl: rawStream,
         stream_url: rawStream,
-        embed_url: targetUrl,
+        embed_url: `${apiPrefix}/stream/moviesda/embed?file_id=${encodeURIComponent(fileId)}`,
         downloadUrl: directDl || `${apiPrefix}/api/download?file_id=${fileId}`,
         directDownloadUrl: directDl
       }));
@@ -2627,10 +2915,13 @@ module.exports = async (req, res) => {
                  .replace(/<h2>.*?<\/h2>/gis, "")
                  .replace(/<div class="buffer-note">.*?<\/div>/gis, "");
 
-      // 2. Strip popunder ads and trackers
-      html = html.replace(/<script[^>]*src="[^"]*aclib[^"]*"[^>]*>.*?<\/script>/gis, "")
-                 .replace(/<script[^>]*>[\s\S]*?aclib[\s\S]*?<\/script>/gis, "")
-                 .replace(/<script[^>]*googletagmanager.*?<\/script>/gis, "");
+      // 2. Strip popunder ads, trackers, and devtool blockers + block window.open
+      html = html.replace(/<script[^>]*src="[^"]*(?:aclib|acscdn|popunder|monetag|profiton|disable-devtool)[^"]*"[^>]*>[\s\S]*?<\/script>/gi, "")
+                 .replace(/<script[^>]*>[\s\S]*?(?:aclib|popunder|disable-devtool)[\s\S]*?<\/script>/gi, "")
+                 .replace(/<script[^>]*googletagmanager[\s\S]*?<\/script>/gi, "")
+                 .replace(/<script[^>]*cloudflareinsights[\s\S]*?<\/script>/gi, "");
+      const moviesdaHeadShield = "<head>\n<base href=\"https://play.onestream.today/stream/page/\">\n<script>window.open=function(){return null;};</script>";
+      html = /<head>/i.test(html) ? html.replace(/<head>/i, moviesdaHeadShield) : (moviesdaHeadShield + html);
 
       // 3. Inject Watermark-Killer CSS & Floating Download Button
       const injectCss = `
@@ -2746,8 +3037,8 @@ module.exports = async (req, res) => {
 
     const isTv = safeSe !== '0' && safeEp !== '0';
     const fallbackStreamUrl = isTv 
-      ? `https://atlantic.bz/watch/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}`
-      : `https://atlantic.bz/watch/${encodeURIComponent(tmId)}`;
+      ? `https://vidlink.pro/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}?primaryColor=e50914&autoplay=true`
+      : `https://vidlink.pro/movie/${encodeURIComponent(tmId)}?primaryColor=e50914&autoplay=true`;
     const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe></body></html>`;
 
     try {
@@ -2756,7 +3047,7 @@ module.exports = async (req, res) => {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
           'Referer': 'https://netmirror.plus/'
         },
-        timeout: 3000
+        timeout: 6500
       });
       let htmlStr = buffer ? buffer.toString('utf8') : '';
 
@@ -3061,3 +3352,5 @@ module.exports.searchMovies = searchMovies;
 module.exports.KNOWN_TMDB_MAP = KNOWN_TMDB_MAP;
 module.exports.findKnownTmdbId = findKnownTmdbId;
 module.exports.getVerifiedMoviesdaFileId = getVerifiedMoviesdaFileId;
+module.exports.resolveMoviesdaMovieDetails = resolveMoviesdaMovieDetails;
+module.exports.scoreMoviesdaQuality = scoreMoviesdaQuality;

@@ -104,6 +104,8 @@
       "om: operation mole": "103723",
       "o.m: operation mole": "103723",
       "operation mole": "103723",
+      "mookuthi amman 2": "103807",
+      "mookuthi amman 2 original": "103807",
       "anakapalli": "103147",
       "cold call": "103140",
       "baththa": "102943",
@@ -173,11 +175,14 @@
     const fileId = params.get("file_id") || resolveFileId(title, "103147");
 
     document.getElementById("dispTitle").textContent = `${title} (${year})`;
-    const downloadUrl = `/api/download?file_id=${fileId}&title=${encodeURIComponent(title)}&year=${year}`;
+    const apiPfxEarly = window.location.pathname.includes("/server/movieshub_api")
+      ? "/server/movieshub_api"
+      : "";
+    const downloadUrl = `${apiPfxEarly}/api/download?file_id=${fileId}&title=${encodeURIComponent(title)}&year=${year}`;
     const topDlBtn = document.getElementById("topDlBtn");
     topDlBtn.href = downloadUrl;
 
-    const embedUrl = `https://play.onestream.today/stream/page/${fileId}`;
+    const embedUrl = `${apiPfxEarly}/stream/moviesda/embed?file_id=${encodeURIComponent(fileId)}`;
     const embedFrame = document.getElementById("embedFrame");
     const nativeVideo = document.getElementById("nativeVideo");
     const embedWrap = document.getElementById("embedWrap");
@@ -185,8 +190,8 @@
     const fallbackToggle = document.getElementById("fallbackToggle");
 
     const fallbackStream = mtype === "tv"
-      ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true`
-      : `https://vidlink.pro/movie/${tmId}?multiLang=true`;
+      ? `https://vidlink.pro/tv/${tmId}/1/1?multiLang=true&primaryColor=e50914&autoplay=true`
+      : `https://vidlink.pro/movie/${tmId}?multiLang=true&primaryColor=e50914&autoplay=true`;
 
     if (fallbackToggle) {
       fallbackToggle.addEventListener("click", (e) => {
