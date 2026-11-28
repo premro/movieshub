@@ -3338,7 +3338,8 @@ module.exports = async (req, res) => {
     const fallbackStreamUrl = isTv 
       ? `https://vidsrc.su/embed/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}`
       : `https://vidsrc.su/embed/movie/${encodeURIComponent(tmId)}`;
-    const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe></body></html>`;
+    // Match watched.cx: sandbox="allow-scripts allow-same-origin" without allow-popups or allow-top-navigation
+    const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="dns-prefetch" href="//vidsrc.su"><link rel="preconnect" href="https://vidsrc.su" crossorigin><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" sandbox="allow-scripts allow-same-origin" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe></body></html>`;
 
     try {
       const { buffer, statusCode } = await fetchBuffer(targetUrl, {
@@ -3346,7 +3347,7 @@ module.exports = async (req, res) => {
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
           'Referer': 'https://netmirror.plus/'
         },
-        timeout: 6500
+        timeout: 3200
       });
       let htmlStr = buffer ? buffer.toString('utf8') : '';
 
@@ -3363,6 +3364,8 @@ module.exports = async (req, res) => {
 
       const baseTag = '<base href="https://webvp.watch21.shop/play/">';
       const antiRedirectShield = `
+        <link rel="dns-prefetch" href="//webvp.watch21.shop">
+        <link rel="preconnect" href="https://webvp.watch21.shop" crossorigin>
         <script>
           (function() {
             window.open = function() { return null; };
@@ -3374,6 +3377,42 @@ module.exports = async (req, res) => {
                 e.stopPropagation();
               }
             }, true);
+            // Smooth HLS.js & HTML5 video buffering optimization
+            var origHls = window.Hls;
+            Object.defineProperty(window, 'Hls', {
+              configurable: true,
+              get: function() { return origHls; },
+              set: function(HlsClass) {
+                if (typeof HlsClass === 'function') {
+                  var PatchedHls = function(config) {
+                    var tuned = Object.assign({
+                      enableWorker: true,
+                      lowLatencyMode: false,
+                      maxBufferLength: 45,
+                      maxMaxBufferLength: 120,
+                      backBufferLength: 30,
+                      startLevel: -1,
+                      abrEwmaDefaultEstimate: 2500000,
+                      fragLoadingMaxRetry: 6,
+                      manifestLoadingMaxRetry: 4,
+                      levelLoadingMaxRetry: 4
+                    }, config || {});
+                    return new HlsClass(tuned);
+                  };
+                  PatchedHls.prototype = HlsClass.prototype;
+                  Object.setPrototypeOf(PatchedHls, HlsClass);
+                  origHls = PatchedHls;
+                } else {
+                  origHls = HlsClass;
+                }
+              }
+            });
+            document.addEventListener('DOMContentLoaded', function() {
+              document.querySelectorAll('video').forEach(function(v) {
+                v.preload = 'auto';
+                v.setAttribute('playsinline', '');
+              });
+            });
           })();
         </script>
       `;
