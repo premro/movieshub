@@ -3336,9 +3336,9 @@ module.exports = async (req, res) => {
 
     const isTv = safeSe !== '0' && safeEp !== '0';
     const fallbackStreamUrl = isTv 
-      ? `https://vidlink.pro/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}?primaryColor=e50914&autoplay=true`
-      : `https://vidlink.pro/movie/${encodeURIComponent(tmId)}?primaryColor=e50914&autoplay=true`;
-    const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe></body></html>`;
+      ? `https://vidsrc.su/embed/tv/${encodeURIComponent(tmId)}/${safeSe}/${safeEp}`
+      : `https://vidsrc.su/embed/movie/${encodeURIComponent(tmId)}`;
+    const fallbackCleanEmbed = `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html,body,iframe{width:100%!important;height:100%!important;margin:0!important;padding:0!important;border:0!important;background:#000!important;overflow:hidden!important;}</style></head><body><iframe src="${fallbackStreamUrl}" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" referrerpolicy="no-referrer"></iframe></body></html>`;
 
     try {
       const { buffer, statusCode } = await fetchBuffer(targetUrl, {
@@ -3356,7 +3356,27 @@ module.exports = async (req, res) => {
         return res.end(fallbackCleanEmbed);
       }
 
+      // Strip upstream redirect, popunder, ad-network, and devtool-blocker scripts
+      htmlStr = htmlStr
+        .replace(/<script[^>]*src=["'][^"']*(?:aclib|acscdn|popunder|monetag|profiton|reliedhounder|disable-devtool|histats|watched\.cx)[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:window\.open|top\.location|parent\.location|popunder|aclib|monetag|watched\.cx|disable-devtool)[\s\S]*?<\/script>/gi, '');
+
       const baseTag = '<base href="https://webvp.watch21.shop/play/">';
+      const antiRedirectShield = `
+        <script>
+          (function() {
+            window.open = function() { return null; };
+            window.DisableDevtool = function() {};
+            document.addEventListener('click', function(e) {
+              var a = e.target && e.target.closest ? e.target.closest('a') : null;
+              if (a && a.href && !a.href.startsWith('#')) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }, true);
+          })();
+        </script>
+      `;
       const customStyles = `
         <style>
           html, body {
@@ -3389,9 +3409,9 @@ module.exports = async (req, res) => {
         </style>
       `;
       if (htmlStr.includes('<head>')) {
-        htmlStr = htmlStr.replace('<head>', `<head>${baseTag}${customStyles}`);
+        htmlStr = htmlStr.replace('<head>', `<head>${baseTag}${antiRedirectShield}${customStyles}`);
       } else {
-        htmlStr = `<head>${baseTag}${customStyles}</head>` + htmlStr;
+        htmlStr = `<head>${baseTag}${antiRedirectShield}${customStyles}</head>` + htmlStr;
       }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(htmlStr);
