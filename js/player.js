@@ -1570,18 +1570,32 @@ class MovieshubPlayer {
         : "/server/movieshub_api";
 
       const netId = movie?.netId || movie?.nid || movie?.netmirrorId || (String(movie?.id || "").startsWith("netmirror-") ? String(movie.id).replace("netmirror-", "") : "");
-      const season = movie?.season || 1;
-      const episode = movie?.episode || 1;
+      let season = parseInt(movie?.season || 1, 10) || 1;
+      let episode = parseInt(movie?.episode || 1, 10) || 1;
 
-      // MULTI-SERVER STREAMING NETWORK (js/player.js)
-      // Standard 9 Verified Active Servers available for all movies
-      const servers = [
+      const buildServers = (curSeason, curEpisode) => [
+        {
+          id: "wcx",
+          name: "Watched.cx",
+          badge: "Multi-Source (Prism 4K)",
+          subSources: [
+            { id: "phoenix", name: "Phoenix", flag: "🇺🇸", status: "online", url: mtype === "tv" ? `https://vidlink.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?primaryColor=ffffff&autoplay=true` : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=ffffff&autoplay=true` },
+            { id: "iris", name: "Iris (multi-audio)", flag: "🌐", status: "online", url: mtype === "tv" ? `https://vidlink.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?multiLang=true&primaryColor=ffffff&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta" : ""}` : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=true&primaryColor=ffffff&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta" : ""}` },
+            { id: "raf", name: "Raf", flag: "🇺🇸", status: "online", url: mtype === "tv" ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}` : `https://vidsync.pro/embed/movie/${resolvedTmdbId}` },
+            { id: "prism", name: "Prism (4K)", flag: "🇺🇸", status: "online", url: mtype === "tv" ? `https://vidfast.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?autoPlay=true` : `https://vidfast.pro/movie/${resolvedTmdbId}?autoPlay=true` },
+            { id: "vega", name: "Vega (4K)", flag: "🇺🇸", status: "online", url: mtype === "tv" ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}` : `https://vidsrc.su/embed/movie/${resolvedTmdbId}` },
+            { id: "onyx", name: "Onyx (multi-audio)", flag: "🇺🇸", status: "online", url: mtype === "tv" ? `https://vidnest.fun/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}` : `https://vidnest.fun/movie/${resolvedTmdbId}` }
+          ],
+          url: mtype === "tv"
+            ? `https://vidfast.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?autoPlay=true`
+            : `https://vidfast.pro/movie/${resolvedTmdbId}?autoPlay=true`
+        },
         {
           id: "s1",
           name: "Server 1",
           badge: "Movieshub Cloud",
           url: mtype === "tv"
-            ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${season}&ep=${episode}`
+            ? `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}&se=${curSeason}&ep=${curEpisode}`
             : `${pfx}/stream/netmirror/embed?tm_id=${resolvedTmdbId}&nid=${netId}&year=${movie?.year || 2024}&lang=${safeLang}`
         },
         {
@@ -1589,7 +1603,7 @@ class MovieshubPlayer {
           name: "Server 2",
           badge: "Primary HD (VidLink)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?primaryColor=e50914&quality=1080&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta&sub=ta" : ""}`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?primaryColor=e50914&quality=1080&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta&sub=ta" : ""}`
             : `https://vidlink.pro/movie/${resolvedTmdbId}?primaryColor=e50914&quality=1080&autoplay=true${safeLang.toLowerCase() === "tamil" ? "&lang=ta&audio=ta&sub=ta" : ""}`
         },
         {
@@ -1597,7 +1611,7 @@ class MovieshubPlayer {
           name: "Server 3",
           badge: "Fast Forward (VidSrc SU)",
           url: mtype === "tv"
-            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            ? `https://vidsrc.su/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}`
             : `https://vidsrc.su/embed/movie/${resolvedTmdbId}`
         },
         {
@@ -1605,7 +1619,7 @@ class MovieshubPlayer {
           name: "Server 4",
           badge: "Backup 1 (0vidads)",
           url: mtype === "tv"
-            ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            ? `https://0vidads.top/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}`
             : `https://0vidads.top/embed/movie/${resolvedTmdbId}`
         },
         {
@@ -1613,23 +1627,23 @@ class MovieshubPlayer {
           name: "Server 5",
           badge: "Multi-Audio (VidSync)",
           url: mtype === "tv"
-            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            ? `https://vidsync.pro/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}`
             : `https://vidsync.pro/embed/movie/${resolvedTmdbId}`
         },
         {
           id: "s6",
           name: "Server 6",
-          badge: "Cinema 4K (CinemaOS)",
+          badge: "Prism 4K (VidFast)",
           url: mtype === "tv"
-            ? `https://cinemaos.tech/player/${resolvedTmdbId}/${season}/${episode}`
-            : `https://cinemaos.tech/player/${resolvedTmdbId}`
+            ? `https://vidfast.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?autoPlay=true`
+            : `https://vidfast.pro/movie/${resolvedTmdbId}?autoPlay=true`
         },
         {
           id: "s7",
           name: "Server 7",
           badge: "Mirror HD (VidNest)",
           url: mtype === "tv"
-            ? `https://vidnest.fun/tv/${resolvedTmdbId}/${season}/${episode}`
+            ? `https://vidnest.fun/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}`
             : `https://vidnest.fun/movie/${resolvedTmdbId}`
         },
         {
@@ -1637,7 +1651,7 @@ class MovieshubPlayer {
           name: "Server 8",
           badge: "Ultra CDN (VidMario)",
           url: mtype === "tv"
-            ? `https://player.vidmario.net/embed/tv/${resolvedTmdbId}/${season}/${episode}`
+            ? `https://player.vidmario.net/embed/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}`
             : `https://player.vidmario.net/embed/movie/${resolvedTmdbId}`
         },
         {
@@ -1653,10 +1667,13 @@ class MovieshubPlayer {
           name: "Server 10",
           badge: "Multi-Lang 4K (VidLink)",
           url: mtype === "tv"
-            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${season}/${episode}?multiLang=true&primaryColor=e50914&autoplay=true`
+            ? `https://vidlink.pro/tv/${resolvedTmdbId}/${curSeason}/${curEpisode}?multiLang=true&primaryColor=e50914&autoplay=true`
             : `https://vidlink.pro/movie/${resolvedTmdbId}?multiLang=true&primaryColor=e50914&autoplay=true`
         }
       ];
+
+      let servers = buildServers(season, episode);
+      let activeWcxSourceId = "prism";
 
       // Smart Auto-Selection for Instant Zero-Buffer Playback:
       const cleanLower = cleanTitle.toLowerCase();
@@ -1670,8 +1687,7 @@ class MovieshubPlayer {
         const s9Idx = servers.findIndex(s => s.id === "s9");
         this.currentServerIdx = s9Idx !== -1 ? s9Idx : 0;
       } else {
-        const s2Idx = servers.findIndex(s => s.id === "s2");
-        this.currentServerIdx = s2Idx !== -1 ? s2Idx : 0;
+        this.currentServerIdx = 0; // Watched.cx Multi-Source (Prism 4K) by default!
       }
       this.isAutoSwitchingEnabled = false;
 
@@ -1692,14 +1708,57 @@ class MovieshubPlayer {
           <div class="player-preloader" id="player-preloader" style="position:absolute;inset:0;background:#050508;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;overflow:hidden;pointer-events:none;">
             <div style="background-image:url('${safeBackdrop}');position:absolute;inset:0;background-size:cover;background-position:center;filter:blur(30px) brightness(0.22);transform:scale(1.15);"></div>
             <div style="position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px;max-width:90%;">
-              <div class="spinner" style="width:46px;height:46px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#e50914;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
+              <div class="spinner" style="width:46px;height:46px;border:3.5px solid rgba(255,255,255,0.15);border-top-color:#ffffff;border-radius:50%;animation:spin 0.8s linear infinite;margin-bottom:16px;"></div>
               <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,0.8);">${safeTitle}</div>
-              <div id="player-loader-status" style="font-size:14px;color:#22c55e;font-weight:700;margin-top:10px;">Connecting to Server 1 (Primary HD)...</div>
-              <div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Free Stream • Ultra HD Playback</div>
+              <div id="player-loader-status" style="font-size:14px;color:#22c55e;font-weight:700;margin-top:10px;">Connecting to Watched.cx (Prism 4K)...</div>
+              <div id="player-loader-sub" style="font-size:12px;color:#9ca3af;margin-top:4px;">Protected Ad-Free Stream • No Redirection • Ultra HD</div>
             </div>
           </div>
+
+          ${mtype === "tv" ? `
+          <div class="wcx-episode-bar" id="wcxEpisodeBar">
+            <div class="wcx-ep-season-wrap">
+              <span class="wcx-ep-label">Season</span>
+              <select id="wcxSeasonSelect" class="wcx-ep-select">
+                <option value="${season}">Season ${season}</option>
+              </select>
+            </div>
+            <div class="wcx-ep-pills" id="wcxEpisodePills">
+              <button class="wcx-ep-pill active" data-ep="${episode}">Ep ${episode}</button>
+            </div>
+          </div>` : ""}
+
           <div class="player-stream-frame-container" id="playerStreamFrameContainer" style="flex:1;min-height:0;position:relative;width:100%;display:flex;align-items:center;justify-content:center;background:#000;overflow:hidden;">
             <iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>
+
+            <!-- Watched.cx Floating Source Popover (Screenshot UX) -->
+            <div class="wcx-source-menu hidden" id="wcxSourceMenu">
+              <div class="wcx-source-menu-header">
+                <span>&lsaquo; Source</span>
+                <span class="wcx-source-sub-tag" id="wcxSourceSubStatus">Subtitles Ready</span>
+              </div>
+              <div class="wcx-source-list" id="wcxSourceList">
+                ${servers[0].subSources.map(src => `
+                  <button type="button" class="wcx-source-item ${src.id === activeWcxSourceId ? "active" : ""}" data-wcx-id="${src.id}">
+                    <span class="wcx-dot ${src.status}"></span>
+                    <span class="wcx-flag">${src.flag}</span>
+                    <span class="wcx-name">${src.name}</span>
+                    <span class="wcx-check">${src.id === activeWcxSourceId ? "✓" : ""}</span>
+                  </button>
+                `).join("")}
+              </div>
+              <div class="wcx-source-subs-wrap" id="wcxSubtitlesBox">
+                <div class="wcx-source-subs-title">Subtitles (watched.cx)</div>
+                <select id="wcxSubtitleSelect" class="wcx-sub-select">
+                  <option value="">Loading live subtitles...</option>
+                </select>
+              </div>
+            </div>
+
+            <button type="button" class="wcx-source-fab" id="wcxSourceFabBtn" title="Switch Watched.cx Source & Subtitles">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span id="wcxSourceFabLabel">Source</span>
+            </button>
           </div>
           <div class="player-server-bar">
             <div class="player-server-left">
@@ -1744,12 +1803,136 @@ class MovieshubPlayer {
                 <span style="color:#22c55e;font-size:11px;font-weight:700;">● Active</span>
                 <span style="color:#888;">|</span>
                 <span style="color:${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "#f59e0b" : "#e50914"};font-weight:700;font-size:11px;">
-                  ${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "Pre-HD (Theatre)" : "1080p HD"}
+                  ${(movie?.isTheatrePrint || (movie?.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || (cleanTitle.includes("meesaya murukku 2"))) ? "Pre-HD (Theatre)" : "4K UHD"}
                 </span>
               </div>
             </div>
           </div>
         `;
+      }
+
+      // Wire Watched.cx Source Popover & Live Subtitles + Episode Selector
+      const wcxFabBtn = document.getElementById("wcxSourceFabBtn");
+      const wcxMenu = document.getElementById("wcxSourceMenu");
+      const wcxFabLabel = document.getElementById("wcxSourceFabLabel");
+      if (wcxFabBtn && wcxMenu) {
+        wcxFabBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          wcxMenu.classList.toggle("hidden");
+        });
+        document.addEventListener("click", (e) => {
+          if (!wcxMenu.classList.contains("hidden") && !wcxMenu.contains(e.target) && !wcxFabBtn.contains(e.target)) {
+            wcxMenu.classList.add("hidden");
+          }
+        });
+      }
+
+      const fetchAndPopulateSubtitles = (sNum, eNum) => {
+        const subSelect = document.getElementById("wcxSubtitleSelect");
+        const subStatus = document.getElementById("wcxSourceSubStatus");
+        if (!subSelect) return;
+        fetch(`${pfx}/api/subtitles?tmdb_id=${encodeURIComponent(resolvedTmdbId)}&type=${mtype}&season=${sNum}&episode=${eNum}`)
+          .then(r => r.json())
+          .then(data => {
+            const subs = (data && Array.isArray(data.subtitles)) ? data.subtitles : [];
+            if (subs.length === 0) {
+              subSelect.innerHTML = `<option value="">Auto / Embedded Subtitles</option>`;
+              if (subStatus) subStatus.textContent = "Embedded CC";
+            } else {
+              subSelect.innerHTML = `<option value="">Subtitles (${subs.length} languages available)</option>` +
+                subs.map(s => `<option value="${s.url}">${s.lang}</option>`).join("");
+              if (subStatus) subStatus.textContent = `${subs.length} Subtitles`;
+            }
+          })
+          .catch(() => {
+            if (subStatus) subStatus.textContent = "Embedded CC";
+          });
+      };
+      fetchAndPopulateSubtitles(season, episode);
+
+      const bindWcxSourceClicks = (curLoadServer) => {
+        const listEl = document.getElementById("wcxSourceList");
+        if (!listEl) return;
+        listEl.querySelectorAll(".wcx-source-item").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const wId = btn.dataset.wcxId;
+            const wSrv = servers[0];
+            const foundSrc = wSrv.subSources.find(x => x.id === wId);
+            if (!foundSrc) return;
+            activeWcxSourceId = wId;
+            wSrv.url = foundSrc.url;
+            wSrv.badge = foundSrc.name;
+            listEl.querySelectorAll(".wcx-source-item").forEach(item => {
+              const active = item.dataset.wcxId === wId;
+              item.classList.toggle("active", active);
+              const chk = item.querySelector(".wcx-check");
+              if (chk) chk.textContent = active ? "✓" : "";
+            });
+            if (wcxFabLabel) wcxFabLabel.textContent = foundSrc.name;
+            if (wcxMenu) wcxMenu.classList.add("hidden");
+            curLoadServer(0, false);
+            if (window.showToast) window.showToast(`Watched.cx • ${foundSrc.name}`);
+          });
+        });
+      };
+
+      const fetchAndRenderEpisodes = (sNum) => {
+        if (mtype !== "tv") return;
+        const seasonSelect = document.getElementById("wcxSeasonSelect");
+        const epPills = document.getElementById("wcxEpisodePills");
+        if (!epPills) return;
+        fetch(`${pfx}/api/episodes?tmdb_id=${encodeURIComponent(resolvedTmdbId)}&season=${sNum}`)
+          .then(r => r.json())
+          .then(data => {
+            const totalSeasons = Math.max(1, parseInt(data?.totalSeasons || 1, 10) || 1);
+            if (seasonSelect && seasonSelect.options.length <= 1 && totalSeasons > 1) {
+              seasonSelect.innerHTML = Array.from({ length: totalSeasons }, (_, i) =>
+                `<option value="${i + 1}" ${i + 1 === sNum ? "selected" : ""}>Season ${i + 1}</option>`
+              ).join("");
+            }
+            const eps = Array.isArray(data?.episodes) && data.episodes.length > 0
+              ? data.episodes
+              : Array.from({ length: 12 }, (_, i) => ({ episode_number: i + 1, name: `Episode ${i + 1}` }));
+            epPills.innerHTML = eps.map(ep => {
+              const num = ep.episode_number || 1;
+              return `<button type="button" class="wcx-ep-pill ${num === episode ? "active" : ""}" data-ep="${num}" title="${(ep.name || "").replace(/"/g, "&quot;")}">S${sNum}:E${num} ${ep.name ? "• " + ep.name.slice(0, 22) : ""}</button>`;
+            }).join("");
+            epPills.querySelectorAll(".wcx-ep-pill").forEach(btn => {
+              btn.addEventListener("click", () => {
+                episode = parseInt(btn.dataset.ep, 10) || 1;
+                epPills.querySelectorAll(".wcx-ep-pill").forEach(b => b.classList.toggle("active", parseInt(b.dataset.ep, 10) === episode));
+                servers = buildServers(season, episode);
+                const selectedSub = servers[0].subSources.find(x => x.id === activeWcxSourceId);
+                if (selectedSub) {
+                  servers[0].url = selectedSub.url;
+                  servers[0].badge = selectedSub.name;
+                }
+                fetchAndPopulateSubtitles(season, episode);
+                loadServer(this.currentServerIdx, false);
+                if (window.showToast) window.showToast(`Playing Season ${season}, Episode ${episode}`);
+              });
+            });
+          })
+          .catch(() => {});
+      };
+      if (mtype === "tv") {
+        fetchAndRenderEpisodes(season);
+        const seasonSelect = document.getElementById("wcxSeasonSelect");
+        if (seasonSelect) {
+          seasonSelect.addEventListener("change", () => {
+            season = parseInt(seasonSelect.value, 10) || 1;
+            episode = 1;
+            servers = buildServers(season, episode);
+            const selectedSub = servers[0].subSources.find(x => x.id === activeWcxSourceId);
+            if (selectedSub) {
+              servers[0].url = selectedSub.url;
+              servers[0].badge = selectedSub.name;
+            }
+            fetchAndRenderEpisodes(season);
+            fetchAndPopulateSubtitles(season, episode);
+            loadServer(this.currentServerIdx, false);
+          });
+        }
       }
 
       const preloader = document.getElementById("player-preloader");
@@ -1788,7 +1971,7 @@ class MovieshubPlayer {
         if (container) {
           let curIframe = document.getElementById("player-stream-iframe");
           if (!curIframe) {
-            container.innerHTML = `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`;
+            container.insertAdjacentHTML("afterbegin", `<iframe id="player-stream-iframe" allow="autoplay; fullscreen; encrypted-media; picture-in-picture; web-share" allowfullscreen webkitallowfullscreen="true" mozallowfullscreen="true" loading="eager" referrerpolicy="no-referrer-when-downgrade" style="width:100%;height:100%;border:none;display:block;"></iframe>`);
             curIframe = document.getElementById("player-stream-iframe");
             this.streamIframe = curIframe;
           } else {
@@ -1879,6 +2062,29 @@ class MovieshubPlayer {
           }, 20000);
         }
       };
+
+      // Wire Watched.cx Source Switcher & Subtitles selector
+      bindWcxSourceClicks(loadServer);
+      const wcxSubSelect = document.getElementById("wcxSubtitleSelect");
+      if (wcxSubSelect) {
+        wcxSubSelect.addEventListener("change", () => {
+          const subUrl = wcxSubSelect.value;
+          const subLabel = wcxSubSelect.options[wcxSubSelect.selectedIndex]?.textContent || "Subtitles";
+          const subStatus = document.getElementById("wcxSourceSubStatus");
+          if (subUrl) {
+            if (subStatus) subStatus.textContent = subLabel;
+            const curIframe = document.getElementById("player-stream-iframe");
+            try {
+              if (curIframe && curIframe.contentWindow) {
+                curIframe.contentWindow.postMessage({ type: "subtitle", url: subUrl, label: subLabel }, "*");
+              }
+            } catch (e) {}
+            if (window.showToast) window.showToast(`Subtitles loaded: ${subLabel}`);
+          } else {
+            if (subStatus) subStatus.textContent = "Embedded CC";
+          }
+        });
+      }
 
       // Fast preloader dismissal so video controls are immediately interactive
       setTimeout(hidePreloader, 600);

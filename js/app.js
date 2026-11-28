@@ -69,7 +69,7 @@ class MovieshubApp {
     this.initProfileManagerUI();
 
     const hash = (window.location.hash || "").replace("#", "");
-    if (hash === "livetv" || hash === "sports" || hash === "mylist") {
+    if (["home", "movies", "shows", "anime", "livetv", "sports", "mylist"].includes(hash)) {
       this.switchView(hash);
     }
 
@@ -80,17 +80,6 @@ class MovieshubApp {
     const isClientTwoHoursOld = !lastClientSyncTimestamp || (Date.now() - lastClientSyncTimestamp >= 2 * 60 * 60 * 1000);
     const needsDailySync = (lastClientSyncDay !== todayDateStr) || isClientTwoHoursOld;
     this.loadDashboardData(false, needsDailySync);
-
-    // Auto-sync movies from all servers every 30 minutes / on day rollover / 2 hours elapsed
-    setInterval(() => {
-      const now = Date.now();
-      const last = parseInt(localStorage.getItem("movieshub_dash_last_sync") || "0", 10);
-      const today = new Date().toDateString();
-      const dayChanged = localStorage.getItem("movieshub_last_sync_date") !== today;
-      const expired = now - last >= 2 * 60 * 60 * 1000;
-      this.loadDashboardData(true, dayChanged || expired);
-    }, 30 * 60 * 1000);
-    setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000);
 
     // Auto-refresh when tab becomes active / focused if day changed or 2 hours elapsed
     let lastTabFocusSync = Date.now();
@@ -103,6 +92,12 @@ class MovieshubApp {
       if (dayChanged || expired || (now - lastTabFocusSync > 10 * 60 * 1000)) {
         lastTabFocusSync = now;
         this.loadDashboardData(true, dayChanged || expired);
+        if (expired && this.liveTv && typeof this.liveTv.loadTataPlayChannels === "function") {
+          this.liveTv.loadTataPlayChannels(true);
+        }
+        if (expired && this.sports && typeof this.sports.fetchLiveMatches === "function") {
+          this.sports.fetchLiveMatches(true);
+        }
       }
     };
     window.addEventListener("focus", checkTabFocusSync);
@@ -170,6 +165,8 @@ class MovieshubApp {
         ...(this.dashboardData.latest_six || []),
         ...(this.dashboardData.trending || []),
         ...(this.dashboardData.latest || []),
+        ...(this.dashboardData.shows || []),
+        ...(this.dashboardData.anime || []),
         ...(this.dashboardData.all || [])
       ];
       if (this.dashboardData.languages && typeof this.dashboardData.languages === "object") {
@@ -265,6 +262,8 @@ class MovieshubApp {
         (data.tamil_2026 || []).forEach(mergeMovie);
         (data.tamil_2025 || []).forEach(mergeMovie);
         (data.tamil_2024 || []).forEach(mergeMovie);
+        if (Array.isArray(data.shows)) data.shows.forEach(m => { m.mediaType = "tv"; m.isTv = true; mergeMovie(m); });
+        if (Array.isArray(data.anime)) data.anime.forEach(m => { m.mediaType = "tv"; m.isTv = true; m.isAnime = true; mergeMovie(m); });
 
         if (data.languages && typeof data.languages === "object") {
           Object.values(data.languages).forEach(arr => {
@@ -286,7 +285,7 @@ class MovieshubApp {
           this.searchEngine.catalog = this.catalog;
         }
 
-        if (!this.searchQuery && (this.activeView === "home" || this.activeView === "movies")) {
+        if (!this.searchQuery && ["home", "movies", "shows", "anime"].includes(this.activeView)) {
           this.renderMainContent();
           if (addedCount > 0 && !silent) this.showToast(`Synced ${addedCount} latest releases`);
         }
@@ -725,7 +724,9 @@ class MovieshubApp {
 
   selectLanguage(langId) {
     this.activeLanguage = (langId || "all").toLowerCase();
-    this.activeView = "movies";
+    if (!["home", "movies", "shows", "anime"].includes(this.activeView)) {
+      this.activeView = "movies";
+    }
     this.searchQuery = "";
 
     const hero = document.getElementById("hero-banner");
@@ -750,17 +751,14 @@ class MovieshubApp {
     });
 
     // Update nav links
-    document.querySelectorAll(".nav-link").forEach(l => {
-      if (l.dataset.lang === this.activeLanguage) {
-        l.classList.add("active");
-      } else {
-        l.classList.remove("active");
-      }
+    document.querySelectorAll(".nav-link, .mobile-nav-item").forEach(l => {
+      if (l.dataset.view === this.activeView) l.classList.add("active");
+      else l.classList.remove("active");
     });
 
     const langObj = LANGUAGES.find(l => l.id === this.activeLanguage);
-    const langName = langObj ? langObj.name : "All Movies";
-    this.showToast(`Displaying ${langName} Collection`);
+    const langName = langObj ? langObj.name : "All Collection";
+    this.showToast(`Displaying ${langName}`);
 
     this.renderMainContent();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -799,7 +797,7 @@ class MovieshubApp {
       this.renderMainContent();
     } else {
       if (hero) hero.style.display = "block";
-      if (langBar) langBar.style.display = "block";
+      if (langBar) langBar.style.display = (viewName === "shows" || viewName === "anime") ? "none" : "block";
       if (this.liveTv) this.liveTv.destroy();
       if (this.sports) this.sports.destroy();
       this.renderMainContent();
@@ -945,29 +943,34 @@ class MovieshubApp {
     // 2. View: Watchlist
     if (this.activeView === "mylist") {
       items = items.filter(m => this.myList.includes(m.id));
-      this.renderGrid(main, "My Watchlist", items, "Your watchlist is empty. Add movies to watch later!");
+      this.renderGrid(main, "My Watchlist", items, "Your watchlist is empty. Add movies or shows to watch later!");
       return;
     }
 
-    // 3. Language view: Dedicated Tamil Showcase (2026, 2025, 2024)
+    // 3. View: Segregated TV Shows (Watched.cx style)
+    if (this.activeView === "shows") {
+      this.renderShowsSections(main);
+      return;
+    }
+
+    // 4. View: Segregated Anime (Watched.cx style)
+    if (this.activeView === "anime") {
+      this.renderAnimeSections(main);
+      return;
+    }
+
+    // 5. Language view: Dedicated Tamil Showcase (2026, 2025, 2024)
     if (this.activeLanguage === "tamil") {
       this.renderTamilSections(main);
       return;
     }
 
-    // 4. Filter by Language
-    if (this.activeLanguage !== "all") {
-      items = items.filter(m => (m.language || "").toLowerCase() === this.activeLanguage);
-    }
-
-    // 5. Filter by Genre
-    if (this.activeGenre !== "All") {
-      items = items.filter(m => (m.genres || []).includes(this.activeGenre));
-    }
-
     // 6. Language view for non-Tamil languages (English, Hindi, Telugu, Malayalam)
     if (this.activeLanguage !== "all") {
       let langItems = this.catalog.filter(m => (m.language || "").toLowerCase() === this.activeLanguage);
+      if (this.activeView === "movies") {
+        langItems = langItems.filter(m => m.mediaType !== "tv");
+      }
 
       if (this.dashboardData && this.dashboardData.languages) {
         const matchKey = Object.keys(this.dashboardData.languages).find(k => k.toLowerCase() === this.activeLanguage);
@@ -985,25 +988,217 @@ class MovieshubApp {
       }
 
       const langObj = LANGUAGES.find(l => l.id === this.activeLanguage);
-      const langTitle = `${langObj ? langObj.name : ""} Blockbusters (${langObj ? langObj.native || "" : ""})`;
+      const langTitle = `${langObj ? langObj.name : ""} ${this.activeView === "movies" ? "Movies" : "Blockbusters"} (${langObj ? langObj.native || "" : ""})`;
       this.renderGrid(main, langTitle, langItems, `No titles found in ${this.activeLanguage}.`);
       return;
     }
 
-    // 7. Home View (All Languages Showcase + Hero Billboard)
+    // 7. Segregated Movies View (excludes TV series)
+    if (this.activeView === "movies") {
+      this.renderMoviesOnlySections(main);
+      return;
+    }
+
+    // 8. Home View (All Languages + Shows + Anime Showcase + Hero Billboard)
     this.renderAllLanguagesHome(main);
   }
 
+  async fetchAndCacheSegregatedType(type = "shows") {
+    try {
+      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
+      const res = await fetch(`${pfx}/api/shows?type=${encodeURIComponent(type)}&page=1`);
+      if (!res.ok) return [];
+      const data = await res.json();
+      const list = Array.isArray(data?.results) ? data.results : [];
+      list.forEach(m => {
+        m.mediaType = "tv";
+        m.isTv = true;
+        if (type === "anime") m.isAnime = true;
+        this.registerMovie(m);
+        if (!this.catalog.some(c => (c.tmdbId && m.tmdbId && String(c.tmdbId) === String(m.tmdbId)) || c.id === m.id)) {
+          this.catalog.push(m);
+        }
+      });
+      return list;
+    } catch (e) {
+      return [];
+    }
+  }
 
+  renderShowsSections(container) {
+    const showsFromDash = Array.isArray(this.dashboardData?.shows) ? this.dashboardData.shows : [];
+    const showsFromCat = this.catalog.filter(m => m.mediaType === "tv" && !m.isAnime && (m.language || "").toLowerCase() !== "japanese");
+    const combined = [...showsFromDash, ...showsFromCat];
+    const uniqueShows = [];
+    const seen = new Set();
+    for (const s of combined) {
+      const k = String(s.tmdbId || s.id || s.title);
+      if (!seen.has(k)) {
+        seen.add(k);
+        uniqueShows.push(s);
+      }
+    }
+
+    if (uniqueShows.length < 10 && !this._fetchedShowsOnce) {
+      this._fetchedShowsOnce = true;
+      this.fetchAndCacheSegregatedType("shows").then(list => {
+        if (list.length > 0 && this.activeView === "shows") this.renderMainContent();
+      });
+    }
+
+    const heroShows = uniqueShows.filter(m => m.backdrop || m.poster).slice(0, 10);
+    container.innerHTML = `
+      ${heroShows.length > 0 ? this.setupHeroCarousel(heroShows) : ""}
+      <div class="wcx-section-banner">
+        <div>
+          <h1>📺 TV Shows & Multi-Audio Series</h1>
+          <p>Segregated binge library with Season & Episode selector • Watched.cx Multi-Source & Live Subtitles</p>
+        </div>
+        <div class="wcx-banner-badges">
+          <span class="wcx-banner-pill">Episodes & Seasons</span>
+          <span class="wcx-banner-pill">Zero Ads • Zero Sandbox</span>
+          <span class="wcx-banner-pill">${uniqueShows.length} Shows</span>
+        </div>
+      </div>
+      <section class="content-row">
+        <div class="row-header">
+          <h2>🔥 Trending Series & Originals</h2>
+          <span class="row-subtitle">Click any show to pick Season, Episode & Watched.cx Source</span>
+        </div>
+        <div class="cards-grid">
+          ${uniqueShows.map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>
+    `;
+    if (heroShows.length > 0) this.bindHeroCarousel();
+    this.bindCardEvents(container);
+  }
+
+  renderAnimeSections(container) {
+    const animeFromDash = Array.isArray(this.dashboardData?.anime) ? this.dashboardData.anime : [];
+    const animeFromCat = this.catalog.filter(m => m.isAnime || ((m.genres || []).includes("Animation") && m.mediaType === "tv") || (m.language || "").toLowerCase() === "japanese");
+    const combined = [...animeFromDash, ...animeFromCat];
+    const uniqueAnime = [];
+    const seen = new Set();
+    for (const a of combined) {
+      const k = String(a.tmdbId || a.id || a.title);
+      if (!seen.has(k)) {
+        seen.add(k);
+        uniqueAnime.push(a);
+      }
+    }
+
+    if (uniqueAnime.length < 10 && !this._fetchedAnimeOnce) {
+      this._fetchedAnimeOnce = true;
+      this.fetchAndCacheSegregatedType("anime").then(list => {
+        if (list.length > 0 && this.activeView === "anime") this.renderMainContent();
+      });
+    }
+
+    const heroAnime = uniqueAnime.filter(m => m.backdrop || m.poster).slice(0, 10);
+    container.innerHTML = `
+      ${heroAnime.length > 0 ? this.setupHeroCarousel(heroAnime) : ""}
+      <div class="wcx-section-banner">
+        <div>
+          <h1>✨ Anime Collection</h1>
+          <p>Subbed & Multi-Audio Anime Series synced every 2 hours • Watched.cx 4K & Subtitles</p>
+        </div>
+        <div class="wcx-banner-badges">
+          <span class="wcx-banner-pill">Sub & Multi-Audio</span>
+          <span class="wcx-banner-pill">Episode Switcher</span>
+          <span class="wcx-banner-pill">${uniqueAnime.length} Anime</span>
+        </div>
+      </div>
+      <section class="content-row">
+        <div class="row-header">
+          <h2>⚡ Popular Anime Series</h2>
+          <span class="row-subtitle">HD streams with instant source failover</span>
+        </div>
+        <div class="cards-grid">
+          ${uniqueAnime.map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>
+    `;
+    if (heroAnime.length > 0) this.bindHeroCarousel();
+    this.bindCardEvents(container);
+  }
+
+  renderMoviesOnlySections(container) {
+    let moviesOnly = this.catalog.filter(m => m.mediaType !== "tv");
+    if (this.activeGenre !== "All") {
+      moviesOnly = moviesOnly.filter(m => (m.genres || []).includes(this.activeGenre));
+    }
+    const sorted = [...moviesOnly].sort((a, b) => ((b.year || 2024) * 100 + (parseFloat(b.rating) || 7.5)) - ((a.year || 2024) * 100 + (parseFloat(a.rating) || 7.5)));
+    const heroMovies = sorted.filter(m => m.backdrop || m.poster).slice(0, 10);
+    const tamilMovies = sorted.filter(m => m.language === "Tamil");
+    const englishMovies = sorted.filter(m => m.language === "English");
+    const hindiMovies = sorted.filter(m => m.language === "Hindi");
+    const teluguMovies = sorted.filter(m => m.language === "Telugu");
+    const malayalamMovies = sorted.filter(m => m.language === "Malayalam");
+
+    container.innerHTML = `
+      ${heroMovies.length > 0 ? this.setupHeroCarousel(heroMovies) : ""}
+      <div class="wcx-section-banner">
+        <div>
+          <h1>🎬 All Movies Catalog</h1>
+          <p>Segregated feature films across Tamil, English, Hindi, Telugu & Malayalam • 4K Ultra HD</p>
+        </div>
+        <div class="wcx-banner-badges">
+          <span class="wcx-banner-pill">Watched.cx 4K + 9 Servers</span>
+          <span class="wcx-banner-pill">${sorted.length} Movies</span>
+        </div>
+      </div>
+      <section class="content-row">
+        <div class="row-header"><h2>🔥 Latest & Trending Movies</h2><span class="row-subtitle">Synced every 2 hours</span></div>
+        <div class="cards-carousel">${sorted.slice(0, 24).map(m => this.renderMovieCard(m)).join("")}</div>
+      </section>
+      <section class="content-row">
+        <div class="row-header"><h2>🔴 Tamil Movies (${tamilMovies.length})</h2><button class="view-all-lang-btn" data-lang="tamil">View All →</button></div>
+        <div class="cards-carousel">${tamilMovies.slice(0, 20).map(m => this.renderMovieCard(m)).join("")}</div>
+      </section>
+      <section class="content-row">
+        <div class="row-header"><h2>🔵 Hollywood & English (${englishMovies.length})</h2><button class="view-all-lang-btn" data-lang="english">View All →</button></div>
+        <div class="cards-carousel">${englishMovies.slice(0, 20).map(m => this.renderMovieCard(m)).join("")}</div>
+      </section>
+      <section class="content-row">
+        <div class="row-header"><h2>🟠 Hindi Movies (${hindiMovies.length})</h2><button class="view-all-lang-btn" data-lang="hindi">View All →</button></div>
+        <div class="cards-carousel">${hindiMovies.slice(0, 20).map(m => this.renderMovieCard(m)).join("")}</div>
+      </section>
+      <section class="content-row">
+        <div class="row-header"><h2>🌸 Telugu & Malayalam (${teluguMovies.length + malayalamMovies.length})</h2><button class="view-all-lang-btn" data-lang="telugu">View All →</button></div>
+        <div class="cards-carousel">${[...teluguMovies.slice(0, 12), ...malayalamMovies.slice(0, 12)].map(m => this.renderMovieCard(m)).join("")}</div>
+      </section>
+    `;
+    if (heroMovies.length > 0) this.bindHeroCarousel();
+    container.querySelectorAll(".view-all-lang-btn").forEach(btn => {
+      btn.addEventListener("click", () => this.switchLanguage(btn.dataset.lang));
+    });
+    this.bindCardEvents(container);
+  }
+
+  async triggerUnifiedTwoHourSync(manual = false) {
+    const btn = document.getElementById("syncNowBtn");
+    if (btn) btn.classList.add("syncing");
+    try {
+      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
+      await Promise.allSettled([
+        fetch(`${pfx}/api/sync?t=${Date.now()}`, { cache: "no-store" }),
+        this.loadDashboardData(!manual, true),
+        this.liveTv && typeof this.liveTv.loadTataPlayChannels === "function" ? this.liveTv.loadTataPlayChannels(true) : Promise.resolve(),
+        this.sports && typeof this.sports.fetchLiveMatches === "function" ? this.sports.fetchLiveMatches(true) : Promise.resolve()
+      ]);
+      if (manual) {
+        this.showToast("✓ Synced Movies, Shows, Anime, Live TV & Sports (Next auto-sync in 2h)");
+      }
+    } finally {
+      if (btn) btn.classList.remove("syncing");
+    }
+  }
 
   setupTwoHourRefresh() {
     const TWO_HOURS = 2 * 60 * 60 * 1000;
     setInterval(() => {
-      this.loadDashboardData(true, true).then(() => {
-        if (!this.searchQuery && (this.activeView === "home" || this.activeView === "movies")) {
-          this.renderMainContent();
-        }
-      });
+      this.triggerUnifiedTwoHourSync(false);
     }, TWO_HOURS);
   }
 
@@ -1566,12 +1761,24 @@ class MovieshubApp {
       <section class="content-row">
         <div class="row-header">
           <h2>⚔️ World TV & Multi-Audio Series</h2>
-          <span class="row-subtitle">Game of Thrones, House of the Dragon & Premium Series in Tamil & English Multi-Audio</span>
+          <button class="view-all-lang-btn" data-view-jump="shows">View All Shows →</button>
         </div>
         <div class="cards-carousel">
-          ${this.catalog.filter(m => m.mediaType === "tv").map(m => this.renderMovieCard(m)).join("")}
+          ${this.catalog.filter(m => m.mediaType === "tv" && !m.isAnime).slice(0, 20).map(m => this.renderMovieCard(m)).join("")}
         </div>
       </section>
+
+      <!-- 5b. ANIME SERIES (Watched.cx Segregated Showcase) -->
+      ${((this.dashboardData?.anime && this.dashboardData.anime.length > 0) || this.catalog.some(m => m.isAnime)) ? `
+      <section class="content-row">
+        <div class="row-header">
+          <h2>✨ Trending Anime Series</h2>
+          <button class="view-all-lang-btn" data-view-jump="anime">View All Anime →</button>
+        </div>
+        <div class="cards-carousel">
+          ${(this.dashboardData?.anime && this.dashboardData.anime.length > 0 ? this.dashboardData.anime : this.catalog.filter(m => m.isAnime)).slice(0, 18).map(m => this.renderMovieCard(m)).join("")}
+        </div>
+      </section>` : ""}
 
       <!-- 6. TOP 10 IN MOVIESHUB TODAY -->
       <section class="content-row">
@@ -1645,6 +1852,10 @@ class MovieshubApp {
     // View All buttons
     container.querySelectorAll(".view-all-lang-btn").forEach(btn => {
       btn.addEventListener("click", () => {
+        if (btn.dataset.viewJump) {
+          this.switchView(btn.dataset.viewJump);
+          return;
+        }
         const lang = btn.dataset.lang;
         this.switchLanguage(lang);
       });
@@ -1669,12 +1880,18 @@ class MovieshubApp {
     const posterSrc = movie.poster || `${(typeof window !== "undefined" && window.API_PREFIX) || ""}/api/poster?title=${encodeURIComponent(movie.title)}&year=${movie.year || 2026}`;
     const cleanTitle = (movie.title || "Movie").replace(/[<>"']/g, "");
     const displayTitle = this.searchQuery ? this.searchEngine.highlightMatch(movie.title, this.searchQuery) : movie.title;
+    const isAnimeCard = Boolean(movie.isAnime || ((movie.genres || []).includes("Animation") && movie.mediaType === "tv"));
+    const isTvCard = Boolean(movie.mediaType === "tv" || movie.isTv);
+    const typeBadgeHtml = isAnimeCard
+      ? `<span class="card-type-badge anime">ANIME</span>`
+      : (isTvCard ? `<span class="card-type-badge tv">SHOW</span>` : "");
 
     return `
       <div class="movie-card" data-id="${movie.id}">
         <div class="card-media">
           <img class="card-img" src="${posterSrc}" alt="${cleanTitle}" loading="lazy" onerror="handlePosterError(this, '${cleanTitle}', '${movie.year || 2026}')" />
           <span class="card-lang-badge">${movie.language}</span>
+          ${typeBadgeHtml}
           <span class="card-quality-badge ${((movie.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || movie.isTheatrePrint) ? "theatre" : ""}">${((movie.qualities && movie.qualities.some(q => q.toLowerCase().includes("theatre") || q.toLowerCase().includes("pre-hd"))) || movie.isTheatrePrint) ? "THEATRE PRINT" : ((movie.qualities && movie.qualities[0]) || "4K")}</span>
           
           <div class="card-media-overlay">
@@ -2166,6 +2383,14 @@ class MovieshubApp {
         if (this.player) this.player.close();
       }
     });
+
+    // Watched.cx 2-Hour Sync Manual Trigger
+    const syncNowBtn = document.getElementById("syncNowBtn");
+    if (syncNowBtn) {
+      syncNowBtn.addEventListener("click", () => {
+        this.triggerUnifiedTwoHourSync(true);
+      });
+    }
 
     // Cinecat Header Controls
     const browseBtn = document.getElementById("cine-header-browse");

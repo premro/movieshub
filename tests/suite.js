@@ -134,7 +134,7 @@ for (const m of global.MOVIE_CATALOG) {
   const streamEl = getMockEl("player-stream-iframe");
   const iframeSrc = streamEl.src || "";
   const iframeSrcdoc = streamEl.srcdoc || "";
-  const validStream = (iframeSrc && (iframeSrc.includes("vidsrc.su") || iframeSrc.includes("vidlink.pro") || iframeSrc.includes("cinemaos.tech") || iframeSrc.includes("vidnest.fun") || iframeSrc.includes("vidmario.net"))) || (iframeSrcdoc && (iframeSrcdoc.includes("/stream/moviesda/embed") || iframeSrcdoc.includes("vidlink.pro") || iframeSrcdoc.includes("vidsrc")));
+  const validStream = (iframeSrc && (iframeSrc.includes("vidsrc.su") || iframeSrc.includes("vidlink.pro") || iframeSrc.includes("vidfast.pro") || iframeSrc.includes("vidnest.fun") || iframeSrc.includes("vidmario.net"))) || (iframeSrcdoc && (iframeSrcdoc.includes("/stream/moviesda/embed") || iframeSrcdoc.includes("vidlink.pro") || iframeSrcdoc.includes("vidsrc")));
   if (!validStream) {
     playerStreamsOk = false;
   }
@@ -250,7 +250,7 @@ assert(playerCode.includes("Server 2") && playerCode.includes("VidLink"), "Serve
 assert(playerCode.includes("Server 3") && playerCode.includes("VidSrc SU"), "Server 3 (VidSrc SU) is active and ad-free");
 assert(playerCode.includes("Server 4") && playerCode.includes("0vidads"), "Server 4 (0vidads) is intact");
 assert(playerCode.includes("Server 5") && playerCode.includes("VidSync"), "Server 5 (VidSync) is intact");
-assert(playerCode.includes("Server 6") && playerCode.includes("CinemaOS"), "Server 6 (CinemaOS) is active and ad-free");
+assert(playerCode.includes("Server 6") && playerCode.includes("Prism 4K (VidFast)"), "Server 6 (Prism 4K VidFast) is active and ad-free");
 assert(playerCode.includes("Server 7") && playerCode.includes("VidNest"), "Server 7 (VidNest) is active and ad-free");
 assert(playerCode.includes("Server 8") && playerCode.includes("VidMario"), "Server 8 (VidMario) is active and ad-free");
 
@@ -347,7 +347,7 @@ assert(playerCode.includes('e.key === "Escape"'), "Escape key exits fullscreen o
 assert(playerCode.includes('ef.src = "about:blank"') && playerCode.includes("nv.pause()"), "Moviesda player enforces strict single-audio exclusivity");
 assert(playerCode.includes("pauseVideo"), "Server switching and modal close immediately pause and terminate background iframe audio");
 assert(apiCode.includes("ONE_HOUR_MS") && apiCode.includes("setInterval"), "Backend automatically syncs from all servers every 1 hour (3600s)");
-assert(freshAppCode.includes("setInterval(() => this.loadDashboardData(true), 60 * 60 * 1000)"), "Client checks for fresh catalog updates every 1 hour");
+assert(freshAppCode.includes("triggerUnifiedTwoHourSync") && freshAppCode.includes("2 * 60 * 60 * 1000"), "Client checks for fresh catalog updates every 2 hours");
 
 // 19. Testing 2026 Theatrical Release 'Scene' (TMDB 1402181) & Anti-Ramayana Fallback Protection
 console.log("\n19. Testing 2026 Theatrical Release 'Scene' (TMDB 1402181) & Anti-Ramayana Fallback Protection...");

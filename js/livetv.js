@@ -192,7 +192,8 @@ const LEGACY_CHANNELS_BACKUP = [
     "resolution": "1080p",
     "badge": "Tamil HD",
     "logo": "\ud83d\udcfa",
-    "streamUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8"
+    "streamUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:zeetamil1.smil/playlist.m3u8",
+    "backupUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8"
   },
   {
     "id": "star-vijay",
@@ -567,7 +568,7 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play • 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11960-j9lu9vow-v1/imageContent-11960-j9lu9vow-m1.png",
-    "streamUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8",
+    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
     "backupUrl": "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8",
     "isTataPlay": true
   },
@@ -633,8 +634,8 @@ const INITIAL_TATAPLAY_CHANNELS = [
     "resolution": "1080p",
     "badge": "Tata Play • 1080p HD",
     "logo": "https://ltsk-cdn.s3.eu-west-1.amazonaws.com/jumpstart/Temp_Live/cdn/HLS/Channel/imageContent-11400-j88l28s0-v1/imageContent-11400-j88l28s0-m1.png",
-    "streamUrl": "https://bpprod5catchup.akamaized.net/bpk-tv/irdeto_com_Channel_600/output/manifest.mpd",
-    "backupUrl": "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Cinema/hls/Zee_Cinema.m3u8",
+    "streamUrl": "https://fta.ektv.in/live/697/master.m3u8",
+    "backupUrl": "https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8",
     "isTataPlay": true
   },
   {
@@ -1022,29 +1023,66 @@ class MovieshubLiveTV {
     this.searchQuery = "";
     this.hlsInstance = null;
     this.shakaPlayer = null;
+    this.lastSyncAt = 0;
 
-    // Load full Tata Play channels dataset asynchronously
+    // Load unified Live TV dataset (API + TimStreams 24/7 + verified Tata Play fallback) & auto-sync every 2 hours
     this.loadTataPlayChannels();
+    if (typeof window !== "undefined" && typeof setInterval !== "undefined") {
+      setInterval(() => {
+        this.loadTataPlayChannels(true);
+      }, 2 * 60 * 60 * 1000);
+    }
   }
 
-  async loadTataPlayChannels() {
+  async loadTataPlayChannels(force = false) {
     if (typeof window === "undefined" || !window.fetch) return;
+    const pfx = window.API_PREFIX || "";
+    const merged = [...INITIAL_TATAPLAY_CHANNELS];
+    const seenIds = new Set(merged.map(c => c.id));
+    const isBrokenFeed = (u) => {
+      const s = String(u || "");
+      return !s || s.includes("d2o8pibksxtln6.cloudfront.net") || s.includes("bpprod5catchup.akamaized.net") || s.includes("bpprod");
+    };
+
     try {
-      const resp = await fetch("data/tataplay_channels.json?v=20261118_v3");
+      const apiResp = await fetch(`${pfx}/api/livetv${force ? "?refresh=1&t=" + Date.now() : ""}`);
+      if (apiResp.ok) {
+        const apiData = await apiResp.json();
+        const apiChannels = Array.isArray(apiData?.channels) ? apiData.channels : [];
+        for (const ch of apiChannels) {
+          if (!ch || !ch.id || isBrokenFeed(ch.streamUrl)) continue;
+          if (!seenIds.has(ch.id)) {
+            seenIds.add(ch.id);
+            merged.push(ch);
+          }
+        }
+        this.lastSyncAt = Date.now();
+      }
+    } catch (err) {
+      console.warn("[LiveTV] /api/livetv unavailable, checking dataset fallback:", err);
+    }
+
+    try {
+      const resp = await fetch("data/tataplay_channels.json?v=20261128_wcx");
       if (resp.ok) {
         const fullDataset = await resp.json();
         if (Array.isArray(fullDataset) && fullDataset.length > 0) {
-          // Prepend our verified working channels to ensure primary channels are always 100% playable
-          const existingIds = new Set(this.channels.map(c => c.id));
-          const additional = fullDataset.filter(c => !existingIds.has(c.id));
-          this.channels = [...this.channels, ...additional];
-          this.updateCounts();
-          this.renderChannelList();
+          for (const ch of fullDataset) {
+            if (!ch || !ch.id || isBrokenFeed(ch.streamUrl)) continue;
+            if (!seenIds.has(ch.id)) {
+              seenIds.add(ch.id);
+              merged.push(ch);
+            }
+          }
         }
       }
     } catch (err) {
-      console.warn("[LiveTV] Using bundled Tata Play channels baseline:", err);
+      console.warn("[LiveTV] Using verified baseline channels:", err);
     }
+
+    this.channels = merged;
+    this.updateCounts();
+    this.renderChannelList();
   }
 
   loadCustomChannels() {
@@ -1194,8 +1232,9 @@ class MovieshubLiveTV {
               <span class="livetv-category-tag" id="livetvChannelCat">Tata Play Network</span>
             </div>
 
-            <!-- Multi-Quality & Multi-Audio Selector -->
+            <!-- Multi-Quality, Multi-Audio & 2h Live Sync -->
             <div class="livetv-stream-controls" id="livetvStreamControls" style="display:flex;align-items:center;gap:8px;">
+              <button type="button" id="livetvSyncBtn" class="livetv-stream-select" style="cursor:pointer;font-weight:700;" title="Sync all Live TV channels now">↻ Sync TV</button>
               <select id="livetvQualitySelect" class="livetv-stream-select" title="Stream Resolution">
                 <option value="-1">1080p HD</option>
               </select>
@@ -1205,16 +1244,17 @@ class MovieshubLiveTV {
             </div>
           </div>
 
-          <!-- Screen / Video -->
+          <!-- Screen / Video / Clean Ad-Free Embed -->
           <div class="livetv-screen">
             <button class="livetv-player-back-float" id="livetvFloatingBackBtn" style="display:none;" title="Back to Movieshub">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
-              <span>Back to Movies</span>
+              <span>Back to Home</span>
             </button>
             <video id="livetvVideo" class="livetv-video-el" controls autoplay playsinline></video>
+            <iframe id="livetvEmbedFrame" class="livetv-iframe-el" allow="autoplay; encrypted-media; picture-in-picture; fullscreen; web-share" allowfullscreen referrerpolicy="no-referrer-when-downgrade" style="display:none;"></iframe>
             <div class="livetv-empty-state" id="livetvEmptyState" style="display:none;">
               <div class="livetv-empty-icon">📺</div>
-              <h3>Tata Play Live TV Network</h3>
+              <h3>Watched.cx + Tata Play Live TV</h3>
               <p>Select any channel from the sidebar or click "Import M3U" to load custom streams.</p>
             </div>
             <div class="livetv-loader" id="livetvLoader" style="display:none;">
@@ -1427,11 +1467,23 @@ class MovieshubLiveTV {
         this.shakaPlayer = null;
       }
       if (window.movieshubApp) {
-        window.movieshubApp.switchSection("movies");
+        window.movieshubApp.switchView("home");
       }
     };
     if (backBtn) backBtn.addEventListener("click", goBack);
     if (floatingBackBtn) floatingBackBtn.addEventListener("click", goBack);
+
+    const syncTvBtn = document.getElementById("livetvSyncBtn");
+    if (syncTvBtn) {
+      syncTvBtn.addEventListener("click", async () => {
+        syncTvBtn.textContent = "↻ Syncing...";
+        syncTvBtn.disabled = true;
+        await this.loadTataPlayChannels(true);
+        syncTvBtn.textContent = "↻ Synced";
+        syncTvBtn.disabled = false;
+        setTimeout(() => { syncTvBtn.textContent = "↻ Sync TV"; }, 2500);
+      });
+    }
 
     // Category Select Dropdown
     const catSelect = document.getElementById("livetvCategorySelect");
@@ -1713,20 +1765,26 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
     const cat = document.getElementById("livetvChannelCat");
     const emptyState = document.getElementById("livetvEmptyState");
     const video = document.getElementById("livetvVideo");
+    const embed = document.getElementById("livetvEmbedFrame");
     const loader = document.getElementById("livetvLoader");
 
     if (header) header.style.display = "flex";
     if (title) title.textContent = channel.name;
-    if (cat) cat.textContent = "Tata Play • " + (channel.genre || channel.category);
+    if (cat) {
+      const srcTag = channel.source === "watched-livetv" ? "Watched.cx 24/7 Live" : "Tata Play Live";
+      cat.textContent = srcTag + " • " + (channel.genre || channel.category);
+    }
     if (emptyState) emptyState.style.display = "none";
-    if (video) video.style.display = "block";
 
-    // Stream playback
-    this.streamVideo(channel.streamUrl, video, loader, channel);
+    // Stream playback (clean HLS/DASH video OR ad-free /stream/sports proxy iframe)
+    this.streamVideo(channel.streamUrl, video, loader, channel, embed);
   }
 
-  streamVideo(url, videoEl, loaderEl, channel = null) {
-    if (!videoEl) return;
+  streamVideo(url, videoEl, loaderEl, channel = null, embedEl = null, fallbackStep = 0) {
+    if (!videoEl && !embedEl) return;
+    if (!embedEl && typeof document !== "undefined") {
+      embedEl = document.getElementById("livetvEmbedFrame");
+    }
 
     if (this.hlsInstance) {
       this.hlsInstance.destroy();
@@ -1747,6 +1805,51 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
       if (loaderEl) loaderEl.style.display = "none";
     };
 
+    const isDirectMedia = Boolean(url && (url.includes(".m3u8") || url.includes(".mpd") || url.includes(".mp4")));
+    const shouldUseEmbed = Boolean(embedEl && url && ((channel && channel.isEmbed) || !isDirectMedia));
+
+    // 0. Clean Ad-Free Proxy Iframe Mode (tim-streams 24/7 channels — zero sandbox, zero popups)
+    if (shouldUseEmbed) {
+      if (videoEl) {
+        try { videoEl.pause(); } catch (e) {}
+        videoEl.removeAttribute("src");
+        videoEl.style.display = "none";
+      }
+      const streamControls = document.getElementById("livetvStreamControls");
+      if (streamControls) {
+        const qSel = document.getElementById("livetvQualitySelect");
+        const aSel = document.getElementById("livetvAudioSelect");
+        if (qSel) qSel.innerHTML = `<option value="-1">1080p Live Embed</option>`;
+        if (aSel) aSel.style.display = "none";
+      }
+
+      const pfx = (typeof window !== "undefined" && window.API_PREFIX) || "";
+      const proxySrc = url.startsWith("/") ? url : `${pfx}/stream/sports?url=${encodeURIComponent(url)}`;
+      if (embedEl.removeAttribute) embedEl.removeAttribute("sandbox");
+      embedEl.style.display = "block";
+      embedEl.onload = () => hideLoader();
+      embedEl.onerror = () => {
+        const nextUrl = fallbackStep === 0 ? channel?.backupUrl : (fallbackStep === 1 ? channel?.backupUrl2 : null);
+        if (nextUrl && nextUrl !== url) {
+          this.streamVideo(nextUrl, videoEl, loaderEl, channel, embedEl, fallbackStep + 1);
+        } else {
+          hideLoader();
+        }
+      };
+      embedEl.src = proxySrc;
+      if (this.loaderTimeout) clearTimeout(this.loaderTimeout);
+      this.loaderTimeout = setTimeout(hideLoader, 2500);
+      return;
+    }
+
+    // Video element mode
+    if (embedEl) {
+      embedEl.src = "about:blank";
+      embedEl.style.display = "none";
+    }
+    if (!videoEl) return;
+    videoEl.style.display = "block";
+
     videoEl.removeEventListener("playing", hideLoader);
     videoEl.removeEventListener("canplay", hideLoader);
     videoEl.removeEventListener("loadeddata", hideLoader);
@@ -1760,7 +1863,7 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
     if (this.loaderTimeout) clearTimeout(this.loaderTimeout);
     this.loaderTimeout = setTimeout(() => {
       hideLoader();
-    }, 2000);
+    }, 2500);
 
     videoEl.onclick = () => {
       if (videoEl.paused) {
@@ -1779,21 +1882,27 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
       }
     };
 
-    // Fallback stream selector
+    // Multi-step verified fallback stream selector (zero dead CloudFront links)
     const fallbackStream = () => {
-      let fallbackUrl = channel && channel.backupUrl;
-      if (!fallbackUrl) {
+      let fallbackUrl = null;
+      if (fallbackStep === 0 && channel && channel.backupUrl && channel.backupUrl !== url) {
+        fallbackUrl = channel.backupUrl;
+      } else if (fallbackStep <= 1 && channel && channel.backupUrl2 && channel.backupUrl2 !== url) {
+        fallbackUrl = channel.backupUrl2;
+      } else if (fallbackStep < 2) {
         if (channel && channel.category === "Sports") {
           fallbackUrl = "https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8";
         } else if (channel && channel.category === "Tamil") {
-          fallbackUrl = "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Tamil_HD/hls/Zee_Tamil_HD.m3u8";
+          fallbackUrl = "https://fta.ektv.in/live/697/master.m3u8";
         } else {
-          fallbackUrl = "https://d2o8pibksxtln6.cloudfront.net/live/media/Zee_Cinema/hls/Zee_Cinema.m3u8";
+          fallbackUrl = "https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8";
         }
       }
-      if (url !== fallbackUrl) {
-        console.log("[LiveTV] Switching to reliable fallback stream:", fallbackUrl);
-        this.streamVideo(fallbackUrl, videoEl, loaderEl, null);
+      if (fallbackUrl && url !== fallbackUrl) {
+        console.log("[LiveTV] Switching to verified fallback stream:", fallbackUrl);
+        this.streamVideo(fallbackUrl, videoEl, loaderEl, channel, embedEl, fallbackStep + 1);
+      } else {
+        hideLoader();
       }
     };
 
@@ -1918,6 +2027,10 @@ https://cdn.pishow.tv/ott/live/1241/master.m3u8`;
     if (this.shakaPlayer) {
       this.shakaPlayer.destroy();
       this.shakaPlayer = null;
+    }
+    const embedEl = typeof document !== "undefined" ? document.getElementById("livetvEmbedFrame") : null;
+    if (embedEl) {
+      embedEl.src = "about:blank";
     }
   }
 }

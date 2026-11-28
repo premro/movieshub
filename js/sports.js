@@ -24,13 +24,18 @@ class MovieshubSports {
 
   init() {
     this.fetchLiveMatches();
-    // Auto-update live sports schedule regularly every 3 minutes
+    // Auto-update live sports schedule regularly every 3 minutes + 2-hour full sync alignment
     if (!this.refreshTimer) {
       this.refreshTimer = setInterval(() => {
         if (window.movieshubApp && window.movieshubApp.activeView === "sports" && !this.activeModal) {
           this.fetchLiveMatches();
         }
       }, 180000);
+    }
+    if (!this.twoHourTimer) {
+      this.twoHourTimer = setInterval(() => {
+        this.fetchLiveMatches(true);
+      }, 2 * 60 * 60 * 1000);
     }
   }
 
@@ -393,6 +398,7 @@ class MovieshubSports {
           src="${streamSrc}" 
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen" 
           allowfullscreen 
+          referrerpolicy="no-referrer-when-downgrade"
           style="width: 100%; height: 100%; border: none; display: block; background: #000;">
         </iframe>
       `;
@@ -400,6 +406,11 @@ class MovieshubSports {
       if (iframe) {
         iframe.onload = () => {
           if (loaderEl) loaderEl.style.display = "none";
+        };
+        iframe.onerror = () => {
+          if (idx + 1 < streams.length) {
+            this.loadStreamAt(idx + 1, streams, match);
+          }
         };
       }
     } else {

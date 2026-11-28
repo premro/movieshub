@@ -57,7 +57,7 @@ let lastDashboardSyncTime = 0;
 let isSyncingDashboard = false;
 let syncDashboardPromise = null;
 let cachedDashboard = null;
-const DASHBOARD_SYNC_VERSION = 2;
+const DASHBOARD_SYNC_VERSION = 3;
 function getCacheFilePath() {
   const candidatePaths = [
     '/tmp/dashboard_cache.json',
@@ -113,6 +113,41 @@ function fetchJson(url, options = {}) {
       req.destroy();
       reject(new Error('Request timed out'));
     });
+    req.end();
+  });
+}
+
+function fetchPostJson(url, bodyObj, options = {}) {
+  return new Promise((resolve, reject) => {
+    const u = new URL(url);
+    const client = u.protocol === 'http:' ? http : https;
+    const payload = JSON.stringify(bodyObj || {});
+    const req = client.request(u, {
+      method: 'POST',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload),
+        ...(options.headers || {})
+      },
+      timeout: options.timeout || 6000
+    }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          resolve(JSON.parse(data));
+        } catch (err) {
+          resolve(null);
+        }
+      });
+    });
+    req.on('error', reject);
+    req.on('timeout', () => {
+      req.destroy();
+      reject(new Error('Request timed out'));
+    });
+    req.write(payload);
     req.end();
   });
 }
@@ -474,6 +509,8 @@ async function syncDashboardCatalog(force = false) {
       tamil_2024: (cachedDashboard && cachedDashboard.tamil_2024) || [],
       trending: [],
       latest: [],
+      shows: [],
+      anime: [],
       languages: {
         tamil: [],
         english: [],
@@ -494,7 +531,7 @@ async function syncDashboardCatalog(force = false) {
       }
     };
 
-    // Parallel multi-language discovery: fetches 2026 & 2025 for all major languages + Now Playing + Daily Trending + Weekly Trending
+    // Parallel multi-language discovery: fetches 2026 & 2025 for all major languages + Now Playing + Daily Trending + Weekly Trending + Shows + Anime
     const [
       npRes,
       dayTrRes,
@@ -508,7 +545,10 @@ async function syncDashboardCatalog(force = false) {
       te26Res,
       te25Res,
       ml26Res,
-      ml25Res
+      ml25Res,
+      tvTrendRes,
+      tvPopRes,
+      animeRes
     ] = await Promise.allSettled([
       fetchTmdbApi('/movie/now_playing', { page: 1 }),
       fetchTmdbApi('/trending/movie/day', { page: 1 }),
@@ -522,8 +562,43 @@ async function syncDashboardCatalog(force = false) {
       fetchTmdbApi('/discover/movie', { with_original_language: 'te', primary_release_year: 2026, sort_by: 'popularity.desc' }),
       fetchTmdbApi('/discover/movie', { with_original_language: 'te', primary_release_year: 2025, sort_by: 'popularity.desc' }),
       fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2026, sort_by: 'popularity.desc' }),
-      fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2025, sort_by: 'popularity.desc' })
+      fetchTmdbApi('/discover/movie', { with_original_language: 'ml', primary_release_year: 2025, sort_by: 'popularity.desc' }),
+      fetchTmdbApi('/trending/tv/week', { page: 1 }),
+      fetchTmdbApi('/tv/popular', { page: 1 }),
+      fetchTmdbApi('/discover/tv', { with_original_language: 'ja', with_genres: '16', sort_by: 'popularity.desc', page: 1 })
     ]);
+
+    // Process TV Shows (Segregated Watched.cx Style)
+    const seenShowIds = new Set();
+    [tvTrendRes, tvPopRes].forEach(res => {
+      if (res.status === 'fulfilled' && res.value && Array.isArray(res.value.results)) {
+        res.value.results.forEach(raw => {
+          if (!raw || !raw.id || seenShowIds.has(raw.id)) return;
+          seenShowIds.add(raw.id);
+          const m = normalizeMovie({ ...raw, media_type: 'tv' });
+          m.mediaType = 'tv';
+          m.isTv = true;
+          updated.shows.push(m);
+          addMovie(m);
+        });
+      }
+    });
+
+    // Process Anime Series (Japanese Animation)
+    const seenAnimeIds = new Set();
+    if (animeRes.status === 'fulfilled' && animeRes.value && Array.isArray(animeRes.value.results)) {
+      animeRes.value.results.forEach(raw => {
+        if (!raw || !raw.id || seenAnimeIds.has(raw.id)) return;
+        seenAnimeIds.add(raw.id);
+        const m = normalizeMovie({ ...raw, media_type: 'tv' });
+        m.mediaType = 'tv';
+        m.isTv = true;
+        m.isAnime = true;
+        m.category = 'Anime';
+        updated.anime.push(m);
+        addMovie(m);
+      });
+    }
 
     // Process Daily Trending (Populates Top 5 Billboard Hero Slider with today's hot movies)
     if (dayTrRes.status === 'fulfilled' && dayTrRes.value && Array.isArray(dayTrRes.value.results)) {
@@ -789,6 +864,12 @@ async function syncDashboardCatalog(force = false) {
           }
         }
       });
+    }
+    if (updated.shows.length === 0 && cachedDashboard && Array.isArray(cachedDashboard.shows)) {
+      updated.shows = [...cachedDashboard.shows];
+    }
+    if (updated.anime.length === 0 && cachedDashboard && Array.isArray(cachedDashboard.anime)) {
+      updated.anime = [...cachedDashboard.anime];
     }
 
     // Guarantee Ramayana and Madha Gaja Raja with verified stream IDs
@@ -1086,6 +1167,10 @@ async function syncDashboardCatalog(force = false) {
     updated.tamil_2025.forEach(sanitizeMovieImages);
     updated.latest_six.forEach(sanitizeMovieImages);
     updated.hero.forEach(sanitizeMovieImages);
+    updated.shows.forEach(sanitizeMovieImages);
+    updated.anime.forEach(sanitizeMovieImages);
+    updated.nextSyncAt = new Date(now + TWO_HOURS_MS).toISOString();
+    updated.syncIntervalMs = TWO_HOURS_MS;
 
     cachedDashboard = updated;
     lastDashboardSyncTime = now;
@@ -2624,15 +2709,25 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify(cachedDashboard || { all: [], hero: [], latest_six: [], trending: [], languages: {} }));
   }
 
-  // 2b. Force Catalog Sync Endpoint
+  // 2b. Force Catalog Sync Endpoint (2-Hour Unified Sync: Movies + Shows + Anime + Live TV + Sports)
   if (pathname === '/api/sync') {
-    await syncDashboardCatalog(true);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
+    await Promise.allSettled([
+      syncDashboardCatalog(true),
+      syncLiveTvCatalog(true),
+      syncTimStreams(true)
+    ]);
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
     return res.end(JSON.stringify({
       status: 'ok',
       syncedAt: cachedDashboard ? cachedDashboard.last_synced_human : new Date().toISOString(),
+      nextSyncAt: new Date(Date.now() + TWO_HOURS_MS).toISOString(),
+      syncIntervalMs: TWO_HOURS_MS,
       latestCount: cachedDashboard ? cachedDashboard.latest_six.length : 0,
-      totalMovies: cachedDashboard ? cachedDashboard.all.length : 0
+      totalMovies: cachedDashboard ? cachedDashboard.all.length : 0,
+      showsCount: cachedDashboard && Array.isArray(cachedDashboard.shows) ? cachedDashboard.shows.length : 0,
+      animeCount: cachedDashboard && Array.isArray(cachedDashboard.anime) ? cachedDashboard.anime.length : 0,
+      liveTvCount: cachedLiveTvData ? cachedLiveTvData.total : 0,
+      sportsCount: cachedSportsData ? cachedSportsData.total : 0
     }));
   }
 
@@ -2648,8 +2743,208 @@ module.exports = async (req, res) => {
     return res.end(JSON.stringify(data || { status: 'ok', matches: [] }));
   }
 
-  // 2d. Clean Sports Stream Proxy (Strips sandbox blockers & rogue ad scripts)
-  if (pathname === "/stream/sports") {
+  // 2c-2. Unified Live TV Channels Aggregator (Verified Working HLS + TimStreams 24/7 Channels, 2-Hour Sync)
+  if (pathname === '/api/livetv') {
+    const forceRefresh = u.searchParams.get('refresh') === '1';
+    const data = await syncLiveTvCatalog(forceRefresh);
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': forceRefresh ? 'no-store, no-cache, must-revalidate' : 'public, max-age=0, s-maxage=120, stale-while-revalidate=600',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(JSON.stringify(data || { status: 'ok', total: 0, channels: [] }));
+  }
+
+  // 2c-3. Segregated TV Shows & Anime Discovery API (TMDB + Watched.cx Style)
+  if (pathname === '/api/shows') {
+    const type = (u.searchParams.get('type') || 'shows').toLowerCase();
+    const lang = (u.searchParams.get('lang') || 'all').toLowerCase();
+    const origLang = LANG_CODE_MAP[lang];
+    const page = u.searchParams.get('page') || '1';
+    const params = { sort_by: 'popularity.desc', page };
+    if (type === 'anime') {
+      params.with_genres = '16';
+      params.with_original_language = 'ja';
+    } else if (origLang) {
+      params.with_original_language = origLang;
+    }
+    const data = await fetchTmdbApi('/discover/tv', params);
+    const results = ((data && data.results) || []).slice(0, 24).map(raw => {
+      const m = normalizeMovie({ ...raw, media_type: 'tv' });
+      m.mediaType = 'tv';
+      m.isTv = true;
+      if (type === 'anime') {
+        m.isAnime = true;
+        m.category = 'Anime';
+      }
+      return m;
+    });
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ type, language: lang, page: parseInt(page, 10) || 1, results }));
+  }
+
+  // 2c-4. Watched.cx + TMDB TV Show Season Episodes Resolver
+  if (pathname === '/api/episodes') {
+    const tmdbId = String(u.searchParams.get('tmdb_id') || u.searchParams.get('id') || '').replace(/[^0-9]/g, '');
+    const seasonNum = Math.max(1, parseInt(u.searchParams.get('season') || '1', 10) || 1);
+    if (!tmdbId) {
+      res.writeHead(400, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+      return res.end(JSON.stringify({ error: 'Missing tmdb_id', episodes: [] }));
+    }
+    let episodes = [];
+    let totalSeasons = 1;
+    try {
+      const wcx = await fetchJson(`https://watched.cx/api/episodes?tmdbId=${tmdbId}&season=${seasonNum}`, {
+        headers: { Referer: 'https://watched.cx/', Origin: 'https://watched.cx' },
+        timeout: 4500
+      }).catch(() => null);
+      if (wcx && Array.isArray(wcx.episodes) && wcx.episodes.length > 0) {
+        episodes = wcx.episodes.map((ep, idx) => ({
+          episode_number: ep.episode_number || ep.number || (idx + 1),
+          name: ep.name || ep.title || `Episode ${idx + 1}`,
+          overview: ep.overview || '',
+          runtime: ep.runtime || null,
+          still_path: ep.still_path ? (ep.still_path.startsWith('http') ? ep.still_path : `https://image.tmdb.org/t/p/w500${ep.still_path}`) : null
+        }));
+        if (wcx.seasons) totalSeasons = wcx.seasons;
+      }
+    } catch (e) {}
+
+    if (episodes.length === 0) {
+      const [tvInfo, seasonData] = await Promise.all([
+        fetchTmdbApi(`/tv/${tmdbId}`).catch(() => null),
+        fetchTmdbApi(`/tv/${tmdbId}/season/${seasonNum}`).catch(() => null)
+      ]);
+      if (tvInfo && tvInfo.number_of_seasons) totalSeasons = tvInfo.number_of_seasons;
+      if (seasonData && Array.isArray(seasonData.episodes)) {
+        episodes = seasonData.episodes.map((ep, idx) => ({
+          episode_number: ep.episode_number || (idx + 1),
+          name: ep.name || `Episode ${idx + 1}`,
+          overview: ep.overview || '',
+          runtime: ep.runtime || null,
+          still_path: ep.still_path ? `https://image.tmdb.org/t/p/w500${ep.still_path}` : null
+        }));
+      }
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=3600',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(JSON.stringify({ tmdbId, season: seasonNum, totalSeasons, episodes }));
+  }
+
+  // 2c-5. Watched.cx Live Subtitles Aggregator (POST https://watched.cx/api/vod/subtitles -> sub.wyzie.io VTT)
+  if (pathname === '/api/subtitles') {
+    const tmdbId = String(u.searchParams.get('tmdb_id') || u.searchParams.get('id') || '').replace(/[^0-9]/g, '');
+    const mtype = u.searchParams.get('type') === 'tv' ? 'tv' : 'movie';
+    const seasonNum = Math.max(1, parseInt(u.searchParams.get('season') || '1', 10) || 1);
+    const episodeNum = Math.max(1, parseInt(u.searchParams.get('episode') || '1', 10) || 1);
+    let subtitles = [];
+    if (tmdbId) {
+      try {
+        const subRes = await fetchPostJson('https://watched.cx/api/vod/subtitles', {
+          tmdbId: Number(tmdbId),
+          mediaType: mtype,
+          season: seasonNum,
+          episode: episodeNum
+        }, {
+          headers: { Referer: 'https://watched.cx/', Origin: 'https://watched.cx' },
+          timeout: 5000
+        }).catch(() => null);
+        const list = Array.isArray(subRes) ? subRes : (subRes && Array.isArray(subRes.subtitles) ? subRes.subtitles : []);
+        subtitles = list.filter(s => s && s.url).slice(0, 25).map(s => ({
+          id: s.id || s.lang || s.language || 'en',
+          lang: s.display || s.language || s.lang || 'English',
+          code: s.lang || s.languageCode || 'en',
+          url: s.url,
+          format: s.format || 'vtt'
+        }));
+      } catch (e) {}
+    }
+    res.writeHead(200, {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=1800',
+      'Access-Control-Allow-Origin': '*'
+    });
+    return res.end(JSON.stringify({ tmdbId, type: mtype, subtitles }));
+  }
+
+  // 2c-6. Watched.cx Multi-Source Resolver API (Phoenix, Iris, Raf, Prism 4K, Vega 4K, Onyx)
+  if (pathname === '/api/watched/sources') {
+    const tmdbId = String(u.searchParams.get('tmdb_id') || u.searchParams.get('id') || '').replace(/[^0-9]/g, '');
+    const mtype = u.searchParams.get('type') === 'tv' ? 'tv' : 'movie';
+    const seasonNum = Math.max(1, parseInt(u.searchParams.get('season') || '1', 10) || 1);
+    const episodeNum = Math.max(1, parseInt(u.searchParams.get('episode') || '1', 10) || 1);
+    const safeLang = (u.searchParams.get('lang') || '').toLowerCase();
+    const sources = [
+      {
+        id: 'phoenix',
+        name: 'Phoenix',
+        label: 'Fast Cloud Direct',
+        flag: '🇺🇸',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidlink.pro/tv/${tmdbId}/${seasonNum}/${episodeNum}?primaryColor=ffffff&autoplay=true`
+          : `https://vidlink.pro/movie/${tmdbId}?primaryColor=ffffff&autoplay=true`
+      },
+      {
+        id: 'iris',
+        name: 'Iris (multi-audio)',
+        label: 'Multi-Language & Tamil/Hindi Dub',
+        flag: '🌐',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidlink.pro/tv/${tmdbId}/${seasonNum}/${episodeNum}?multiLang=true&primaryColor=ffffff&autoplay=true${safeLang === 'tamil' ? '&lang=ta&audio=ta' : ''}`
+          : `https://vidlink.pro/movie/${tmdbId}?multiLang=true&primaryColor=ffffff&autoplay=true${safeLang === 'tamil' ? '&lang=ta&audio=ta' : ''}`
+      },
+      {
+        id: 'raf',
+        name: 'Raf',
+        label: 'Ultra Stable Mirror',
+        flag: '🇺🇸',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidsync.pro/embed/tv/${tmdbId}/${seasonNum}/${episodeNum}`
+          : `https://vidsync.pro/embed/movie/${tmdbId}`
+      },
+      {
+        id: 'prism',
+        name: 'Prism (4K)',
+        label: '4K Ultra HD Stream',
+        flag: '🇺🇸',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidfast.pro/tv/${tmdbId}/${seasonNum}/${episodeNum}?autoPlay=true`
+          : `https://vidfast.pro/movie/${tmdbId}?autoPlay=true`
+      },
+      {
+        id: 'vega',
+        name: 'Vega (4K)',
+        label: 'Zero-Buffer CDN',
+        flag: '🇺🇸',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidsrc.su/embed/tv/${tmdbId}/${seasonNum}/${episodeNum}`
+          : `https://vidsrc.su/embed/movie/${tmdbId}`
+      },
+      {
+        id: 'onyx',
+        name: 'Onyx (multi-audio)',
+        label: 'VidNest Backup',
+        flag: '🇺🇸',
+        status: 'online',
+        url: mtype === 'tv'
+          ? `https://vidnest.fun/tv/${tmdbId}/${seasonNum}/${episodeNum}`
+          : `https://vidnest.fun/movie/${tmdbId}`
+      }
+    ];
+    res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+    return res.end(JSON.stringify({ status: 'ok', provider: 'watched.cx', tmdbId, type: mtype, sources }));
+  }
+
+  // 2d. Clean Sports & LiveTV Stream Proxy (Strips sand.js, reliedhounder, plum.js, sandbox blockers & rogue ad scripts)
+  if (pathname === "/stream/sports" || pathname === "/stream/livetv") {
     const targetUrl = u.searchParams.get("url");
     if (!targetUrl || !targetUrl.startsWith("http")) {
       res.writeHead(400, { "Content-Type": "text/plain" });
@@ -2659,7 +2954,7 @@ module.exports = async (req, res) => {
     try {
       const { buffer, finalUrl } = await fetchBuffer(targetUrl, {
         headers: {
-          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
           "Referer": "https://tim-streams.com/"
         },
         timeout: 8000
@@ -2668,19 +2963,23 @@ module.exports = async (req, res) => {
       let cleanHtml = buffer ? buffer.toString("utf8") : "";
       const parsedOrigin = new URL(finalUrl || targetUrl).origin;
 
-      // Neutralize anti-sandbox checks (plain & obfuscated sand_guard / _0x1b92 / plum.js WASM sandbox detector)
+      // Neutralize anti-sandbox & anti-embed checks (/sand.js, plum.js WASM detector, sand_guard, framebusters)
+      cleanHtml = cleanHtml.replace(/<script[^>]*\bsrc=["'][^"']*\/sand\.js[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "");
+      cleanHtml = cleanHtml.replace(/<script[^>]*\bsrc=["'][^"']*plum\.js[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "");
       cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?Remove sandbox attributes on the iframe tag[\s\S]*?<\/script>/gi, "<script>/* Sandbox checks stripped */</script>");
-      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:_0x1b92|sand_guard|\\x52\\x65\\x6d\\x6f\\x76\\x65|sandDetect)[\s\S]*?<\/script>/gi, "<script>/* Obfuscated sandbox guard stripped */</script>");
-      cleanHtml = cleanHtml.replace(/<script[^>]*\bsrc="[^"]*plum\.js[^"]*"[^>]*>[\s\S]*?<\/script>/gi, "");
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:_0x1b92|sand_guard|\\x52\\x65\\x6d\\x6f\\x76\\x65|sandDetect|window\.top\s*!==\s*window\.self|top\.location\s*=)[\s\S]*?<\/script>/gi, "<script>/* Obfuscated sandbox/framebust guard stripped */</script>");
 
-      // Neutralize ad popunders, trackers, & disable-devtool (both tag attr and body forms)
-      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:popundersPerIP|histats\.com|aclib|acscdn|monetag)[\s\S]*?<\/script>/gi, "<script>/* Ad scripts stripped */</script>");
+      // Neutralize ad popunders, reliedhounder, aclib, monetag, trackers, & disable-devtool
+      cleanHtml = cleanHtml.replace(/<script[^>]*reliedhounder[^>]*>[\s\S]*?<\/script>/gi, "");
+      cleanHtml = cleanHtml.replace(/<(?:link|img|iframe)[^>]*reliedhounder[^>]*>/gi, "");
+      cleanHtml = cleanHtml.replace(/<script[^>]*\bsrc=["'][^"']*(?:aclib|acscdn|monetag|histats|reliedhounder|popads|popcash)[^"']*["'][^>]*>[\s\S]*?<\/script>/gi, "");
+      cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?(?:popundersPerIP|histats\.com|aclib|acscdn|monetag|reliedhounder|atob\(['"]aHR0)[\s\S]*?<\/script>/gi, "<script>/* Ad scripts stripped */</script>");
       cleanHtml = cleanHtml.replace(/<!--\s*Histats\.com[\s\S]*?Histats\.com\s*END\s*-->/gi, "").replace(/<noscript>[\s\S]*?histats\.com[\s\S]*?<\/noscript>/gi, "");
       cleanHtml = cleanHtml.replace(/<script[^>]*disable-devtool[^>]*>[\s\S]*?<\/script>/gi, "");
       cleanHtml = cleanHtml.replace(/<script[^>]*>(?:(?!<\/script>)[\s\S])*?disable-devtool[\s\S]*?<\/script>/gi, "");
 
-      // Inject <base> + popup/sandbox-detector shield at start of <head>
-      const shieldHead = `<head>\n<base href="${parsedOrigin}/">\n<script>window.open=function(){return null;};window.sandDetect=function(){return false;};window.DisableDevtool=function(){};</script>`;
+      // Inject <base> + popup/sandbox-detector/redirect shield at start of <head>
+      const shieldHead = `<head>\n<base href="${parsedOrigin}/">\n<script>(function(){window.open=function(){return null;};window.sandDetect=function(){return false;};window.DisableDevtool=function(){};window.adblock=false;document.addEventListener('click',function(e){var a=e.target&&e.target.closest?e.target.closest('a'):null;if(a&&a.href&&!a.href.startsWith('#')&&!a.href.includes(location.hostname)){e.preventDefault();e.stopPropagation();}},true);})();</script>`;
       if (/<head>/i.test(cleanHtml)) {
         cleanHtml = cleanHtml.replace(/<head>/i, shieldHead);
       } else {
@@ -2695,7 +2994,7 @@ module.exports = async (req, res) => {
       return res.end(cleanHtml);
     } catch (err) {
       res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Content-Security-Policy": "frame-ancestors *;" });
-      return res.end(`<!DOCTYPE html><html><body style="margin:0;background:#07070b;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;"><div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">Feed temporarily unavailable</div><div style="font-size:13px;color:#9ca3af;">Please switch to Stream 2 or another sports server.</div></div></body></html>`);
+      return res.end(`<!DOCTYPE html><html><body style="margin:0;background:#07070b;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;text-align:center;"><div><div style="font-size:18px;font-weight:700;margin-bottom:8px;">Feed temporarily unavailable</div><div style="font-size:13px;color:#9ca3af;">Please switch to Stream 2 or another live server.</div></div></body></html>`);
     }
   }
 
@@ -3179,13 +3478,119 @@ module.exports = async (req, res) => {
   res.writeHead(404, { 'Content-Type': 'application/json' });
   res.end(JSON.stringify({ error: 'Endpoint not found', path: pathname }));
 };
-// Automatic 2-Hour Sync from all server providers (TMDB, Moviezda, Netmirror)
+// Automatic 2-Hour Sync from all server providers (TMDB, Moviezda, Netmirror, Live TV, Sports)
 if (typeof setInterval !== 'undefined') {
   const syncTimer = setInterval(() => {
     console.log('[Movieshub Auto-Sync] 2-Hour sync triggered across all server providers...');
-    syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] 2-Hour sync error:', e.message));
+    syncDashboardCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] Dashboard sync error:', e.message));
+    syncLiveTvCatalog(true).catch(e => console.warn('[Movieshub Auto-Sync] LiveTV sync error:', e.message));
+    syncTimStreams(true).catch(e => console.warn('[Movieshub Auto-Sync] Sports sync error:', e.message));
   }, TWO_HOURS_MS);
   if (syncTimer && syncTimer.unref) syncTimer.unref();
+}
+
+let cachedLiveTvData = null;
+let lastLiveTvSyncTime = 0;
+try {
+  if (fs.existsSync("/tmp/livetv_cache.json")) {
+    cachedLiveTvData = JSON.parse(fs.readFileSync("/tmp/livetv_cache.json", "utf8"));
+    if (cachedLiveTvData && cachedLiveTvData.syncedAtMs) {
+      lastLiveTvSyncTime = cachedLiveTvData.syncedAtMs;
+    }
+  }
+} catch (e) {}
+
+const VERIFIED_BASE_LIVETV_CHANNELS = [
+  { id: "sun-tv-hd", name: "Sun TV HD", category: "Tamil", genre: "Entertainment", language: "Tamil", resolution: "1080p", badge: "Tamil Live HD", logo: "☀️", streamUrl: "https://fta.ektv.in/live/697/master.m3u8", backupUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8" },
+  { id: "star-vijay-hd", name: "Star Vijay HD", category: "Tamil", genre: "Entertainment", language: "Tamil", resolution: "1080p", badge: "Tamil Live HD", logo: "⭐", streamUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8", backupUrl: "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8" },
+  { id: "colors-tamil-hd", name: "Colors Tamil HD", category: "Tamil", genre: "Entertainment", language: "Tamil", resolution: "1080p", badge: "Tamil Live HD", logo: "🎨", streamUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:colorstamilhd11.smil/playlist.m3u8", backupUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8" },
+  { id: "zee-tamil-hd", name: "Zee Tamil HD", category: "Tamil", genre: "Entertainment", language: "Tamil", resolution: "1080p", badge: "Tamil Live HD", logo: "📺", streamUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:zeetamil1.smil/playlist.m3u8", backupUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starvijayuk.smil/playlist.m3u8" },
+  { id: "ktv-tamil-movies", name: "KTV HD - Tamil Movies 24/7", category: "Tamil", genre: "Movies", language: "Tamil", resolution: "1080p", badge: "Tamil Movies HD", logo: "🎬", streamUrl: "https://fta.ektv.in/live/697/master.m3u8", backupUrl: "https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8" },
+  { id: "polimer-tv", name: "Polimer TV HD", category: "Tamil", genre: "Entertainment", language: "Tamil", resolution: "1080p", badge: "Tamil Live HD", logo: "🎭", streamUrl: "https://cdn.pishow.tv/ott/live/1241/master.m3u8", backupUrl: "https://fta.ektv.in/live/697/master.m3u8" },
+  { id: "thanthi-one", name: "Thanthi One Movies", category: "Tamil", genre: "Movies", language: "Tamil", resolution: "1080p", badge: "Tamil Movies HD", logo: "🎞️", streamUrl: "https://mumt07.tangotv.in/zHjX9OFlTHANTHIONE/index.m3u8" },
+  { id: "thanthi-tv", name: "Thanthi TV HD", category: "Tamil", genre: "News", language: "Tamil", resolution: "1080p", badge: "Tamil News HD", logo: "📰", streamUrl: "https://streams.tangotv.in/THANTHITV/ORIGIN/index.m3u8" },
+  { id: "sathiyam-tv", name: "Sathiyam TV 24x7", category: "Tamil", genre: "News", language: "Tamil", resolution: "1080p", badge: "Tamil News", logo: "🗞️", streamUrl: "https://mumt04.tangotv.in/m18aqlK4SATHIYAMTV/index.m3u8" },
+  { id: "malaimurasu-news", name: "Malaimurasu Seithigal", category: "Tamil", genre: "News", language: "Tamil", resolution: "1080p", badge: "Tamil News", logo: "📻", streamUrl: "https://streams.tangotv.in/MALAIMURASUSEITHIGAL/ORIGIN/index.m3u8" },
+  { id: "star-sports-tamil", name: "Star Sports 1 Tamil HD", category: "Sports", genre: "Sports", language: "Tamil", resolution: "1080p", badge: "Live Cricket HD", logo: "🏏", streamUrl: "https://real-vk.proxy.nellaiiptv.com/SDMEDIA/index.m3u8", backupUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8" },
+  { id: "dd-sports-hd", name: "DD Sports HD", category: "Sports", genre: "Sports", language: "Hindi", resolution: "1080p", badge: "India Sports HD", logo: "🏆", streamUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8", backupUrl: "https://mumt07.tangotv.in/zHjX9OFlDDSPORTS/index.m3u8" },
+  { id: "sony-ten-3-hd", name: "Sony Ten 3 HD", category: "Sports", genre: "Sports", language: "Hindi", resolution: "1080p", badge: "Sports Network HD", logo: "⚽", streamUrl: "https://r2.amml.in/sony-ten-3-hd/live.m3u8", backupUrl: "https://cdn.pishow.tv/ott/live/1161/master.m3u8" },
+  { id: "star-maa-hd", name: "Star Maa HD", category: "Telugu", genre: "Entertainment", language: "Telugu", resolution: "1080p", badge: "Telugu Live HD", logo: "🌟", streamUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:starmaa1.smil/playlist.m3u8" },
+  { id: "star-maa-movies", name: "Star Maa Movies HD", category: "Telugu", genre: "Movies", language: "Telugu", resolution: "1080p", badge: "Telugu Movies HD", logo: "🎥", streamUrl: "https://da86m1sqpm3o0.cloudfront.net/28072023/smil:maamovies.smil/playlist.m3u8" },
+  { id: "goldmines-movies", name: "Goldmines Blockbusters HD", category: "Hindi", genre: "Movies", language: "Hindi", resolution: "1080p", badge: "Hindi Movies 24/7", logo: "🍿", streamUrl: "https://mumt04.tangotv.in/m18aqlK4GOLDMINEMOVIES/index.m3u8" },
+  { id: "goldmines-bollywood", name: "Goldmines Bollywood HD", category: "Hindi", genre: "Movies", language: "Hindi", resolution: "1080p", badge: "Bollywood 24/7", logo: "🎞️", streamUrl: "https://mumt04.tangotv.in/m18aqlK4GOLDMINESBOLLYWOOD/index.m3u8" },
+  { id: "ndtv-24x7", name: "NDTV 24x7 HD", category: "News", genre: "News", language: "English", resolution: "1080p", badge: "India News HD", logo: "📡", streamUrl: "https://ndtv24x7elemarchana.akamaized.net/hls/live/2003678/ndtv24x7/master.m3u8" },
+  { id: "euronews-hd", name: "Euronews English HD", category: "News", genre: "News", language: "English", resolution: "1080p", badge: "Global News HD", logo: "🌐", streamUrl: "https://cdn-euronews.akamaized.net/live/eds/euronews-en/25002/index.m3u8" },
+  { id: "bloomberg-tv", name: "Bloomberg TV US HD", category: "News", genre: "News", language: "English", resolution: "1080p", badge: "Finance News HD", logo: "📈", streamUrl: "https://bloomberg.com/media-manifest/streams/us.m3u8" },
+  { id: "9x-jalwa-music", name: "9X Jalwa Music HD", category: "Music", genre: "Music", language: "Hindi", resolution: "1080p", badge: "Bollywood Music", logo: "🎶", streamUrl: "https://wiselp.wiseplayout.com/9X_Jalwa/master.m3u8" },
+  { id: "nasa-tv-hd", name: "NASA TV UHD", category: "Knowledge", genre: "Knowledge", language: "English", resolution: "1080p", badge: "Science & Space", logo: "🚀", streamUrl: "https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8" },
+  { id: "twentyfour-news", name: "24 News Malayalam HD", category: "Malayalam", genre: "News", language: "Malayalam", resolution: "1080p", badge: "Malayalam News HD", logo: "🌴", streamUrl: "https://mumt07.tangotv.in/zHjX9OFlTWENTYFOURNEWS/index.m3u8" }
+];
+
+async function syncLiveTvCatalog(force = false) {
+  const now = Date.now();
+  if (!force && cachedLiveTvData && Array.isArray(cachedLiveTvData.channels) && cachedLiveTvData.channels.length > 0 && (now - lastLiveTvSyncTime < TWO_HOURS_MS)) {
+    return cachedLiveTvData;
+  }
+
+  const channels = [...VERIFIED_BASE_LIVETV_CHANNELS];
+  const seenIds = new Set(channels.map(c => c.id));
+  const TIM_TV_GENRE_MAP = {
+    1: { category: "Entertainment", logo: "📺" },
+    2: { category: "Sports", logo: "🏆" },
+    3: { category: "Kids", logo: "🧒" },
+    4: { category: "Movies", logo: "🎬" },
+    5: { category: "News", logo: "📰" }
+  };
+
+  try {
+    const chanRes = await fetchJson("https://tim-streams.com/api/channels", { timeout: 6500 }).catch(() => null);
+    const timChannels = (chanRes && Array.isArray(chanRes.channels)) ? chanRes.channels : [];
+    for (const ch of timChannels) {
+      if (!ch || !ch.name || !Array.isArray(ch.streams) || ch.streams.length === 0) continue;
+      const slug = String(ch.url || ch.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const cid = `wcx-tv-${slug}`;
+      if (seenIds.has(cid)) continue;
+      seenIds.add(cid);
+
+      const gInfo = TIM_TV_GENRE_MAP[ch.genre] || { category: "Entertainment", logo: "📡" };
+      const stream1 = ch.streams[0]?.url || "";
+      if (!stream1) continue;
+      channels.push({
+        id: cid,
+        name: ch.name,
+        category: gInfo.category,
+        genre: gInfo.category,
+        language: "English",
+        resolution: "1080p",
+        badge: `24/7 Live • ${gInfo.category}`,
+        logo: gInfo.logo,
+        streamUrl: stream1,
+        backupUrl: ch.streams[1]?.url || stream1,
+        backupUrl2: ch.streams[2]?.url || "",
+        isEmbed: true,
+        source: "watched-livetv"
+      });
+    }
+  } catch (err) {
+    console.warn("[LiveTV Sync Error]", err.message);
+  }
+
+  cachedLiveTvData = {
+    status: "ok",
+    syncedAtMs: now,
+    lastUpdated: new Date(now).toISOString(),
+    nextSyncAt: new Date(now + TWO_HOURS_MS).toISOString(),
+    syncIntervalMs: TWO_HOURS_MS,
+    total: channels.length,
+    channels
+  };
+  lastLiveTvSyncTime = now;
+
+  try {
+    fs.writeFileSync("/tmp/livetv_cache.json", JSON.stringify(cachedLiveTvData));
+  } catch (e) {}
+
+  return cachedLiveTvData;
 }
 
 
@@ -3342,6 +3747,7 @@ async function syncTimStreams(force = false) {
 }
 
 module.exports.syncDashboardCatalog = syncDashboardCatalog;
+module.exports.syncLiveTvCatalog = syncLiveTvCatalog;
 module.exports.syncTimStreams = syncTimStreams;
 module.exports.getActiveMoviesdaDomain = getActiveMoviesdaDomain;
 module.exports.getMoviesdaFolders = getMoviesdaFolders;

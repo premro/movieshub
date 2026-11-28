@@ -10,7 +10,7 @@
   <meta name="description" content="Movieshub - Pure ad-free streaming with instant language filters for Tamil, English, Hindi, Telugu, and Malayalam. Created by Prem.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="alternate icon" href="favicon.ico">
-  <link rel="stylesheet" href="css/styles.css?v=20261122_01">
+  <link rel="stylesheet" href="css/styles.css?v=20261128_wcx">
   <script>
     window.IS_CATALYST = typeof window !== "undefined" && (
       window.location.hostname.includes("catalystserverless") ||
@@ -132,9 +132,20 @@
       </a>
 
       <nav class="nav-links">
-        <a href="#movies" class="nav-link active" data-view="movies">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+        <a href="#home" class="nav-link active" data-view="home">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span>Home</span>
+        </a>
+        <a href="#movies" class="nav-link" data-view="movies">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
           <span>Movies</span>
+        </a>
+        <a href="#shows" class="nav-link" data-view="shows">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+          <span>Shows</span>
+        </a>
+        <a href="#anime" class="nav-link" data-view="anime">
+          <span>✨ Anime</span>
         </a>
         <a href="#livetv" class="nav-link" data-view="livetv">
           <span class="live-dot-pulse"></span>
@@ -159,7 +170,7 @@
           type="text" 
           class="live-search-input" 
           id="live-search-input" 
-          placeholder="What do you want to watch?" 
+          placeholder="Search movies, shows, anime, channels..." 
           autocomplete="off"
         />
         <button class="search-clear-btn" id="search-clear-btn" title="Clear">✕</button>
@@ -167,6 +178,10 @@
     </div>
 
     <div class="header-right">
+      <button class="sync-now-pill" id="syncNowBtn" title="Auto-syncs every 2 hours • Click to sync Movies, Shows, Live TV & Sports now">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span>2h Sync</span>
+      </button>
       <button class="cine-header-btn" id="cine-header-browse" title="Browse / Categories">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
       </button>
@@ -242,33 +257,41 @@
     </div>
   </div>
 
-  <!-- Cinecat Floating Frosted Bottom Navigation Capsule Pill (Screenshot 2) -->
+  <!-- Watched.cx Floating Frosted Bottom Navigation Capsule Pill -->
   <nav class="cinecat-floating-nav mobile-bottom-nav" id="mobile-bottom-nav">
-    <a href="#movies" class="cine-nav-pill active mobile-nav-item" data-view="movies" title="Home">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <a href="#home" class="cine-nav-pill active mobile-nav-item" data-view="home" title="Home">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       <span>Home</span>
     </a>
-    <a href="#discover" class="cine-nav-pill mobile-nav-item" data-view="discover" id="cine-nav-discover" title="Discover">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-      <span>Discover</span>
+    <a href="#movies" class="cine-nav-pill mobile-nav-item" data-view="movies" title="Movies">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+      <span>Movies</span>
     </a>
-    <a href="#find" class="cine-nav-pill mobile-nav-item" id="cine-nav-find" title="Find">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <span>Find</span>
+    <a href="#shows" class="cine-nav-pill mobile-nav-item" data-view="shows" title="TV Shows">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+      <span>Shows</span>
     </a>
-    <a href="#mylist" class="cine-nav-pill mobile-nav-item" data-view="mylist" title="Bookmarks">
+    <a href="#anime" class="cine-nav-pill mobile-nav-item" data-view="anime" title="Anime">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Anime</span>
+    </a>
+    <a href="#livetv" class="cine-nav-pill mobile-nav-item" data-view="livetv" title="Live TV">
       <div style="position:relative;display:inline-flex;align-items:center;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        <span class="nav-badge" id="mobile-mylist-count" style="display:none;">0</span>
-      </div>
-      <span>Bookmarks</span>
-    </a>
-    <a href="#livetv" class="cine-nav-pill mobile-nav-item" data-view="livetv" title="TV">
-      <div style="position:relative;display:inline-flex;align-items:center;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
         <span class="live-dot-pulse"></span>
       </div>
-      <span>TV</span>
+      <span>Live TV</span>
+    </a>
+    <a href="#sports" class="cine-nav-pill mobile-nav-item" data-view="sports" title="Live Sports">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+      <span>Sports</span>
+    </a>
+    <a href="#mylist" class="cine-nav-pill mobile-nav-item" data-view="mylist" title="My List">
+      <div style="position:relative;display:inline-flex;align-items:center;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+        <span class="nav-badge" id="mobile-mylist-count" style="display:none;">0</span>
+      </div>
+      <span>My List</span>
     </a>
   </nav>
 
@@ -285,10 +308,10 @@
   <script src="js/profile.js?v=20261109_04"></script>
   <script src="js/catalog.js?v=20261122_01"></script>
   <script src="js/search.js?v=20261109_04"></script>
-  <script src="js/livetv.js?v=20261109_04"></script>
-  <script src="js/sports.js?v=20261121_02"></script>
+  <script src="js/livetv.js?v=20261128_wcx"></script>
+  <script src="js/sports.js?v=20261128_wcx"></script>
   <script src="js/dolby-atmos.js?v=20261120_09"></script>
-  <script src="js/player.js?v=20261122_01"></script>
-  <script src="js/app.js?v=20261122_01"></script>
+  <script src="js/player.js?v=20261128_wcx"></script>
+  <script src="js/app.js?v=20261128_wcx"></script>
 </body>
 </html>
